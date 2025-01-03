@@ -1,4 +1,4 @@
-<!-- 分类 -->
+<!-- 标签分类 -->
 <template>
   <div class="cat-or-tag">
     <div class="title">

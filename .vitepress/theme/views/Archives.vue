@@ -1,3 +1,4 @@
+<!--归档  /pages/archives  -->
 <template>
   <div class="archives s-card">
     <div class="title">

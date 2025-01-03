@@ -3,27 +3,29 @@ export const themeConfig = {
   // 站点信息
   siteMeta: {
     // 站点标题
-    title: "Curve",
+    title: " Mr.E",
     // 站点描述
-    description: "Hello World",
+    description: "E仔的家",
     // 站点logo
     logo: "/images/logo/logo.webp",
     // 站点地址
-    site: "https://blog.imsyy.top",
+    // site: "https://blog.imsyy.top",
+    site: "https://vitepress-theme-curve-844imlarx-jbls-projects-baadffb0.vercel.app",
     // 语言
     lang: "zh-CN",
     // 作者
     author: {
-      name: "Admin",
+      name: "JBL",
       cover: "/images/logo/logo.webp",
-      email: "114514@gmail.com",
-      link: "https://www.imsyy.top",
+      email: "mengdingbuhui@163.com",
+      // link: "https://www.imsyy.top",
+      link: "https://vitepress-theme-curve-844imlarx-jbls-projects-baadffb0.vercel.app",
     },
   },
   // 备案信息
-  icp: "萌ICP备114514号",
+  icp: "copyright: MIT License",
   // 建站日期
-  since: "2020-07-28",
+  since: "2025-01-03",
   // 每页文章数据
   postSize: 8,
   // inject
@@ -31,9 +33,9 @@ export const themeConfig = {
     // 头部
     // https://vitepress.dev/zh/reference/site-config#head
     header: [
-      // favicon
+      // favicon图标配置，设置网站的图标链接，指向根目录下的favicon.ico文件
       ["link", { rel: "icon", href: "/favicon.ico" }],
-      // RSS
+      // RSS订阅配置，设置RSS订阅相关的链接及属性，用于用户订阅网站内容，这里链接指向https://blog.imsyy.top/rss.xml
       [
         "link",
         {
@@ -342,7 +344,7 @@ export const themeConfig = {
     // 站点简介
     hello: {
       enable: true,
-      text: "这里有关于<strong>开发</strong>相关的问题和看法，也会有一些<strong>奇技淫巧</strong>的分享，其中大部分内容会侧重于<strong>前端开发</strong>。希望你可以在这里找到对你有用的知识和教程。",
+      text: "这里有关于<strong>开发</strong>相关的问题和看法，也会有一些<strong>奇技淫巧</strong>的分享，其中大部分内容会侧重于<strong>JAVA开发</strong>。希望你可以在这里找到对你有用的知识和教程。",
     },
     // 目录
     toc: {
@@ -399,7 +401,7 @@ export const themeConfig = {
   },
   // 打赏
   rewardData: {
-    enable: true,
+    enable: false,
     // 微信二维码
     wechat: "https://pic.efefee.cn/uploads/2024/04/07/66121049d1e80.webp",
     // 支付宝二维码
