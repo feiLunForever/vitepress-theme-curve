@@ -8,10 +8,11 @@
       :style="{ animationDelay: `${0.4 + index / 10}s` }"
       @click="toPost(item.regularPath)"
     >
-      <div v-if="!simple && showCover(item)" class="post-cover">
-        <img :src="getCover(item)" :alt="item.title">
-      </div>
-      
+<!--   去掉文章图片   -->
+<!--      <div v-if="!simple && showCover(item)" class="post-cover">-->
+<!--        <img :src="getCover(item)" :alt="item.title">-->
+<!--      </div>-->
+
       <div class="post-content">
         <div v-if="!simple && item?.categories" class="post-category">
           <span v-for="cat in item?.categories" :key="cat" class="cat-name">
@@ -70,12 +71,12 @@ const props = defineProps({
 const { theme: themeConfig } = useData()
 
 // 计算布局类型
-const layoutType = computed(() => 
+const layoutType = computed(() =>
   themeConfig.value?.cover?.twoColumns ? 'twoColumns' : themeConfig.value?.cover?.showCover?.coverLayout ?? 'left'
 )
 
 // 计算网格样式
-const gridStyle = computed(() => 
+const gridStyle = computed(() =>
   layoutType.value === 'twoColumns' ? {
     '--grid-columns': 2,
     '--grid-gap': '1rem'
@@ -88,11 +89,11 @@ const showCover = () => themeConfig.value?.cover?.showCover?.enable
 // 获取封面图片 按优先级获取：cover > defaultCover > false
 const getCover = ({ cover: itemCover }) => {
   const { cover } = themeConfig.value ?? {}
-  
+
   if (!cover?.showCover?.enable) return false
   if (itemCover) return itemCover
-  
-  return Array.isArray(cover.showCover.defaultCover) 
+
+  return Array.isArray(cover.showCover.defaultCover)
     ? cover.showCover.defaultCover[Math.floor(Math.random() * cover.showCover.defaultCover.length)]
     : false
 }
@@ -119,12 +120,12 @@ const toPost = (path) => {
     cursor: pointer;
     overflow: hidden;
     height: 200px;
-    
+
     .post-cover {
       flex: 0 0 35%;
       overflow: hidden;
       transform: translateZ(0);
-      
+
       img {
         width: 100%;
         height: 100%;
@@ -142,7 +143,7 @@ const toPost = (path) => {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      
+
       .post-category {
         display: flex;
         flex-wrap: wrap;
@@ -267,7 +268,7 @@ const toPost = (path) => {
     @media (max-width: 768px) {
       flex-direction: column;
       height: auto;
-      
+
       .post-cover {
         flex: none;
         width: 100%;
