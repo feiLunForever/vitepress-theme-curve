@@ -35,25 +35,25 @@ export const themeConfig = {
     header: [
       // favicon图标配置，设置网站的图标链接，指向根目录下的favicon.ico文件
       ["link", { rel: "icon", href: "/favicon.ico" }],
-      // RSS订阅配置，设置RSS订阅相关的链接及属性，用于用户订阅网站内容，这里链接指向https://blog.imsyy.top/rss.xml
-      [
-        "link",
-        {
-          rel: "alternate",
-          type: "application/rss+xml",
-          title: "RSS",
-          href: "https://www.mengdingbuhui.top/rss.xml",
-        },
-      ],
-      // 预载 CDN
-      [
-        "link",
-        {
-          crossorigin: "",
-          rel: "preconnect",
-          href: "https://s1.hdslb.com",
-        },
-      ],
+      // RSS订阅配置，设置RSS订阅相关的链接及属性，用于用户订阅网站内容，这里链接指向 https://www.mengdingbuhui.top/rss.xml
+      // [
+      //   "link",
+      //   {
+      //     rel: "alternate",
+      //     type: "application/rss+xml",
+      //     title: "RSS",
+      //     href: "https://www.mengdingbuhui.top/rss.xml",
+      //   },
+      // ],
+      // // 预载 CDN
+      // [
+      //   "link",
+      //   {
+      //     crossorigin: "",
+      //     rel: "preconnect",
+      //     href: "https://s1.hdslb.com",
+      //   },
+      // ],
       [
         "link",
         {
@@ -71,6 +71,7 @@ export const themeConfig = {
           href: "https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css",
         },
       ],
+      // 预载 南方科技大学 CDN
       [
         "link",
         {
@@ -99,7 +100,7 @@ export const themeConfig = {
           rel: "stylesheet",
         },
       ],
-      // 预载 DocSearch
+      // 预载 DocSearch 【预连接到Algolia的DocSearch服务，这通常用于站内搜索功能】
       [
         "link",
         {
@@ -128,99 +129,11 @@ export const themeConfig = {
         { text: "效率工具", link: "/pages/tools", icon: "tools" },
       ],
     },
-    {
-      text: "友链",
-      items: [
-        { text: "友链鱼塘", link: "/pages/friends", icon: "fish" },
-        { text: "友情链接", link: "/pages/link", icon: "people" },
-      ],
-    },
-    {
-      text: "我的",
-      items: [
-        { text: "畅所欲言", link: "/pages/message", icon: "chat" },
-        { text: "致谢名单", link: "/pages/thanks", icon: "reward" },
-        { text: "关于本站", link: "/pages/about", icon: "contacts" },
-      ],
-    },
-  ],
-  // 导航栏菜单 - 左侧
-  navMore: [
-    {
-      name: "博客",
-      list: [
-        {
-          icon: "/images/logo/logo.webp",
-          name: "主站",
-          url: "/",
-        },
-        {
-          icon: "/images/logo/logo.webp",
-          name: "博客镜像站",
-          url: "https://blog-backup.imsyy.top/",
-        },
-      ],
-    },
-    {
-      name: "服务",
-      list: [
-        {
-          icon: "https://pic.efefee.cn/uploads/2024/04/08/6613465358077.png",
-          name: "起始页",
-          url: "https://nav.imsyy.top/",
-        },
-        {
-          icon: "https://pic.efefee.cn/uploads/2024/04/08/661346d418ad7.png",
-          name: "今日热榜",
-          url: "https://hot.imsyy.top/",
-        },
-        {
-          icon: "https://pic.efefee.cn/uploads/2024/04/08/66134722586fa.png",
-          name: "站点监测",
-          url: "https://status.imsyy.top/",
-        },
-      ],
-    },
-    {
-      name: "项目",
-      list: [
-        {
-          icon: "/images/logo/logo.webp",
-          name: "Curve",
-          url: "https://github.com/imsyy/vitepress-theme-curve",
-        },
-        {
-          icon: "https://pic.efefee.cn/uploads/2024/04/07/66124f5fc63c8.png",
-          name: "SPlayer",
-          url: "https://github.com/imsyy/SPlayer",
-        },
-        {
-          icon: "https://pic.efefee.cn/uploads/2024/04/08/6613465358077.png",
-          name: "Snavigation",
-          url: "https://github.com/imsyy/SPlayer",
-        },
-        {
-          icon: "/images/logo/logo.webp",
-          name: "Home",
-          url: "https://github.com/imsyy/home",
-        },
-        {
-          icon: "https://pic.efefee.cn/uploads/2024/04/08/661346d418ad7.png",
-          name: "DailyHotApi",
-          url: "https://github.com/imsyy/DailyHotApi",
-        },
-        {
-          icon: "https://pic.efefee.cn/uploads/2024/04/08/66134722586fa.png",
-          name: "site-status",
-          url: "https://github.com/imsyy/site-status",
-        },
-      ],
-    },
   ],
   // 封面配置
   cover: {
     // 是否开启双栏布局
-    twoColumns: false,
+    twoColumns: true,
     // 是否开启封面显示
     showCover: {
       // 是否开启封面显示 文章不设置cover封面会显示异常，可以设置下方默认封面
@@ -241,28 +154,12 @@ export const themeConfig = {
     social: [
       {
         icon: "email",
-        link: "mailto:one@imsyy.top",
+        link: "mengdingbuhui@163.com",
       },
       {
         icon: "github",
-        link: "https://www.github.com/imsyy/",
-      },
-      {
-        icon: "telegram",
-        link: "https://t.me/bottom_user",
-      },
-      {
-        icon: "bilibili",
-        link: "https://space.bilibili.com/98544142",
-      },
-      {
-        icon: "qq",
-        link: "https://res.abeim.cn/api/qq/?qq=1539250352",
-      },
-      {
-        icon: "twitter-x",
-        link: "https://twitter.com/iimmsyy",
-      },
+        link: "https://github.com/feiLunForever/vitepress-theme-curve",
+      }
     ],
     // sitemap
     sitemap: [
@@ -275,15 +172,7 @@ export const themeConfig = {
           { text: "文章归档", link: "/pages/archives", newTab: true },
         ],
       },
-      {
-        text: "项目",
-        items: [
-          { text: "Home", link: "https://github.com/imsyy/home/", newTab: true },
-          { text: "SPlayer", link: "https://github.com/imsyy/SPlayer/", newTab: true },
-          { text: "DailyHotApi", link: "https://github.com/imsyy/DailyHotApi/", newTab: true },
-          { text: "Snavigation", link: "https://github.com/imsyy/Snavigation/", newTab: true },
-        ],
-      },
+
       {
         text: "专栏",
         items: [
@@ -291,29 +180,7 @@ export const themeConfig = {
           { text: "我的项目", link: "/pages/project" },
           { text: "效率工具", link: "/pages/tools" },
         ],
-      },
-      {
-        text: "页面",
-        items: [
-          { text: "畅所欲言", link: "/pages/message" },
-          { text: "关于本站", link: "/pages/about" },
-          { text: "隐私政策", link: "/pages/privacy" },
-          { text: "版权协议", link: "/pages/cc" },
-        ],
-      },
-      {
-        text: "服务",
-        items: [
-          { text: "站点状态", link: "https://status.imsyy.top/", newTab: true },
-          { text: "一个导航", link: "https://nav.imsyy.top/", newTab: true },
-          { text: "站点订阅", link: "https://www.mengdingbuhui.top/rss.xml", newTab: true },
-          {
-            text: "反馈投诉",
-            link: "https://eqnxweimkr5.feishu.cn/share/base/form/shrcnCXCPmxCKKJYI3RKUfefJre",
-            newTab: true,
-          },
-        ],
-      },
+      }
     ],
   },
   // 评论
