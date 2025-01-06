@@ -6,9 +6,10 @@
 
 ---
 
-Preview: 👻 [無名小栈](https://blog.imsyy.top/)
+[//]: # (Preview: 👻 [無名小栈]&#40;https://blog.imsyy.top/&#41;)
+Preview: 👻 [E仔之家](www.mengdingbuhui.top)
 
-Docs: 📖 [主题文档](https://blog.imsyy.top/pages/categories/%E4%B8%BB%E9%A2%98%E6%96%87%E6%A1%A3)
+[//]: # (Docs: 📖 [主题文档]&#40;https://blog.imsyy.top/pages/categories/%E4%B8%BB%E9%A2%98%E6%96%87%E6%A1%A3&#41;)
 
 > [!NOTE]
 > 该主题本意为自用，所以部分配置可能并不完善，包括评论系统的支持，目前仅支持 Artalk，如有其他需求，可提交 pr

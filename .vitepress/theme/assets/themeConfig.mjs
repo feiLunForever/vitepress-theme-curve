@@ -10,7 +10,7 @@ export const themeConfig = {
     logo: "/images/logo/logo.webp",
     // 站点地址
     // site: "https://blog.imsyy.top",
-    site: "https://vitepress-theme-curve-844imlarx-jbls-projects-baadffb0.vercel.app",
+    site: "https://www.mengdingbuhui.top",
     // 语言
     lang: "zh-CN",
     // 作者
@@ -19,7 +19,7 @@ export const themeConfig = {
       cover: "/images/logo/logo.webp",
       email: "mengdingbuhui@163.com",
       // link: "https://www.imsyy.top",
-      link: "https://vitepress-theme-curve-844imlarx-jbls-projects-baadffb0.vercel.app",
+      link: "https://www.mengdingbuhui.top",
     },
   },
   // 备案信息
@@ -42,7 +42,7 @@ export const themeConfig = {
           rel: "alternate",
           type: "application/rss+xml",
           title: "RSS",
-          href: "https://blog.imsyy.top/rss.xml",
+          href: "https://www.mengdingbuhui.top/rss.xml",
         },
       ],
       // 预载 CDN
@@ -306,7 +306,7 @@ export const themeConfig = {
         items: [
           { text: "站点状态", link: "https://status.imsyy.top/", newTab: true },
           { text: "一个导航", link: "https://nav.imsyy.top/", newTab: true },
-          { text: "站点订阅", link: "https://blog.imsyy.top/rss.xml", newTab: true },
+          { text: "站点订阅", link: "https://www.mengdingbuhui.top/rss.xml", newTab: true },
           {
             text: "反馈投诉",
             link: "https://eqnxweimkr5.feishu.cn/share/base/form/shrcnCXCPmxCKKJYI3RKUfefJre",
