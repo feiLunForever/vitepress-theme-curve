@@ -1,6 +1,6 @@
 /**
- * 获取一言
- * @param {string} [rule="updated"] - 文章的排序规则，可以是 "created" 或 "updated"
+ * 获取一言。这个函数通过调用一言API来获取一句随机的话语。
+ * @returns {Promise<any>}
  */
 export const getHitokoto = async () => {
   const result = await fetch("https://v1.hitokoto.cn");
@@ -10,6 +10,7 @@ export const getHitokoto = async () => {
 
 /**
  * 获取给定网址的站点图标和描述
+ * 这个函数通过解析给定URL的HTML内容来获取站点的标题、图标和描述。
  * @param {string} url - 站点 URL
  * @returns {Promise<{iconUrl: string, description: string}>}
  */
@@ -46,11 +47,13 @@ export const getSiteInfo = async (url) => {
 };
 
 /**
- * Meting
- * @param {id} string - 歌曲ID
- * @param {server} string - 服务器
- * @param {type} string - 类型
- * @returns {Promise<Object>} - 音乐详情
+ * 获取音乐列表。
+ * 这个函数通过调用Meting API来获取指定音乐服务器的音乐列表。
+ * @param url
+ * @param id
+ * @param server
+ * @param type
+ * @returns {Promise<*>}
  */
 export const getMusicList = async (url, id, server = "netease", type = "playlist") => {
   const result = await fetch(`${url}?server=${server}&type=${type}&id=${id}`);
@@ -65,7 +68,8 @@ export const getMusicList = async (url, id, server = "netease", type = "playlist
 };
 
 /**
- * 站点统计数据
+ * 获取站点统计数据。
+ * 这个函数通过调用51.la的API来获取站点的访问统计数据。
  */
 export const getStatistics = async (key) => {
   const result = await fetch(`https://v6-widget.51.la/v6/${key}/quote.js`);
