@@ -13,28 +13,30 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 # ArrayBlockingQueue源码分析
 
+![1688285621899-cb4d6d06-4d1e-4f99-a05e-cacfd862959c-20231204150333-df9523u](./ArrayBlockingQueue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90.assets/1688285621899-cb4d6d06-4d1e-4f99-a05e-cacfd862959c-20231204150333-df9523u.png)
+
 ## 成员变量
 
-* ​`final ReentrantLock lock;`​
+* `final ReentrantLock lock;`​
 
   * **作用**：提供独占锁机制，用于保护竞争资源。
   * **特点**：确保同一时刻只有一个线程能访问队列的临界区。
 
-* ​`private final Condition notEmpty;`​
+* `private final Condition notEmpty;`​
 
   * **作用**：表示“锁的非空条件”。
   * **线程等待**：当线程尝试从队列中获取数据但队列为空时，线程会通过`notEmpty.await()`​方法等待。
   * **线程唤醒**：当其他线程向队列中插入元素后，会调用`notEmpty.signal()`​方法唤醒等待的线程。
 
-* ​`private final Condition notFull;`​
+* `private final Condition notFull;`​
 
   * **作用**：表示“锁满的条件”。
   * **线程等待**：当线程尝试向队列中插入元素但队列已满时，线程会通过`notFull.await()`​方法等待。**线程唤醒**：当其他线程从队列中取出元素后，会调用`notFull.signal()`​方法唤醒等待的线程。
 
 ## 入队
 
-* ​`offer(E e)`​：尝试添加元素，队列满时返回`false`​。
-* ​`put(E e)`​：添加元素，队列满时阻塞线程，直到有空位。
+* `offer(E e)`​：尝试添加元素，队列满时返回`false`​。
+* `put(E e)`​：添加元素，队列满时阻塞线程，直到有空位。
 
 ```java
 // 加入成功返回true,否则返回false 
@@ -69,7 +71,7 @@ public void put(E e) throws InterruptedException {
 }
 ```
 
-​`enqueue()`​方法是最终增加元素的方法：
+`enqueue()`​方法是最终增加元素的方法：
 
 ```java
 // 元素放入队列，注意调用这个方法时都要先加锁 
@@ -85,15 +87,15 @@ private void enqueue(E x) {
 
 ## 出队
 
-* ​`poll()`​
+* `poll()`​
 
   * **特点**：队列为空时返回`null`​，不会阻塞线程。
   * **使用场景**：适用于需要非阻塞操作的场合。
-* ​`take()`​
+* `take()`​
 
   * **特点**：队列为空时，会阻塞线程直到有元素可返回。
   * **使用场景**：适用于需要阻塞等待元素的场合。
-* ​`remove()`​
+* `remove()`​
 
   * **特点**：移除指定元素，不存在时抛出异常。
   * **使用场景**：需要确保元素存在并移除时使用。
