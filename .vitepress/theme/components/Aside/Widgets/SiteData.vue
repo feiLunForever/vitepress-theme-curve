@@ -25,31 +25,46 @@
           <i class="iconfont icon-visibility"></i>
           总访问量
         </span>
-        <span class="num" id="busuanzi_value_site_pv">0</span>
+        <span class="num">{{ pageViews }} 次</span>
       </div>
       <div class="data-item">
         <span class="name">
           <i class="iconfont icon-account"></i>
           总访客数
         </span>
-        <span class="num" id="busuanzi_value_site_uv">0</span>
+        <span class="num">{{ visitors }} 人</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { loadScript } from "@/utils/commonTools";
+import { ref, onMounted } from 'vue'
 import { daysFromNow } from "@/utils/helper";
 
 const { theme } = useData();
 
+const pageViews = ref(0)
+const visitors = ref(0)
+
+// 获取51la统计数据
+const get51LaStats = () => {
+  if (typeof LA === 'undefined') return;
+  
+  LA.init({
+    id: theme.value.tongji['51la'],
+    ck: theme.value.tongji['51la'],
+    callback: (data) => {
+      // 更新访问数据
+      pageViews.value = data.pageviews
+      visitors.value = data.visitors
+    }
+  })
+}
+
 onMounted(() => {
-  loadScript("https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js", {
-    async: true,
-    reload: true,
-  });
-});
+  get51LaStats()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -74,16 +89,6 @@ onMounted(() => {
       .num {
         opacity: 0.8;
         font-size: 15px;
-      }
-      #busuanzi_value_site_pv {
-        &::after {
-          content: " 次";
-        }
-      }
-      #busuanzi_value_site_uv {
-        &::after {
-          content: " 人";
-        }
       }
       &:last-child {
         padding-bottom: 0;
