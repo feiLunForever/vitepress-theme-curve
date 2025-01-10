@@ -308,4 +308,12 @@ export const themeConfig = {
   tongji: {
     "51la": "3Kr33aSpNbkheSgz",
   },
+  // 密码保护
+  passwordProtect: {
+    enable: true,
+    // 设置不需要密码验证的页面路径
+    excludePaths: [
+      '/pages/about'
+    ]
+  }
 };
