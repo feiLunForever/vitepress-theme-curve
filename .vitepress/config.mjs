@@ -33,7 +33,16 @@ export default withPwa(
     // 主题
     appearance: "dark",
     // Head
-    head: themeConfig.inject.header,
+    head: [
+      ...themeConfig.inject.header,
+      [
+        "meta",
+        {
+          name: "algolia-site-verification",
+          content: "AE2B9395026BF559"
+        }
+      ],
+    ],
     // sitemap
     sitemap: {
       hostname: themeConfig.siteMeta.site,
