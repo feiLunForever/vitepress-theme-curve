@@ -169,7 +169,7 @@ export const themeConfig = {
           { text: "近期文章", link: "/" },
           { text: "全部分类", link: "/pages/categories" },
           { text: "全部标签", link: "/pages/tags" },
-          { text: "文章归档", link: "/pages/archives", newTab: true },
+          { text: "文章归档", link: "/pages/archives" },
         ],
       },
 
@@ -233,17 +233,6 @@ export const themeConfig = {
     // 站点数据
     siteData: {
       enable: true,
-    },
-  },
-  // 友链
-  friends: {
-    // 友链朋友圈
-    circleOfFriends: "",
-    // 动态友链
-    dynamicLink: {
-      server: "",
-      app_token: "",
-      table_id: "",
     },
   },
   // 搜索
