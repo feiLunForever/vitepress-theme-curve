@@ -4,8 +4,6 @@
     <div class="page-content">
       <!-- 页面内容 -->
       <Content id="page-content" :class="['markdown-main-style', { 's-card': frontmatter.card }]" />
-      <!-- 评论 -->
-      <Comments v-if="frontmatter.comment" />
     </div>
     <Aside v-if="frontmatter.aside" />
   </div>

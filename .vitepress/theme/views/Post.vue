@@ -43,11 +43,6 @@
           <i class="iconfont icon-fire" />
           <span id="twikoo_visitors" class="artalk-pv-count">0</span>
         </span>
-        <!-- 评论数 -->
-        <span class="chat meta hover" @click="commentRef?.scrollToComments">
-          <i class="iconfont icon-chat" />
-          <span id="twikoo_comments" class="artalk-comment-count">0</span>
-        </span>
       </div>
     </div>
     <div class="post-content">
@@ -91,8 +86,6 @@
         <NextPost />
         <!-- 相关文章 -->
         <RelatedPost />
-        <!-- 评论 -->
-        <Comments ref="commentRef" />
       </article>
       <Aside showToc />
     </div>
@@ -105,9 +98,6 @@ import { generateId } from "@/utils/commonTools";
 import initFancybox from "@/utils/initFancybox";
 
 const { page, theme, frontmatter } = useData();
-
-// 评论元素
-const commentRef = ref(null);
 
 // 获取对应文章数据
 const postMetaData = computed(() => {
