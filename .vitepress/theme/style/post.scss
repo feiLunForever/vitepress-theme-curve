@@ -1,74 +1,95 @@
+// 文章容器样式
 .post {
   width: 100%;
   display: flex;
   flex-direction: column;
-  animation: fade-up 0.8s ease-out;
+  animation: fade-up 0.8s ease-out; // 淡入上升动画
+
+  // 文章元数据区域
   .post-meta {
     padding: 3rem 2rem;
+    // 顶部渐变背景
     background: linear-gradient(to bottom, var(--main-mask-Inverse-background), transparent);
     width: 100%;
+
+    // 元数据内容
     .meta {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
+      display: flex; // 设置为flex布局
+      flex-direction: row; // 子元素水平排列
+      align-items: center; // 子元素垂直居中对齐
+
+      // 分类标签
       .categories {
-        margin-right: 12px;
+        margin-right: 12px; // 右侧外边距
         .cat-item {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          padding: 8px 16px;
-          font-size: 0.9rem;
-          border-radius: 20px;
-          background: var(--main-color-bg);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-          transition: all 0.3s ease;
+          display: flex; // 设置为flex布局
+          flex-direction: row; // 子元素水平排列
+          align-items: center; // 子元素垂直居中对齐
+          padding: 8px 16px; // 内边距
+          font-size: 0.9rem; // 字体大小
+          border-radius: 20px; // 边框圆角
+          background: var(--main-color-bg); // 背景颜色
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); // 盒子阴影
+          transition: all 0.3s ease; // 过渡效果
+
           .iconfont {
-            margin-right: 6px;
+            margin-right: 6px; // 右侧外边距
           }
+
           &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px); // 悬停时向上移动
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); // 悬停时增加阴影
           }
         }
       }
+
+      // 标签列表
       .tags {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
+        display: flex; // 设置为flex布局
+        flex-direction: row; // 子元素水平排列
+        align-items: center; // 子元素垂直居中对齐
         .tag-item {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          padding: 6px 14px;
-          margin: 0 8px;
-          border-radius: 16px;
-          background: var(--main-card-second-background);
-          transition: all 0.3s ease;
+          display: flex; // 设置为flex布局
+          flex-direction: row; // 子元素水平排列
+          align-items: center; // 子元素垂直居中对齐
+          padding: 6px 14px; // 内边距
+          margin: 0 8px; // 外边距
+          border-radius: 16px; // 边框圆角
+          background: var(--main-card-second-background); // 背景颜色
+          transition: all 0.3s ease; // 过渡效果
+
           .iconfont {
-            margin-right: 4px;
-            opacity: 0.6;
-            font-weight: normal;
+            margin-right: 4px; // 右侧外边距
+            opacity: 0.6; // 图标透明度
+            font-weight: normal; // 字体权重
           }
+
           &:hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px); // 悬停时向上移动
           }
         }
       }
     }
+
+
+    // 文章标题
     .title {
       font-size: 2.4rem;
       font-weight: 700;
       line-height: 1.4;
       margin: 2rem 0;
+      // 标题渐变色
       background: linear-gradient(45deg, var(--main-color), #666);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+
+    // 其他元数据
     .other-meta {
       display: flex;
       flex-direction: row;
       align-items: center;
+
       .meta {
         display: flex;
         flex-direction: row;
@@ -77,154 +98,180 @@
         font-size: 14px;
         border-radius: 8px;
         opacity: 0.8;
+
         .iconfont {
           margin-right: 6px;
           transition: color 0.3s;
         }
-        &.date {
+
+        &.date { // 日期样式
           padding-left: 0;
         }
-        &.hot {
+
+        &.hot { // 热度图标
           .iconfont {
             font-size: 18px;
           }
         }
-        &.hover {
-          transition:
-                  color 0.3s,
-                  background-color 0.3s;
-          cursor: pointer;
-          &:hover {
-            color: var(--main-color);
-            background-color: var(--main-color-bg);
-            .iconfont {
-              color: var(--main-color);
+
+        &.hover { // 为可悬停的项添加样式
+          transition: // 定义过渡效果
+                  color 0.3s, // 颜色变化过渡时间为0.3秒
+                  background-color 0.3s; // 背景颜色变化过渡时间为0.3秒
+          cursor: pointer; // 鼠标悬停时显示指针为手形
+
+          &:hover { // 当鼠标悬停在元素上时的样式
+            color: var(--main-color); // 文本颜色变为主题颜色
+            background-color: var(--main-color-bg); // 背景颜色变为主题背景颜色
+            .iconfont { // 针对内部的图标字体样式
+              color: var(--main-color); // 图标颜色变为主题颜色
             }
           }
         }
+
       }
     }
   }
+
+  // 文章内容区域
   .post-content {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    animation: fade-up 0.6s 0.3s backwards;
+    width: 100%; // 设置元素的宽度为100%
+    display: flex; // 将元素设置为flex布局容器
+    flex-direction: row; // 设置flex容器的主轴方向为水平
+    animation: fade-up 0.6s 0.3s backwards; // 应用名为fade-up的动画，持续时间为0.6秒，延迟开始时间为0.3秒，动画开始前元素的样式为动画的最后一帧
+
+    // 文章主体
     .post-article {
-      width: calc(100% - 300px);
-      padding: 2.5rem;
-      border-radius: 16px;
-      background: var(--main-card-background);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
-      user-select: text;
-      cursor: auto;
-      &:hover {
-        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+      width: calc(100% - 300px); // 设置元素的宽度为父容器宽度减去300px
+      padding: 2.5rem; // 设置元素的内边距为2.5rem
+      border-radius: 16px; // 设置元素的边框圆角为16px
+      background: var(--main-card-background); // 设置元素的背景颜色为自定义变量--main-card-background
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); // 设置元素的阴影效果，水平和垂直偏移为0，模糊半径为4px，扩展半径为20px，颜色为半透明的黑色
+      transition: all 0.3s ease; // 设置元素的所有属性变化都有0.3秒的过渡效果，过渡曲线为ease
+      user-select: text; // 允许用户选择元素内的文本
+      cursor: auto; // 设置鼠标悬停在元素上时的光标为默认样式
+
+      &:hover { // 当鼠标悬停在元素上时的样式
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08); // 增强元素的阴影效果，模糊半径和扩展半径增大，颜色稍微加深
       }
-      .expired {
-        margin: 1.5rem 0;
-        padding: 1rem 1.5rem;
-        border-radius: 12px;
-        background: var(--main-warning-color-gray);
-        border: none;
+
+      .expired { // 过期提醒容器
+        margin: 1.5rem 0; // 上下外边距
+        padding: 1rem 1.5rem; // 内边距
+        border-radius: 12px; // 圆角
+        background: var(--main-warning-color-gray); // 警告背景色
+        border: none; // 无边框
         strong {
-          font-size: 1.1rem;
+          font-size: 1.1rem; // 加粗文字大小
         }
       }
-      .other-meta {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        margin: 2rem 0;
-        opacity: 0.8;
-        .all-tags {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          .tag-item {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            padding: 8px 16px;
-            margin-right: 12px;
-            border-radius: 20px;
-            background: var(--main-color-bg);
-            transition: all 0.3s ease;
-            .iconfont {
-              margin-right: 4px;
-              opacity: 0.6;
-              font-weight: normal;
+      .other-meta { // 其他元数据容器
+        display: flex; // 弹性布局
+        flex-direction: row; // 水平排列
+        align-items: center; // 垂直居中
+        justify-content: space-between; // 两端对齐
+        margin: 2rem 0; // 上下外边距
+        opacity: 0.8; // 透明度
+
+        .all-tags { // 所有标签容器
+          display: flex; // 弹性布局
+          flex-direction: row; // 水平排列
+          align-items: center; // 垂直居中
+
+          .tag-item { // 标签项
+            display: flex; // 弹性布局
+            flex-direction: row; // 水平排列
+            align-items: center; // 垂直居中
+            padding: 8px 16px; // 内边距
+            margin-right: 12px; // 右侧外边距
+            border-radius: 20px; // 圆角
+            background: var(--main-color-bg); // 背景色
+            transition: all 0.3s ease; // 过渡动画
+
+            .iconfont { // 图标
+              margin-right: 4px; // 右侧外边距
+              opacity: 0.6; // 透明度
+              font-weight: normal; // 字重
             }
-            &:hover {
-              transform: translateY(-2px);
+
+            &:hover { // 悬停效果
+              transform: translateY(-2px); // 向上位移
             }
           }
         }
-        .report {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          padding: 8px 20px;
-          border-radius: 20px;
-          background: var(--main-error-color-gray);
-          transition: all 0.3s ease;
-          .iconfont {
-            margin-right: 6px;
+
+        .report { // 举报按钮
+          display: flex; // 弹性布局
+          flex-direction: row; // 水平排列
+          align-items: center; // 垂直居中
+          padding: 8px 20px; // 内边距
+          border-radius: 20px; // 圆角
+          background: var(--main-error-color-gray); // 错误背景色
+          transition: all 0.3s ease; // 过渡动画
+
+          .iconfont { // 图标
+            margin-right: 6px; // 右侧外边距
           }
-          &:hover {
-            transform: translateY(-2px);
-            background: var(--main-error-color);
+
+          &:hover { // 悬停效果
+            transform: translateY(-2px); // 向上位移
+            background: var(--main-error-color); // 错误色背景
           }
         }
       }
     }
-    .main-aside {
-      width: 300px;
-      padding-left: 1rem;
+    .main-aside { // 侧边栏
+      width: 300px; // 宽度
+      padding-left: 1rem; // 左侧内边距
     }
-    @media (max-width: 1200px) {
+    @media (max-width: 1200px) { // 响应式布局 - 大屏
       .post-article {
-        width: 100%;
+        width: 100%; // 文章宽度占满
       }
       .main-aside {
-        display: none;
+        display: none; // 隐藏侧边栏
       }
     }
   }
-  @media (max-width: 768px) {
-    .post-meta {
-      padding: 2rem 1rem;
+  @media (max-width: 768px) { // 响应式布局 - 中小屏
+    .post-meta { // 文章元数据
+      padding: 2rem 1rem; // 内边距调整
+
       .meta {
-        justify-content: center;
+        justify-content: center; // 居中对齐
+
         .categories {
-          margin-right: 0;
+          margin-right: 0; // 移除右侧外边距
         }
+
         .tags {
-          display: none;
+          display: none; // 隐藏标签
         }
       }
-      .title {
-        font-size: 1.8rem;
-        text-align: center;
-        line-height: 40px;
+
+      .title { // 标题样式调整
+        font-size: 1.8rem; // 字体大小
+        text-align: center; // 居中对齐
+        line-height: 40px; // 行高
       }
+
       .other-meta {
-        justify-content: center;
+        justify-content: center; // 居中对齐
       }
     }
     .post-content {
-      .post-article {
-        border: none;
-        padding: 1.5rem;
-        .other-meta {
-          margin: 1rem 0 2rem 0;
-          flex-direction: column;
-          .all-tags {
-            flex-wrap: wrap;
+      .post-article { // 文章主体
+        border: none; // 移除边框
+        padding: 1.5rem; // 内边距调整
+
+        .other-meta { // 其他元数据
+          margin: 1rem 0 2rem 0; // 外边距调整
+          flex-direction: column; // 垂直排列
+
+          .all-tags { // 所有标签
+            flex-wrap: wrap; // 允许换行
             .tag-item {
-              margin-top: 12px;
+              margin-top: 12px; // 上方外边距
             }
           }
           .report {
@@ -239,64 +286,64 @@
 // 文章内容样式
 :deep(.markdown-main-style) {
   // 标题
-  div > {
-    h1 {
-      font-size: 2rem;
-      text-align: center;
-      border-bottom: 1px dashed var(--main-color-bg);
-      padding-bottom: 1rem;
-      .header-anchor {
-        &::before {
-          display: none;
+  div > { // 选择div元素的直接子元素
+    h1 { // 选择div内的h1元素
+      font-size: 2rem; // 设置h1的字体大小为2rem
+      text-align: center; // 设置h1的文本居中对齐
+      border-bottom: 1px dashed var(--main-color-bg); // 设置h1的下边框为1px虚线，颜色为自定义变量--main-color-bg
+      padding-bottom: 1rem; // 设置h1的底部内边距为1rem
+      .header-anchor { // 选择h1内的.header-anchor元素
+        &::before { // 选择.header-anchor元素前的伪元素
+          display: none; // 隐藏该伪元素
         }
       }
     }
-    h2 {
-      font-size: 1.6rem;
-      line-height: 1.6;
-      border-bottom: 1px dashed var(--main-color-bg);
-      padding-bottom: 0.5rem;
+    h2 { // 选择div内的h2元素
+      font-size: 1.6rem; // 设置h2的字体大小为1.6rem
+      line-height: 1.6; // 设置h2的行高为1.6
+      border-bottom: 1px dashed var(--main-color-bg); // 设置h2的下边框为1px虚线，颜色为自定义变量--main-color-bg
+      padding-bottom: 0.5rem; // 设置h2的底部内边距为0.5rem
     }
-    h3 {
-      width: fit-content;
-      font-size: 1.2rem;
-      z-index: 0;
-      &::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        height: 8px;
-        border-radius: 3px;
-        background-color: var(--main-card-border);
-        z-index: -1;
+    h3 { // 选择div内的h3元素
+      width: fit-content; // 设置h3的宽度为适应内容宽度
+      font-size: 1.2rem; // 设置h3的字体大小为1.2rem
+      z-index: 0; // 设置h3的堆叠顺序为0
+      &::after { // 选择h3元素后的伪元素
+        content: ""; // 设置伪元素的内容为空
+        position: absolute; // 设置伪元素的定位为绝对定位
+        left: 0; // 设置伪元素的左侧位置为0
+        bottom: 0; // 设置伪元素的底部位置为0
+        width: 100%; // 设置伪元素的宽度为100%
+        height: 8px; // 设置伪元素的高度为8px
+        border-radius: 3px; // 设置伪元素的边框圆角为3px
+        background-color: var(--main-card-border); // 设置伪元素的背景颜色为自定义变量--main-card-border
+        z-index: -1; // 设置伪元素的堆叠顺序为-1，使其在h3下方
       }
     }
     h1,
     h2,
     h3,
-    h4 {
-      position: relative;
-      cursor: pointer;
-      &:hover {
-        .header-anchor {
-          opacity: 1;
+    h4 { // 选择div内的h1, h2, h3, h4元素
+      position: relative; // 设置这些元素的定位为相对定位
+      cursor: pointer; // 设置鼠标悬停在这些元素上时的光标为指针
+      &:hover { // 当鼠标悬停在这些元素上时的样式
+        .header-anchor { // 选择这些元素内的.header-anchor元素
+          opacity: 1; // 设置.header-anchor的透明度为1，使其可见
         }
       }
     }
   }
-  .header-anchor {
-    position: absolute;
-    left: 0;
-    opacity: 0;
-    transition: opacity 0.3s;
-    &::before {
-      content: "#";
-      position: absolute;
-      left: -1.3rem;
-      color: var(--main-color);
-      font-weight: bold;
+  .header-anchor { // 选择类名为.header-anchor的元素
+    position: absolute; // 设置定位方式为绝对定位
+    left: 0; // 将元素定位到左侧距离为0的位置
+    opacity: 0; // 设置元素的初始透明度为0，使其不可见
+    transition: opacity 0.3s; // 设置透明度变化的过渡效果，持续时间为0.3秒
+    &::before { // 选择.header-anchor元素前的伪元素
+      content: "#"; // 设置伪元素的内容为井号（#）
+      position: absolute; // 设置伪元素的定位方式为绝对定位
+      left: -1.3rem; // 将伪元素定位到左侧距离为-1.3rem的位置
+      color: var(--main-color); // 设置伪元素的颜色为自定义变量--main-color
+      font-weight: bold; // 设置伪元素的字体加粗
     }
   }
   // 文本
@@ -306,248 +353,252 @@
   p,
   ul,
   li,
-  td {
-    margin: 1rem 0;
-    text-align: left;
-    letter-spacing: 0.6px;
-    line-height: 2;
+  td { // 选择表格单元格（td）元素
+    margin: 1rem 0; // 设置单元格的外边距为上1rem，下0
+    text-align: left; // 设置单元格文本左对齐
+    letter-spacing: 0.6px; // 设置单元格文本字母间距为0.6px
+    line-height: 2; // 设置单元格文本行高为2倍字体大小
+
     // 行内代码
-    code {
-      display: inline-flex;
-      font-size: 0.8rem;
-      padding: 0 6px;
-      border-radius: 6px;
-      background-color: var(--main-card-border);
-      font-family: "Fira Code", var(--main-font-family), monospace;
-      font-optical-sizing: auto;
-      white-space: nowrap;
-      transform: translateY(-2px);
-      overflow-x: auto;
-      max-width: 100%;
-      transition:
-        color 0.3s,
-        background-color 0.3s;
-      cursor: pointer;
-      &:hover {
-        color: var(--main-color);
-        background-color: var(--main-color-bg);
+    code { // 选择单元格内的代码（code）元素
+      display: inline-flex; // 设置代码元素为行内flex布局
+      font-size: 0.8rem; // 设置代码元素的字体大小为0.8rem
+      padding: 0 6px; // 设置代码元素的左右内边距为6px
+      border-radius: 6px; // 设置代码元素的边框圆角为6px
+      background-color: var(--main-card-border); // 设置代码元素的背景颜色为自定义变量--main-card-border
+      font-family: "Fira Code", var(--main-font-family), monospace; // 设置代码元素的字体族
+      font-optical-sizing: auto; // 设置代码元素的字体光学大小调整
+      white-space: nowrap; // 设置代码元素不换行
+      transform: translateY(-2px); // 设置代码元素垂直向上偏移2px
+      overflow-x: auto; // 设置代码元素在水平方向上超出内容部分可滚动
+      max-width: 100%; // 设置代码元素的最大宽度为100%
+      transition: // 设置代码元素的颜色和背景颜色变化的过渡效果
+              color 0.3s,
+              background-color 0.3s;
+      cursor: pointer; // 设置鼠标悬停在代码元素上时光标为指针
+      &:hover { // 当鼠标悬停在代码元素上时的样式
+        color: var(--main-color); // 设置代码元素的文本颜色为自定义变量--main-color
+        background-color: var(--main-color-bg); // 设置代码元素的背景颜色为自定义变量--main-color-bg
       }
     }
+
     // 超链接
-    a {
-      position: relative;
-      display: inline-flex;
-      color: var(--main-color);
-      &::before {
-        content: "";
-        position: absolute;
-        border-radius: 2px;
-        bottom: 2px;
-        left: 0;
-        right: 0;
-        height: 1px;
-        opacity: 0.8;
-        background-color: var(--main-color);
-        border-radius: 4px;
-        transition: all 0.3s;
+    a { // 选择单元格内的超链接（a）元素
+      position: relative; // 设置超链接元素的定位为相对定位
+      display: inline-flex; // 设置超链接元素为行内flex布局
+      color: var(--main-color); // 设置超链接元素的文本颜色为自定义变量--main-color
+      &::before { // 选择超链接元素前的伪元素
+        content: ""; // 设置伪元素的内容为空
+        position: absolute; // 设置伪元素的定位为绝对定位
+        border-radius: 2px; // 设置伪元素的边框圆角为2px
+        bottom: 2px; // 设置伪元素距离底部的距离为2px
+        left: 0; // 设置伪元素距离左侧的距离为0
+        right: 0; // 设置伪元素距离右侧的距离为0
+        height: 1px; // 设置伪元素的高度为1px
+        opacity: 0.8; // 设置伪元素的透明度为0.8
+        background-color: var(--main-color); // 设置伪元素的背景颜色为自定义变量--main-color
+        border-radius: 4px; // 设置伪元素的边框圆角为4px
+        transition: all 0.3s; // 设置伪元素的所有属性变化的过渡效果，持续时间为0.3秒
       }
-      &:hover {
-        &::before {
-          height: 100%;
-          opacity: 0.2;
-          bottom: 0;
-          left: -2px;
-          right: -2px;
+      &:hover { // 当鼠标悬停在超链接元素上时的样式
+        &::before { // 选择悬停时超链接元素前的伪元素
+          height: 100%; // 设置伪元素的高度为100%
+          opacity: 0.2; // 设置伪元素的透明度为0.2
+          bottom: 0; // 设置伪元素距离底部的距离为0
+          left: -2px; // 设置伪元素距离左侧的距离为-2px
+          right: -2px; // 设置伪元素距离右侧的距离为-2px
         }
       }
     }
+
     // 重点
-    strong {
-      color: var(--main-color);
+    strong { // 选择单元格内的强调文本（strong）元素
+      color: var(--main-color); // 设置强调文本的文本颜色为自定义变量--main-color
     }
   }
   // 图片
-  img {
-    width: 100%;
-    border-radius: 12px;
+  img { // 选择图片（img）元素
+    width: 100%; // 设置图片宽度为100%
+    border-radius: 12px; // 设置图片的边框圆角为12px
   }
-  .img-fancybox {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: var(--main-font-color);
-    .post-img {
-      width: auto;
-      max-height: 450px;
-      max-width: 100%;
-      margin: 0 auto;
-      border-radius: 12px;
-      cursor: zoom-in;
-      transition:
-        opacity 0.3s,
-        filter 0.3s;
-      &:hover {
-        filter: blur(0) brightness(0.8);
+  .img-fancybox { // 选择具有fancybox类的图片容器
+    width: 100%; // 设置容器宽度为100%
+    display: flex; // 设置容器为flex布局
+    flex-direction: column; // 设置flex容器的主轴方向为垂直
+    align-items: center; // 设置flex容器内的子元素水平居中对齐
+    color: var(--main-font-color); // 设置文本颜色为自定义变量--main-font-color
+    .post-img { // 选择容器内的图片（post-img）元素
+      width: auto; // 设置图片宽度为自动（保持图片原始比例）
+      max-height: 450px; // 设置图片的最大高度为450px
+      max-width: 100%; // 设置图片的最大宽度为100%
+      margin: 0 auto; // 设置图片水平居中
+      border-radius: 12px; // 设置图片的边框圆角为12px
+      cursor: zoom-in; // 设置鼠标悬停时为放大镜光标
+      transition: // 设置图片的透明度和滤镜变化的过渡效果
+              opacity 0.3s,
+              filter 0.3s;
+      &:hover { // 当鼠标悬停在图片上时的样式
+        filter: blur(0) brightness(0.8); // 设置图片的滤镜为无模糊和亮度降低
       }
     }
-    .post-img-tip {
-      display: inline-flex;
-      width: 100%;
-      justify-content: center;
-      align-items: center;
-      margin: 0.8rem 0;
-      font-size: 14px;
-      opacity: 0.6;
+    .post-img-tip { // 选择图片下的提示文本（post-img-tip）元素
+      display: inline-flex; // 设置提示文本为行内flex布局
+      width: 100%; // 设置提示文本宽度为100%
+      justify-content: center; // 设置提示文本水平居中
+      align-items: center; // 设置提示文本垂直居中
+      margin: 0.8rem 0; // 设置提示文本的外边距为上0.8rem，下0
+      font-size: 14px; // 设置提示文本的字体大小为14px
+      opacity: 0.6; // 设置提示文本的透明度为0.6
     }
-    &::before {
-      display: none;
+    &::before { // 选择fancybox类前的伪元素
+      display: none; // 设置伪元素不显示
     }
-    &:hover {
-      color: var(--main-font-color);
+    &:hover { // 当鼠标悬停在fancybox类上时的样式
+      color: var(--main-font-color); // 设置文本颜色为自定义变量--main-font-color
     }
   }
   // 代码块
   div {
-    &[class*="language-"] {
-      position: relative;
-      display: flex;
-      flex-direction: row-reverse;
-      border-radius: 12px;
-      background-color: var(--main-card-background);
-      border: 1px solid var(--main-card-border);
-      padding-top: 36px;
-      margin: 1rem 0;
-      overflow: hidden;
-      .copy,
-      .lang {
-        position: absolute;
+    &[class*="language-"] { // 选择包含"language-"类的元素
+      position: relative; // 设置定位方式为相对定位
+      display: flex; // 设置布局为flex
+      flex-direction: row-reverse; // 设置flex方向为从右到左
+      border-radius: 12px; // 设置边框圆角为12px
+      background-color: var(--main-card-background); // 设置背景颜色为自定义变量
+      border: 1px solid var(--main-card-border); // 设置边框样式为1px实线，颜色为自定义变量
+      padding-top: 36px; // 设置顶部内边距为36px
+      margin: 1rem 0; // 设置垂直外边距为1rem，水平外边距为0
+      overflow: hidden; // 隐藏溢出的内容
+      .copy, // 选择类名为.copy的元素
+      .lang { // 选择类名为.lang的元素
+        position: absolute; // 设置定位方式为绝对定位
       }
-      .lang {
-        width: 100%;
-        height: 36px;
-        top: 0;
-        left: 0;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        background-color: var(--main-card-second-background);
-        border-bottom: 1px solid var(--main-card-border);
-        padding-left: 16px;
-        font-weight: bold;
-        font-size: 18px;
+      .lang { // 选择类名为.lang的元素
+        width: 100%; // 设置宽度为100%
+        height: 36px; // 设置高度为36px
+        top: 0; // 定位到顶部
+        left: 0; // 定位到左侧
+        display: flex; // 设置布局为flex
+        flex-direction: row; // 设置flex方向为从左到右
+        align-items: center; // 设置垂直居中对齐
+        background-color: var(--main-card-second-background); // 设置背景颜色为自定义变量
+        border-bottom: 1px solid var(--main-card-border); // 设置底部边框样式为1px实线，颜色为自定义变量
+        padding-left: 16px; // 设置左侧内边距为16px
+        font-weight: bold; // 设置字体加粗
+        font-size: 18px; // 设置字体大小为18px
       }
-      .copy {
-        top: 0;
-        right: 0;
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: transparent;
-        border: none;
-        font-family: "iconfont";
-        font-size: 20px;
-        font-style: normal;
-        z-index: 1;
-        color: var(--main-font-color);
-        cursor: pointer;
-        &::after {
-          content: "\e01c";
-          transition: color 0.3s;
+    }
+    .copy { // 选择类名为.copy的元素
+      top: 0; // 定位到顶部
+      right: 0; // 定位到右侧
+      width: 36px; // 设置宽度为36px
+      height: 36px; // 设置高度为36px
+      display: flex; // 设置布局为flex
+      align-items: center; // 设置垂直居中对齐
+      justify-content: center; // 设置水平居中对齐
+      background-color: transparent; // 设置背景颜色为透明
+      border: none; // 移除边框
+      font-family: "iconfont"; // 设置字体为iconfont
+      font-size: 20px; // 设置字体大小为20px
+      font-style: normal; // 设置字体样式为正常
+      z-index: 1; // 设置堆叠顺序为1
+      color: var(--main-font-color); // 设置字体颜色为自定义变量
+      cursor: pointer; // 设置鼠标样式为指针
+      &::after { // 选择.copy类后的伪元素
+        content: "\e01c"; // 设置伪元素的内容为图标编码
+        transition: color 0.3s; // 设置颜色变化的过渡效果为0.3秒
+      }
+      &::before { // 选择.copy类前的伪元素
+        content: "复制成功"; // 设置伪元素的内容为文本
+        position: absolute; // 设置定位方式为绝对定位
+        left: -60px; // 设置左侧距离为-60px
+        font-size: 14px; // 设置字体大小为14px
+        white-space: nowrap; // 设置文本不换行
+        opacity: 0; // 设置透明度为0
+        transform: translateX(5px); // 设置X轴平移为5px
+        transition: // 设置多个属性的过渡效果
+                color 0.3s,
+                opacity 0.3s,
+                transform 0.3s;
+      }
+      &.copied { // 当.copy类同时具有copied类时的样式
+        &::before { // 选择.copy.copied类前的伪元素
+          opacity: 1; // 设置透明度为1
+          transform: translateX(0); // 设置X轴平移为0
         }
-        &::before {
-          content: "复制成功";
-          position: absolute;
-          left: -60px;
-          font-size: 14px;
-          white-space: nowrap;
-          opacity: 0;
-          transform: translateX(5px);
-          transition:
-            color 0.3s,
-            opacity 0.3s,
-            transform 0.3s;
+      }
+      &:hover { // 当鼠标悬停在.copy类上时的样式
+        &::before, // 选择.copy类前的伪元素
+        &::after { // 选择.copy类后的伪元素
+          color: var(--main-color); // 设置颜色为自定义变量
         }
-        &.copied {
-          &::before {
-            opacity: 1;
-            transform: translateX(0);
+      }
+    }
+    .line-numbers-wrapper { // 选择类名为.line-numbers-wrapper的元素
+      padding: 6px 10px; // 设置内边距为6px 10px
+      opacity: 0.6; // 设置透明度为0.6
+      text-align: center; // 设置文本居中对齐
+      user-select: none; // 禁止用户选择文本
+      color: var(--main-font-second-color); // 设置字体颜色为自定义变量
+      background-color: var(--main-card-second-background); // 设置背景颜色为自定义变量
+      .line-number { // 选择.line-numbers-wrapper内的.line-number元素
+        display: flex; // 设置布局为flex
+        align-items: center; // 设置垂直居中对齐
+        justify-content: center; // 设置水平居中对齐
+        height: 22px; // 设置高度为22px
+        font-size: 14px; // 设置字体大小为14px
+      }
+      br { // 选择<br>元素
+        display: none; // 设置不显示<br>元素
+      }
+    }
+    pre { // 选择<pre>元素
+      margin: 0; // 移除外边距
+      padding: 6px 10px; // 设置内边距为6px 10px
+      width: 100%; // 设置宽度为100%
+      overflow-y: auto; // 设置垂直方向溢出为自动滚动
+      user-select: text; // 允许用户选择文本
+      border-left: 1px solid var(--main-card-border); // 设置左边框样式为1px实线，颜色为自定义变量
+      code { // 选择<pre>内的<code>元素
+        font-family: "Fira Code", var(--main-font-family), monospace; // 设置字体为"Fira Code"，其次是自定义变量，最后是等宽字体
+        font-optical-sizing: auto; // 设置字体光学大小为自动
+        .line { // 选择<code>内的.line元素
+          display: inline-block; // 设置显示方式为行内块元素
+          height: 22px; // 设置高度为22px
+          span { // 选择.line内的<span>元素
+            color: var(--shiki-light); // 设置字体颜色为自定义变量
+            transition: color 0.3s; // 设置颜色变化的过渡效果为0.3秒
           }
-        }
-        &:hover {
-          &::before,
-          &::after {
-            color: var(--main-color);
+          &.highlighted { // 当.line元素同时具有.highlighted类时的样式
+            width: 100%; // 设置宽度为100%
+            background-color: var(--main-card-border); // 设置背景颜色为自定义变量
+            border-radius: 6px; // 设置边框圆角为6px
           }
-        }
-      }
-      .line-numbers-wrapper {
-        padding: 6px 10px;
-        opacity: 0.6;
-        text-align: center;
-        user-select: none;
-        color: var(--main-font-second-color);
-        background-color: var(--main-card-second-background);
-        .line-number {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 22px;
-          font-size: 14px;
-        }
-        br {
-          display: none;
-        }
-      }
-      pre {
-        margin: 0;
-        padding: 6px 10px;
-        width: 100%;
-        overflow-y: auto;
-        user-select: text;
-        border-left: 1px solid var(--main-card-border);
-        code {
-          font-family: "Fira Code", var(--main-font-family), monospace;
-          font-optical-sizing: auto;
-          .line {
-            display: inline-block;
-            height: 22px;
-            span {
-              color: var(--shiki-light);
-              transition: color 0.3s;
-            }
-            &.highlighted {
-              width: 100%;
-              background-color: var(--main-card-border);
-              border-radius: 6px;
-            }
-            &:empty {
-              height: 17px;
-            }
+          &:empty { // 当.line元素为空时的样式
+            height: 17px; // 设置高度为17px
           }
         }
       }
     }
   }
-  pre {
-    width: 100%;
-    overflow-y: auto;
-    user-select: text;
+  pre { // 选择<pre>元素
+    width: 100%; // 设置宽度为100%
+    overflow-y: auto; // 设置垂直方向溢出为自动滚动
+    user-select: text; // 允许用户选择文本
   }
+
   // blockquote
-  blockquote {
-    padding: 2px 16px;
-    margin: 1rem 0;
-    color: var(--main-font-color);
-    text-align: left;
-    border: 1px solid var(--main-card-border);
-    border-left: 8px solid var(--main-card-border);
-    background-color: var(--main-card-second-background);
-    border-radius: 4px 8px 8px 4px;
-    p {
-      margin: 0.5rem 0;
+  blockquote { // 选择<blockquote>元素
+    padding: 2px 16px; // 设置内边距为2px 16px
+    margin: 1rem 0; // 设置外边距为1rem 0
+    color: var(--main-font-color); // 设置文本颜色为自定义变量
+    text-align: left; // 设置文本左对齐
+    border: 1px solid var(--main-card-border); // 设置边框为1px实线，颜色为自定义变量
+    border-left: 8px solid var(--main-card-border); // 设置左边框为8px实线，颜色为自定义变量
+    background-color: var(--main-card-second-background); // 设置背景颜色为自定义变量
+    border-radius: 4px 8px 8px 4px; // 设置边框圆角，分别为上左、上右、下右、下左
+    p { // 选择<blockquote>内的<p>元素
+      margin: 0.5rem 0; // 设置段落外边距为0.5rem 0
     }
   }
   // 标点
