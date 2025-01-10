@@ -46,6 +46,7 @@ export default withPwa(
       tagsData: getAllType(postData),
       categoriesData: getAllCategories(postData),
       archivesData: getAllArchives(postData),
+      sitePassword: process.env.VITE_SITE_PASSWORD,
     },
     // markdown
     markdown: {

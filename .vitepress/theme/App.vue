@@ -1,29 +1,37 @@
 <template>
-  <!-- 背景图片 -->
-  <Background />
-  <!-- 加载提示 -->
-  <Loading />
-  <!-- 中控台 -->
-  <Control />
-  <!-- 导航栏 -->
-  <Nav />
-  <!-- 主内容 -->
-  <main :class="['mian-layout', { loading: loadingStatus, 'is-post': isPostPage }]">
-    <!-- 404 -->
-    <NotFound v-if="page.isNotFound" />
-    <!-- 首页 -->
-    <Home v-if="frontmatter.layout === 'home'" showHeader />
-    <!-- 页面 -->
-    <template v-else>
-      <!-- 文章页面 -->
-      <Post v-if="isPostPage" />
-      <!-- 普通页面 -->
-      <Page v-else-if="!page.isNotFound" />
-    </template>
-  </main>
-  <!-- 页脚 -->
-  <FooterLink v-show="!loadingStatus" :showBar="isPostPage && !page.isNotFound" />
-  <Footer v-show="!loadingStatus" />
+  <PasswordProtect
+      v-if="!isAuthenticated"
+      @authenticated="handleAuthentication"
+  />
+  <!-- 当用户通过验证后显示的内容 -->
+  <div v-else>
+    <!-- 背景图片 -->
+    <Background />
+    <!-- 加载提示 -->
+    <Loading />
+    <!-- 中控台 -->
+    <Control />
+    <!-- 导航栏 -->
+    <Nav />
+    <!-- 主内容 -->
+    <main :class="['mian-layout', { loading: loadingStatus, 'is-post': isPostPage }]">
+      <!-- 404 -->
+      <NotFound v-if="page.isNotFound" />
+      <!-- 首页 -->
+      <Home v-if="frontmatter.layout === 'home'" showHeader />
+      <!-- 页面 -->
+      <template v-else>
+        <!-- 文章页面 -->
+        <Post v-if="isPostPage" />
+        <!-- 普通页面 -->
+        <Page v-else-if="!page.isNotFound" />
+      </template>
+    </main>
+    <!-- 页脚 -->
+    <FooterLink v-show="!loadingStatus" :showBar="isPostPage && !page.isNotFound" />
+    <Footer v-show="!loadingStatus" />
+  </div>
+
   <!-- 悬浮菜单 -->
   <Teleport to="body">
     <!-- 左侧菜单 -->
@@ -41,6 +49,16 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+import PasswordProtect from './components/PasswordProtect.vue';
+
+const isAuthenticated = ref(false);
+
+const handleAuthentication = (isAuth) => {
+  console.log('handleAuthentication called with isAuth:', isAuth);
+  isAuthenticated.value = isAuth;
+};
+
 import { storeToRefs } from "pinia";
 import { mainStore } from "@/store";
 import { calculateScroll, specialDayGray } from "@/utils/helper";
