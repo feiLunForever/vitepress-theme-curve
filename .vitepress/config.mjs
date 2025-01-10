@@ -42,6 +42,19 @@ export default withPwa(
           content: "AE2B9395026BF559"
         }
       ],
+      [
+        "script",
+        {
+          charset: "UTF-8",
+          id: "LA_COLLECT",
+          src: "//sdk.51.la/js-sdk-pro.min.js",
+        },
+      ],
+      [
+        "script",
+        {},
+        `LA.init({id:"${themeConfig.tongji["51la"]}",ck:"${themeConfig.tongji["51la"]}"})`,
+      ],
     ],
     // sitemap
     sitemap: {
