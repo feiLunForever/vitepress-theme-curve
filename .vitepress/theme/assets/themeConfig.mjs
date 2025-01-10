@@ -264,7 +264,7 @@ export const themeConfig = {
   search: {
     enable: true,
     appId: "HHKA40ZFYR",
-    indexName: 'ez',
+    indexName: 'ez_pages',
     apiKey: "13d96613b21edc13efe6b666dc1f4ffb"
   },
   // 打赏
