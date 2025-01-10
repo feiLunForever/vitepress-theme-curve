@@ -16,40 +16,79 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useStorage } from '@vueuse/core'
+import { ref, onMounted, onUnmounted } from 'vue'
+import CryptoJS from 'crypto-js'
 
 const password = ref('')
 const error = ref('')
+const isAuthenticated = ref(false)
+const intervalId = ref(null)
 
-// 存储认证状态和过期时间
-const auth = useStorage('blog-auth', {
-  authenticated: false,
-  expireTime: 0
-})
+// 检查过期状态
+const checkExpiration = () => {
+  const authTimestamp = localStorage.getItem('authTimestamp')
+  const expirationTime = localStorage.getItem('expirationTime')
 
-const isAuthenticated = computed(() => {
-  // 检查是否认证以及是否过期
-  if(!auth.value.authenticated) return false
-  if(Date.now() > auth.value.expireTime) {
-    auth.value.authenticated = false
-    return false
-  }
-  return true
-})
-
-const verify = () => {
-  if(password.value === '123456') {
-    // 设置24小时后过期
-    auth.value = {
-      authenticated: true,
-      expireTime: Date.now() + 24 * 60 * 60 * 1000
+  if (authTimestamp && expirationTime) {
+    const currentTime = Date.now()
+    if (currentTime > parseInt(expirationTime, 10)) {
+      // 已过期，清除状态
+      localStorage.removeItem('isAuthenticated')
+      localStorage.removeItem('authTimestamp')
+      localStorage.removeItem('expirationTime')
+      isAuthenticated.value = false
+      location.reload()
+    } else {
+      isAuthenticated.value = true
     }
+  }
+}
+
+// 启动定时检查
+const startExpirationCheck = () => {
+  intervalId.value = setInterval(() => {
+    checkExpiration()
+  }, 60 * 1000) // 每分钟检查一次
+}
+
+// 停止定时检查
+const stopExpirationCheck = () => {
+  if (intervalId.value) {
+    clearInterval(intervalId.value)
+    intervalId.value = null
+  }
+}
+
+// 验证密码
+const verify = () => {
+  const hashedPassword = CryptoJS.MD5(password.value).toString()
+
+  if (hashedPassword === import.meta.env.VITE_PASSWORD) {
+    isAuthenticated.value = true
+
+    // 存储验证状态和时间戳
+    const currentTime = Date.now()
+    const expirationTimeInMinutes = 60 // 60分钟后过期
+    const expirationTime = currentTime + expirationTimeInMinutes * 60 * 1000
+
+    localStorage.setItem('authTimestamp', currentTime.toString())
+    localStorage.setItem('expirationTime', expirationTime.toString())
+    localStorage.setItem('isAuthenticated', 'true')
+
     error.value = ''
   } else {
     error.value = '密码错误'
   }
 }
+
+onMounted(() => {
+  checkExpiration() // 立即检查一次
+  startExpirationCheck() // 启动定时检查
+})
+
+onUnmounted(() => {
+  stopExpirationCheck() // 清理定时器
+})
 
 defineExpose({
   isAuthenticated
