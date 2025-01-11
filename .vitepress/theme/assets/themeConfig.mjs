@@ -201,11 +201,16 @@ export const themeConfig = {
     // 倒计时
     countDown: {
       enable: true,
-      // 倒计时日期
-      data: {
-        name: "春节",
-        date: "2025-01-29",
-      },
+      data:
+        {
+          name: "E仔",
+          date: "2025-03-30",
+          icon: "🧨",
+          style: {
+            layout: "card",
+            showDays: true
+          }
+        }
     },
     // 站点数据
     siteData: {

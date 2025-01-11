@@ -1,5 +1,17 @@
+:root {
+  --main-color-bg: #212121; // 文章背景色
+  --main-font-color: #d0d0d0; // 主要字体颜色
+  --main-color: #d86666; // 主要颜色
+  --main-card-background: #191919; // 卡片背景色
+  --main-card-border: #383838; // 卡片边框色
+  --main-warning-color-gray: #424242; // 警告背景色
+  --main-error-color-gray: #424242; // 错误背景色
+}
+
 // 文章容器样式
 .post {
+  background-color: var(--main-color-bg); // 设置文章容器背景色
+  color: var(--main-font-color); // 设置文章字体颜色
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -8,8 +20,8 @@
   // 文章元数据区域
   .post-meta {
     padding: 3rem 2rem;
-    // 顶部渐变背景
-    background: linear-gradient(to bottom, var(--main-mask-Inverse-background), transparent);
+    // 更新背景色
+    background: var(--main-card-background); // 使用卡片背景色
     width: 100%;
 
     // 元数据内容
@@ -78,10 +90,11 @@
       font-weight: 700;
       line-height: 1.4;
       margin: 2rem 0;
-      // 标题渐变色
-      background: linear-gradient(45deg, var(--main-color), #666);
+      // 更新标题背景色
+      background: linear-gradient(45deg, var(--main-color), var(--main-card-background)); // 使用主题颜色
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      color: var(--main-color); // 设置标题颜色
     }
 
     // 其他元数据
@@ -89,6 +102,7 @@
       display: flex;
       flex-direction: row;
       align-items: center;
+      color: var(--main-font-color); // 设置其他元数据颜色
 
       .meta {
         display: flex;
@@ -135,6 +149,7 @@
 
   // 文章内容区域
   .post-content {
+    background-color: var(--main-card-background); // 设置内容区域背景色
     width: 100%; // 设置元素的宽度为100%
     display: flex; // 将元素设置为flex布局容器
     flex-direction: row; // 设置flex容器的主轴方向为水平
@@ -387,6 +402,7 @@
       position: relative; // 设置超链接元素的定位为相对定位
       display: inline-flex; // 设置超链接元素为行内flex布局
       color: var(--main-color); // 设置超链接元素的文本颜色为自定义变量--main-color
+      text-decoration: none; // 移除下划线
       &::before { // 选择超链接元素前的伪元素
         content: ""; // 设置伪元素的内容为空
         position: absolute; // 设置伪元素的定位为绝对定位
@@ -984,4 +1000,10 @@
       background-color: var(--main-card-border);
     }
   }
+}
+
+// 代码块样式
+.md-fences {
+  background-color: #212121; // 设置代码块背景色
+  border: 1px solid #424242; // 设置代码块边框
 }
