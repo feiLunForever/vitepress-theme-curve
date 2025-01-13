@@ -71,12 +71,18 @@ export default withPwa(
     },
     // markdown
     markdown: {
+      theme: {
+        light: "github-light",
+        dark: "github-dark-default"
+        // dark: "github-dark",
+      },
       math: true,
       lineNumbers: true,
       toc: { level: [1, 2, 3] },
       image: {
         lazyLoading: true,
       },
+      // theme: 'material-theme',
       config: (md) => markdownConfig(md, themeConfig),
     },
     // 构建排除
