@@ -21,7 +21,7 @@ const { frontmatter } = useData();
     :deep(.markdown-main-style) {
       background: var(--main-card-background);
       border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       padding: 2rem;
       
       &.s-card {
@@ -29,7 +29,7 @@ const { frontmatter } = useData();
         
         &:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
         }
       }
     }

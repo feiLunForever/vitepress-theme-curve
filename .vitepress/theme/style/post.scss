@@ -1,11 +1,11 @@
 :root {
-  --main-color-bg: #212121; // 文章背景色
-  --main-font-color: #d0d0d0; // 主要字体颜色
+  --main-color-bg: #f5f5f5; // 文章背景色，调整为更柔和的灰色
+  --main-font-color: #444444; // 主要字体颜色，调整为深灰色
   --main-color: #d86666; // 主要颜色
-  --main-card-background: #191919; // 卡片背景色
-  --main-card-border: #383838; // 卡片边框色
-  --main-warning-color-gray: #424242; // 警告背景色
-  --main-error-color-gray: #424242; // 错误背景色
+  --main-card-background: #ffffff; // 卡片背景色，保持白色
+  --main-card-border: #dcdcdc; // 卡片边框色，调整为更柔和的灰色
+  --main-warning-color-gray: #f0e68c; // 警告背景色，调整为柔和的黄色
+  --main-error-color-gray: #f8d7da; // 错误背景色，调整为柔和的红色
 }
 
 // 文章容器样式
