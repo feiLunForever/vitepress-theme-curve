@@ -23,7 +23,8 @@ const props = defineProps({
 
 <style lang="scss" scoped>
 .main-aside {
-  padding-left: 1rem;
+  //padding-left: 1rem;
+  padding-right: 1.5rem;
   display: flex;
   flex-direction: column;
   animation: fade-up 0.6s 0.3s backwards;

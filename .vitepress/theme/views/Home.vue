@@ -3,6 +3,8 @@
   <div class="home">
     <Banner v-if="showHeader" :height="store.bannerType" />
     <div class="home-content">
+      <!-- 侧边栏 -->
+      <Aside />
       <div class="posts-content">
         <!-- 分类总览 -->
         <TypeBar :type="showTags ? 'tags' : 'categories'" />
@@ -23,8 +25,6 @@
           "
         />
       </div>
-      <!-- 侧边栏 -->
-      <Aside />
     </div>
   </div>
 </template>

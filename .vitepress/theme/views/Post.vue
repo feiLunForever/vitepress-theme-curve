@@ -41,6 +41,7 @@
       </div>
     </div>
     <div class="post-content">
+      <Aside showToc />
       <article class="post-article s-card">
         <!-- 过期提醒 -->
         <div class="expired s-card" v-if="postMetaData?.expired >= 180">
@@ -74,7 +75,6 @@
         <!-- 相关文章 -->
         <RelatedPost />
       </article>
-      <Aside showToc />
     </div>
   </div>
 </template>
