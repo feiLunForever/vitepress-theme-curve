@@ -23,6 +23,8 @@
   --main-color-white: #ffffff40; // 白色
   --main-color-gray: #999; // 灰色
   --main-color-red: #ff3842; // 红色
+  //--max-width: 1600px; // 全局最大宽度
+  --max-width: 90%; // 全局最大宽度
 }
 
 // 浅色主题变量
@@ -235,5 +237,39 @@ a {
       border-width: 2px !important; // 边框宽度
       border-color: var(--main-color) !important; // 边框颜色
     }
+  }
+}
+
+// App.vue 中的样式
+.mian-layout {
+  width: 100%;
+  max-width: var(--max-width); // 使用全局变量
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  // 手动实现加载动画
+  animation: show 0.5s forwards;
+  animation-duration: 0.5s;
+  display: block;
+  &.loading {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    padding: 1rem 1.5rem;
+    &.is-post {
+      padding: 0;
+    }
+  }
+}
+.left-menu {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 1002;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+  &.hidden {
+    opacity: 0;
+    transform: translateY(100px);
   }
 }

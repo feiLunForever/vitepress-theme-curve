@@ -198,7 +198,7 @@ const { site, theme, frontmatter, page } = useData();
     position: relative;
     width: 100%;
     height: 100%;
-    max-width: 1400px;
+    max-width: var(--max-width);
     padding: 0 2rem;
     display: grid;
     grid-template-columns: minmax(200px, 1fr) auto minmax(200px, 1fr);

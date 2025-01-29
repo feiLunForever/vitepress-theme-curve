@@ -102,7 +102,7 @@ onBeforeUnmount(() => {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: 1400px;
+    max-width: var(--max-width);
     margin: 0 auto;
     padding: 0 1rem;
     color: var(--main-font-color);
