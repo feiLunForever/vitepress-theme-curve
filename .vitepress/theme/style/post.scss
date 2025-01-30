@@ -23,12 +23,15 @@
     // 更新背景色
     background: var(--main-card-background); // 使用卡片背景色
     width: 100%;
+    border-radius: 12px; // 增加圆角
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); // 增加阴影
 
     // 元数据内容
     .meta {
       display: flex; // 设置为flex布局
       flex-direction: row; // 子元素水平排列
       align-items: center; // 子元素垂直居中对齐
+      margin-bottom: 1rem; // 增加底部外边距
 
       // 分类标签
       .categories {

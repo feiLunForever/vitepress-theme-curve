@@ -99,4 +99,10 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @import "../style/post.scss";
+
+.post-content {
+  padding: 2rem; // 增加内边距
+  border-radius: 12px; // 增加圆角
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); // 增加阴影
+}
 </style>
