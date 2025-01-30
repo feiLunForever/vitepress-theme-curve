@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(135deg, var(--main-color) 30%, var(--main-card-background) 110%);
+  background: linear-gradient(135deg, var(--main-color) 30%, var(--main-card-background) 100%);
   color: var(--main-card-background);
   border: none;
   .tip {
