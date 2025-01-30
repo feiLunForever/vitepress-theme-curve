@@ -34,11 +34,11 @@
 
 // 浅色主题变量
 html.light {
-  --main-site-background: #ffffff; // 站点背景色
-  --main-card-second-background: #f0f4f8; // 次卡片背景色（文章摘要。。。），调整为更柔和的灰色
-  --main-font-second-color: #555555; // 次字体颜色，调整为中灰色
+  --main-site-background: #fefefe; // 站点背景色，调整为更柔和的白色
+  --main-card-second-background: #f9f9f9; // 次卡片背景色（文章摘要。。。），调整为更柔和的灰色
+  --main-font-second-color: #666666; // 次字体颜色，调整为中灰色
   --main-mask-background: rgba(255, 255, 255, 0.95); // 遮罩背景颜色
-  --main-mask-second-background: rgba(255, 255, 255, 0.45); // 次遮罩背景颜色
+  --main-mask-second-background: rgba(255, 255, 255, 0.55); // 次遮罩背景颜色，调整为更透明的白色
 }
 
 // 深色主题变量

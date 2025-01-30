@@ -16,13 +16,13 @@ const { frontmatter } = useData();
 <style lang="scss" scoped>
 .page {
   .page-content {
-    padding: 2rem;
+    padding: 2.5rem;
     
     :deep(.markdown-main-style) {
       background: var(--main-card-background);
       border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      padding: 2rem;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      padding: 2.5rem;
       
       &.s-card {
         transition: all 0.3s ease;
