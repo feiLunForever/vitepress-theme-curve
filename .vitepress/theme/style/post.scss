@@ -3,7 +3,7 @@
   --main-font-color: #444444; // 主要字体颜色，调整为深灰色
   --main-color: #d86666; // 主要颜色
   --main-card-background: #ffffff; // 卡片背景色，保持白色
-  --main-card-border: #e0e0e0; // 卡片边框色，调整为更柔和的灰色
+  --main-card-border: #dcdcdc; // 卡片边框色，调整为更柔和的灰色
   --main-warning-color-gray: #f0e68c; // 警告背景色，调整为柔和的黄色
   --main-error-color-gray: #f8d7da; // 错误背景色，调整为柔和的红色
 }
@@ -16,15 +16,15 @@
   display: flex;
   flex-direction: column;
   animation: fade-up 0.8s ease-out; // 淡入上升动画
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); // 增加阴影
 
   // 文章元数据区域
   .post-meta {
     padding: 3rem 2rem;
-    // 更新背景色
     background: var(--main-card-background); // 使用卡片背景色
     width: 100%;
     border-radius: 12px; // 增加圆角
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); // 增加阴影
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); // 增加阴影
 
     // 元数据内容
     .meta {
