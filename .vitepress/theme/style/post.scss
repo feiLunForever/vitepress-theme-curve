@@ -10,7 +10,7 @@
 
 // 文章容器样式
 .post {
-  background-color: var(--main-color-bg); // 设置文章容器背景色
+  //background-color: var(--main-color-bg); // 设置文章容器背景色
   color: var(--main-font-color); // 设置文章字体颜色
   width: 100%;
   display: flex;
@@ -21,7 +21,8 @@
   // 文章元数据区域
   .post-meta {
     padding: 3rem 2rem;
-    background: var(--main-card-background); // 使用卡片背景色
+    //background: var(--main-card-background); // 使用卡片背景色
+    background: linear-gradient(45deg, var(--main-card-background) 10%, var(--main-color) 110%);
     width: 100%;
     border-radius: 12px; // 增加圆角
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); // 增加阴影
@@ -163,6 +164,7 @@
       //padding-left: 1rem; // 左侧内边距
       padding-right: 1rem;
     }
+
     // 文章主体
     .post-article {
       width: calc(100% - 300px); // 设置元素的宽度为父容器宽度减去300px
@@ -188,6 +190,7 @@
           font-size: 1.1rem; // 加粗文字大小
         }
       }
+
       .other-meta { // 其他元数据容器
         display: flex; // 弹性布局
         flex-direction: row; // 水平排列
@@ -243,6 +246,7 @@
         }
       }
     }
+
     @media (max-width: 1200px) { // 响应式布局 - 大屏
       .post-article {
         width: 100%; // 文章宽度占满
@@ -252,6 +256,7 @@
       }
     }
   }
+
   @media (max-width: 768px) { // 响应式布局 - 中小屏
     .post-meta { // 文章元数据
       padding: 2rem 1rem; // 内边距调整
@@ -293,6 +298,7 @@
               margin-top: 12px; // 上方外边距
             }
           }
+
           .report {
             margin-top: 20px;
           }
@@ -317,12 +323,14 @@
         }
       }
     }
+
     h2 { // 选择div内的h2元素
       font-size: 1.6rem; // 设置h2的字体大小为1.6rem
       line-height: 1.6; // 设置h2的行高为1.6
       border-bottom: 1px dashed var(--main-color-bg); // 设置h2的下边框为1px虚线，颜色为自定义变量--main-color-bg
       padding-bottom: 0.5rem; // 设置h2的底部内边距为0.5rem
     }
+
     h3 { // 选择div内的h3元素
       width: fit-content; // 设置h3的宽度为适应内容宽度
       font-size: 1.2rem; // 设置h3的字体大小为1.2rem
@@ -339,6 +347,7 @@
         z-index: -1; // 设置伪元素的堆叠顺序为-1，使其在h3下方
       }
     }
+
     h1,
     h2,
     h3,
@@ -352,6 +361,7 @@
       }
     }
   }
+
   .header-anchor { // 选择类名为.header-anchor的元素
     position: absolute; // 设置定位方式为绝对定位
     left: 0; // 将元素定位到左侧距离为0的位置
@@ -365,10 +375,12 @@
       font-weight: bold; // 设置伪元素的字体加粗
     }
   }
+
   // 文本
   p {
     font-size: 1.1rem;
   }
+
   p,
   ul,
   li,
@@ -420,6 +432,7 @@
         border-radius: 4px; // 设置伪元素的边框圆角为4px
         transition: all 0.3s; // 设置伪元素的所有属性变化的过渡效果，持续时间为0.3秒
       }
+
       &:hover { // 当鼠标悬停在超链接元素上时的样式
         &::before { // 选择悬停时超链接元素前的伪元素
           height: 100%; // 设置伪元素的高度为100%
@@ -436,11 +449,13 @@
       color: var(--main-color); // 设置强调文本的文本颜色为自定义变量--main-color
     }
   }
+
   // 图片
   img { // 选择图片（img）元素
     width: 100%; // 设置图片宽度为100%
     border-radius: 12px; // 设置图片的边框圆角为12px
   }
+
   .img-fancybox { // 选择具有fancybox类的图片容器
     width: 100%; // 设置容器宽度为100%
     display: flex; // 设置容器为flex布局
@@ -457,10 +472,12 @@
       transition: // 设置图片的透明度和滤镜变化的过渡效果
               opacity 0.3s,
               filter 0.3s;
+
       &:hover { // 当鼠标悬停在图片上时的样式
         filter: blur(0) brightness(0.8); // 设置图片的滤镜为无模糊和亮度降低
       }
     }
+
     .post-img-tip { // 选择图片下的提示文本（post-img-tip）元素
       display: inline-flex; // 设置提示文本为行内flex布局
       width: 100%; // 设置提示文本宽度为100%
@@ -470,13 +487,16 @@
       font-size: 14px; // 设置提示文本的字体大小为14px
       opacity: 0.6; // 设置提示文本的透明度为0.6
     }
+
     &::before { // 选择fancybox类前的伪元素
       display: none; // 设置伪元素不显示
     }
+
     &:hover { // 当鼠标悬停在fancybox类上时的样式
       color: var(--main-font-color); // 设置文本颜色为自定义变量--main-font-color
     }
   }
+
   // 代码块
   div {
     &[class*="language-"] { // 选择包含"language-"类的元素
@@ -493,6 +513,7 @@
       .lang { // 选择类名为.lang的元素
         position: absolute; // 设置定位方式为绝对定位
       }
+
       .lang { // 选择类名为.lang的元素
         width: 100%; // 设置宽度为100%
         height: 36px; // 设置高度为36px
@@ -508,6 +529,7 @@
         font-size: 18px; // 设置字体大小为18px
       }
     }
+
     .copy { // 选择类名为.copy的元素
       top: 0; // 定位到顶部
       right: 0; // 定位到右侧
@@ -528,6 +550,7 @@
         content: "\e01c"; // 设置伪元素的内容为图标编码
         transition: color 0.3s; // 设置颜色变化的过渡效果为0.3秒
       }
+
       &::before { // 选择.copy类前的伪元素
         content: "复制成功"; // 设置伪元素的内容为文本
         position: absolute; // 设置定位方式为绝对定位
@@ -541,12 +564,14 @@
                 opacity 0.3s,
                 transform 0.3s;
       }
+
       &.copied { // 当.copy类同时具有copied类时的样式
         &::before { // 选择.copy.copied类前的伪元素
           opacity: 1; // 设置透明度为1
           transform: translateX(0); // 设置X轴平移为0
         }
       }
+
       &:hover { // 当鼠标悬停在.copy类上时的样式
         &::before, // 选择.copy类前的伪元素
         &::after { // 选择.copy类后的伪元素
@@ -554,6 +579,7 @@
         }
       }
     }
+
     .line-numbers-wrapper { // 选择类名为.line-numbers-wrapper的元素
       padding: 6px 10px; // 设置内边距为6px 10px
       opacity: 0.6; // 设置透明度为0.6
@@ -568,10 +594,12 @@
         height: 22px; // 设置高度为22px
         font-size: 14px; // 设置字体大小为14px
       }
+
       br { // 选择<br>元素
         display: none; // 设置不显示<br>元素
       }
     }
+
     pre { // 选择<pre>元素
       margin: 0; // 移除外边距
       padding: 6px 10px; // 设置内边距为6px 10px
@@ -589,11 +617,13 @@
             color: var(--shiki-light); // 设置字体颜色为自定义变量
             transition: color 0.3s; // 设置颜色变化的过渡效果为0.3秒
           }
+
           &.highlighted { // 当.line元素同时具有.highlighted类时的样式
             width: 100%; // 设置宽度为100%
             background-color: var(--main-card-border); // 设置背景颜色为自定义变量
             border-radius: 6px; // 设置边框圆角为6px
           }
+
           &:empty { // 当.line元素为空时的样式
             height: 17px; // 设置高度为17px
           }
@@ -601,6 +631,7 @@
       }
     }
   }
+
   pre { // 选择<pre>元素
     width: 100%; // 设置宽度为100%
     overflow-y: auto; // 设置垂直方向溢出为自动滚动
@@ -621,15 +652,18 @@
       margin: 0.5rem 0; // 设置段落外边距为0.5rem 0
     }
   }
+
   // 标点
   ul {
     list-style-type: none;
     padding-left: 1rem;
+
     li {
       position: relative;
       padding-left: 1.2rem;
       margin: 0.6rem 0;
       overflow: auto;
+
       &::before {
         content: "";
         position: absolute;
@@ -640,18 +674,22 @@
         background-color: var(--main-color);
         border-radius: 50%;
       }
+
       p {
         &:first-child {
           margin-top: 0;
         }
+
         &:last-child {
           margin-bottom: 0;
         }
       }
     }
   }
+
   ol {
     padding-left: 2rem;
+
     li {
       &::marker {
         color: var(--main-color);
@@ -659,6 +697,7 @@
       }
     }
   }
+
   // 表格
   .table-container {
     width: 100%;
@@ -667,6 +706,7 @@
     border-radius: 8px;
     overflow-y: hidden;
     overflow-x: auto;
+
     table {
       width: 100%;
       min-width: 512px;
@@ -674,6 +714,7 @@
       margin: 0 auto;
       border-collapse: collapse;
       border-spacing: 0;
+
       td,
       th {
         margin: 0;
@@ -683,13 +724,16 @@
         vertical-align: middle;
         border: 1px solid var(--main-card-border);
       }
+
       thead {
         background-color: var(--main-card-second-background);
       }
+
       tbody {
         tr {
           transition: background-color 0.3s;
           cursor: pointer;
+
           &:hover {
             background-color: var(--main-card-second-background);
           }
@@ -697,6 +741,7 @@
       }
     }
   }
+
   // 分割线
   hr {
     margin: 1rem 0;
@@ -704,16 +749,19 @@
     border: none;
     background-color: var(--main-card-border);
   }
+
   // 其他
   label {
     cursor: pointer;
   }
+
   // mathjax
   mjx-container {
     overflow: auto;
     padding-bottom: 8px;
     font-family: auto;
   }
+
   // custom-block
   .custom-block {
     margin: 1rem 0;
@@ -723,37 +771,46 @@
     background-color: var(--main-card-border);
     border-left: 6px solid var(--main-color-gray);
     user-select: none;
+
     p {
       margin: 0;
       line-height: normal;
       font-size: 0.95rem;
+
       &.custom-block-title {
         font-size: 14px;
         font-weight: bold;
         margin-bottom: 6px;
       }
     }
+
     &.tip {
       background-color: var(--main-info-color-gray);
       border-left-color: var(--main-info-color);
+
       p {
         color: var(--main-info-color);
       }
     }
+
     &.warning {
       background-color: var(--main-warning-color-gray);
       border-left-color: var(--main-warning-color);
+
       p {
         color: var(--main-warning-color);
       }
     }
+
     &.danger {
       background-color: var(--main-error-color-gray);
       border-left-color: var(--main-error-color);
+
       p {
         color: var(--main-error-color);
       }
     }
+
     // details
     &.details {
       border: none;
@@ -761,6 +818,7 @@
       background-color: transparent;
       transition: max-height 0.4s ease-in-out;
       overflow: hidden;
+
       summary {
         display: flex;
         flex-direction: row;
@@ -771,11 +829,11 @@
         font-weight: bold;
         border: 1px solid var(--main-card-border);
         background-color: var(--main-card-second-background);
-        transition:
-          color 0.3s,
-          border-color 0.3s,
-          background-color 0.3s;
+        transition: color 0.3s,
+        border-color 0.3s,
+        background-color 0.3s;
         cursor: pointer;
+
         &::before {
           content: "\e057";
           font-family: "iconfont";
@@ -783,15 +841,18 @@
           font-size: 18px;
           transition: transform 0.3s;
         }
+
         &::after {
           content: "+";
           margin-left: auto;
         }
+
         &:hover {
           color: var(--main-card-background);
           background-color: var(--main-color);
         }
       }
+
       > :last-child {
         padding: 16px;
         font-size: 1rem;
@@ -800,23 +861,28 @@
         background-color: var(--main-card-background);
         border-top: none;
       }
+
       &[open] {
         summary {
           border-radius: 12px 12px 0 0;
           border-color: var(--main-color);
           color: var(--main-card-background);
           background-color: var(--main-color);
+
           &::before {
             transform: rotate(90deg);
           }
+
           &::after {
             content: "-";
           }
         }
+
         > :last-child {
           border-color: var(--main-color);
         }
       }
+
       &:hover {
         summary {
           color: var(--main-card-background);
@@ -825,6 +891,7 @@
       }
     }
   }
+
   // plugin-tabs
   .plugin-tabs {
     margin: 1rem 0;
@@ -832,10 +899,12 @@
     background-color: var(--main-card-background);
     border: 1px solid var(--main-card-border);
     overflow: hidden;
+
     .plugin-tabs--tab-list {
       padding: 0 12px;
       background-color: var(--main-card-second-background);
       border-bottom: 1px solid var(--main-card-border);
+
       .plugin-tabs--tab {
         padding: 12px 16px;
         margin-right: 12px;
@@ -849,12 +918,14 @@
         border-bottom: 2px solid transparent;
         transition: all 0.3s;
         cursor: pointer;
+
         &[aria-selected="true"] {
           color: var(--main-color);
           border-bottom-color: var(--main-color);
         }
       }
     }
+
     .plugin-tabs--content {
       padding: 1rem;
       max-height: 500px;
@@ -862,20 +933,22 @@
       animation: show 0.5s forwards;
     }
   }
+
   // timeline
   .timeline {
     position: relative;
     padding: 0 0 1rem 26px;
     cursor: pointer;
+
     .timeline-title {
       display: inline-block;
       font-size: 14px;
       opacity: 0.6;
       transform: translateY(-2px);
-      transition:
-        color 0.3s,
-        opacity 0.3s;
+      transition: color 0.3s,
+      opacity 0.3s;
     }
+
     .timeline-content {
       margin-top: 12px;
       border-radius: 2px 12px 12px 12px;
@@ -884,13 +957,16 @@
       width: max-content;
       border: 1px solid var(--main-card-border);
       background-color: var(--main-card-second-background);
+
       > :first-child {
         margin-top: 0;
       }
+
       > :last-child {
         margin-bottom: 0;
       }
     }
+
     &::after {
       content: "";
       position: absolute;
@@ -902,6 +978,7 @@
       background-color: var(--main-card-border);
       z-index: 0;
     }
+
     &::before {
       content: "";
       position: absolute;
@@ -915,22 +992,26 @@
       transition: transform 0.3s;
       z-index: 1;
     }
+
     &:hover {
       .timeline-title {
         opacity: 1;
         color: var(--main-color);
       }
+
       &::before {
         transform: scale(1.2);
       }
     }
   }
+
   // radio
   .radio {
     display: flex;
     flex-direction: row;
     align-items: center;
     margin: 1rem 0;
+
     .radio-point {
       position: relative;
       display: flex;
@@ -942,6 +1023,7 @@
       margin-right: 12px;
       outline: 2px solid var(--main-color);
       border-radius: 50%;
+
       &::after {
         content: "";
         opacity: 0;
@@ -951,16 +1033,19 @@
         background-color: var(--main-color);
         border-radius: 50%;
       }
+
       &.checked {
         &::after {
           opacity: 1;
         }
       }
     }
+
     p {
       margin: 0;
     }
   }
+
   // card
   .card {
     padding: 1rem 1.2rem;
@@ -968,15 +1053,18 @@
     border: 1px solid var(--main-card-border);
     background-color: var(--main-card-second-background);
     box-shadow: 0 8px 16px -4px var(--main-border-shadow);
+
     p {
       &:first-child {
         margin-top: 0;
       }
+
       &:last-child {
         margin-bottom: 0;
       }
     }
   }
+
   // button
   .button {
     outline: none;
@@ -986,20 +1074,24 @@
     background-color: var(--main-card-second-background);
     transition: background-color 0.3s;
     cursor: pointer;
+
     p,
     a {
       padding: 0;
       margin: 0;
       font-size: 1rem;
       color: var(--main-font-color);
+
       &::before {
         display: none;
       }
     }
+
     &.primary {
       color: var(--main-card-background);
       background-color: var(--main-color);
     }
+
     &:hover {
       background-color: var(--main-card-border);
     }
