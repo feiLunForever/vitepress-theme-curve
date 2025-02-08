@@ -636,6 +636,8 @@
     width: 100%; // 设置宽度为100%
     overflow-y: auto; // 设置垂直方向溢出为自动滚动
     user-select: text; // 允许用户选择文本
+    white-space: pre;
+    tab-size: 4;
   }
 
   // blockquote
