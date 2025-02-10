@@ -54,21 +54,21 @@
         <!-- 参考资料 -->
         <References />
         <!-- 版权 -->
-        <Copyright v-if="frontmatter.copyright !== false" :postData="postMetaData" />
+<!--        <Copyright v-if="frontmatter.copyright !== false" :postData="postMetaData" />-->
         <!-- 其他信息 -->
-        <div class="other-meta">
-          <div class="all-tags">
-            <a
-              v-for="(item, index) in postMetaData.tags"
-              :key="index"
-              :href="`/pages/tags/${item}`"
-              class="tag-item"
-            >
-              <i class="iconfont icon-hashtag" />
-              <span class="name">{{ item }}</span>
-            </a>
-          </div>
-        </div>
+<!--        <div class="other-meta">-->
+<!--          <div class="all-tags">-->
+<!--            <a-->
+<!--              v-for="(item, index) in postMetaData.tags"-->
+<!--              :key="index"-->
+<!--              :href="`/pages/tags/${item}`"-->
+<!--              class="tag-item"-->
+<!--            >-->
+<!--              <i class="iconfont icon-hashtag" />-->
+<!--              <span class="name">{{ item }}</span>-->
+<!--            </a>-->
+<!--          </div>-->
+<!--        </div>-->
         <RewardBtn />
         <!-- 下一篇 -->
         <NextPost />
