@@ -101,7 +101,7 @@ onMounted(() => {
 @import "../style/post.scss";
 
 .post-content {
-  padding: 2.5rem; // 增加内边距
+  padding: 1.5rem; // 增加内边距
   border-radius: 16px; // 增加圆角
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); // 增加阴影
 }
