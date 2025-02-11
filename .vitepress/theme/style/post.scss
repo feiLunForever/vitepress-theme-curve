@@ -22,10 +22,10 @@
   .post-meta {
     padding: 3rem 2rem;
     //background: var(--main-card-background); // 使用卡片背景色
-    background: linear-gradient(45deg, var(--main-card-background) 10%, var(--main-color) 110%);
+    background: linear-gradient(45deg, var(--main-card-background) 10%, var(--main-color) 125%);
     width: 100%;
     border-radius: 12px; // 增加圆角
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); // 增加阴影
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); // 增加阴影
 
     // 元数据内容
     .meta {
