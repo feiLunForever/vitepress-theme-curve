@@ -40,8 +40,8 @@ const getAllTitle = () => {
   try {
     postDom.value = document.getElementById("page-content");
     if (!postDom.value) return false;
-    // 所有标题
-    const headers = Array.from(postDom.value.querySelectorAll("h2, h3")).filter(
+    // 所有标题，包括 h4, h5, h6
+    const headers = Array.from(postDom.value.querySelectorAll("h2, h3, h4, h5, h6")).filter(
       (header) => header.parentElement.tagName.toLowerCase() === "div",
     );
     return headers;
@@ -201,6 +201,18 @@ onBeforeUnmount(() => {
         font-size: 14px;
         margin-left: 20px;
       }
+      &.H4 {
+        font-size: 12px;
+        margin-left: 40px;
+      }
+      &.H5 {
+        font-size: 12px;
+        margin-left: 60px;
+      }
+      &.H6 {
+        font-size: 12px;
+        margin-left: 80px;
+      }
       &.active {
         opacity: 1;
         color: var(--main-color);
@@ -210,6 +222,15 @@ onBeforeUnmount(() => {
         }
         &.H3 {
           font-size: 16px;
+        }
+        &.H4 {
+          font-size: 14px;
+        }
+        &.H5 {
+          font-size: 14px;
+        }
+        &.H6 {
+          font-size: 14px;
         }
       }
       &:hover {

@@ -334,18 +334,18 @@
     h3 { // 选择div内的h3元素
       width: fit-content; // 设置h3的宽度为适应内容宽度
       font-size: 1.2rem; // 设置h3的字体大小为1.2rem
-      z-index: 0; // 设置h3的堆叠顺序为0
-      &::after { // 选择h3元素后的伪元素
-        content: ""; // 设置伪元素的内容为空
-        position: absolute; // 设置伪元素的定位为绝对定位
-        left: 0; // 设置伪元素的左侧位置为0
-        bottom: 0; // 设置伪元素的底部位置为0
-        width: 100%; // 设置伪元素的宽度为100%
-        height: 8px; // 设置伪元素的高度为8px
-        border-radius: 3px; // 设置伪元素的边框圆角为3px
-        background-color: var(--main-card-border); // 设置伪元素的背景颜色为自定义变量--main-card-border
-        z-index: -1; // 设置伪元素的堆叠顺序为-1，使其在h3下方
-      }
+      //z-index: 0; // 设置h3的堆叠顺序为0
+      //&::after { // 选择h3元素后的伪元素
+      //  content: ""; // 设置伪元素的内容为空
+      //  position: absolute; // 设置伪元素的定位为绝对定位
+      //  left: 0; // 设置伪元素的左侧位置为0
+      //  bottom: 0; // 设置伪元素的底部位置为0
+      //  width: 100%; // 设置伪元素的宽度为100%
+      //  height: 8px; // 设置伪元素的高度为8px
+      //  border-radius: 3px; // 设置伪元素的边框圆角为3px
+      //  background-color: var(--main-card-border); // 设置伪元素的背景颜色为自定义变量--main-card-border
+      //  z-index: -1; // 设置伪元素的堆叠顺序为-1，使其在h3下方
+      //}
     }
 
     h1,
@@ -452,8 +452,8 @@
 
   // 图片
   img { // 选择图片（img）元素
-    width: 100%; // 设置图片宽度为100%
-    border-radius: 12px; // 设置图片的边框圆角为12px
+    //width: 100%; // 设置图片宽度为100%
+    //border-radius: 12px; // 设置图片的边框圆角为12px
   }
 
   .img-fancybox { // 选择具有fancybox类的图片容器
@@ -704,7 +704,7 @@
   .table-container {
     width: 100%;
     margin: 1rem 0;
-    border: 1px solid var(--main-card-border);
+    //border: 1px solid var(--main-card-border);
     border-radius: 8px;
     overflow-y: hidden;
     overflow-x: auto;
