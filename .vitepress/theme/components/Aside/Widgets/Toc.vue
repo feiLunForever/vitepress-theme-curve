@@ -57,11 +57,24 @@ const generateDirData = () => {
   if (!headers) return false;
   // 构造目录数据
   const nestedData = [];
+  const levelCount = [0, 0, 0, 0, 0, 0]; // 用于跟踪每个层级的计数
+
   headers.forEach((header) => {
+    const level = parseInt(header.tagName.charAt(1)) - 2; // 获取层级（h2 -> 1, h3 -> 1.1, ...）
+
+    // 更新当前层级计数
+    for (let i = level + 1; i < levelCount.length; i++) {
+      levelCount[i] = 0; // 重置更深层级的计数
+    }
+    levelCount[level] += 1; // 增加当前层级的计数
+
+    // 生成序号
+    const number = levelCount.slice(0, level + 1).join('.'); // 生成序号字符串
+
     const headerObj = {
       id: header.id,
       type: header.tagName,
-      text: header.textContent?.replace(/\u200B/g, "").trim(),
+      text: `${number}. ${header.textContent?.replace(/\u200B/g, "").trim()}`, // 添加序号
     };
     // 放入标题内容
     nestedData.push(headerObj);

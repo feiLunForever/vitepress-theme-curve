@@ -78,7 +78,7 @@ export default withPwa(
       },
       math: true,
       lineNumbers: true,
-      toc: { level: [1, 2, 3] },
+      toc: { level: [1, 2, 3, 4, 5, 6], listTag: 'ol' },
       image: {
         lazyLoading: true,
       },
