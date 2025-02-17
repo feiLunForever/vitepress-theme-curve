@@ -201,7 +201,7 @@ GPT等生成式大语言模型通过预测出现概率最高的下一个词来�
 
 2. 向量嵌入
 
-<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241224145418-z0bz413.png" alt="image" style="zoom: 80%;" />​​![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241224150548-d98h0c3.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241224145418-z0bz413.png" alt="image" style="zoom: 80%;" />​​<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241224150548-d98h0c3.png" alt="image" style="zoom:80%;" />​
 
 > `嵌入层`​的作用是将每个`token`​转化为向量表示
 
