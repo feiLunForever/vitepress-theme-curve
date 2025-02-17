@@ -14,7 +14,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 ## AIGC是什么
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113121133-5oahuhp.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113121133-5oahuhp.png" alt="image" style="zoom:30%;" />​
 
 `AIGC`​，即AI生成内容（AI generated content），是指AI可以帮忙生成文字、图片、音频视频等类型的内容，例如ChatGPT生成的文章、github copilot生成的代码以及mid journey生成的图片等。
 
@@ -36,34 +36,34 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 ### 显式编程
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113121344-0hm9q93.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113121344-0hm9q93.png" alt="image" style="zoom:25%;" />​
 
 1. 程序通过人类明确编写逻辑判断花种类（比如图片里有红色说明是玫瑰，图片里有橙色说明是向日葵）, 不涉及`机器学习`​，机器未参与学习过程。
 
 ### 机器学习
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113122027-wf60cgc.png)​![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113122136-r2kebnu.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113122027-wf60cgc.png" alt="image" style="zoom: 33%;" />​<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113122136-r2kebnu.png" alt="image" style="zoom: 33%;" />​
 
 1. 给电脑大量玫瑰和向日葵图片，让其识别模式，总结规律，属于`机器学习`​范畴，机器通过学习能预测和判断未知图片。
 2. 机器学习领域包括`监督学习`​、`无监督学习`​、`强化学习`​等分支。
 
 #### 监督学习
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113121455-yqsx0lj.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113121455-yqsx0lj.png" alt="image" style="zoom:33%;" />​
 
 1. 在`监督学习`​里，`机器学习`​算法会接受有`标签`​的训练，**数据标签就是期望的输出值**，所以每个训练数据点都既包括输入特征，也包括期望的输出值。
 2. 算法的目标是学习输入和输出之间的映射关系，从而在给定新的输入特征后，能够准确预测出相应的输出值。
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113122912-h1u6hih.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113122912-h1u6hih.png" alt="image" style="zoom:33%;" />​
 
 经典的`监督学习`​任务包括`分类`​和`回归`​
 
 * 分类任务是将数据划分为不同类别，例如根据照片预测是猫还是狗；
 
-  * ![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113122949-lxgdb7k.png)​
+  * <img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113122949-lxgdb7k.png" alt="image" style="zoom:33%;" />​
 * 回归任务是预测数值，如预测房价。
 
-  * ![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113123015-gt4v2sm.png)​
+  * <img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113123015-gt4v2sm.png" alt="image" style="zoom:33%;" />​
 
 #### 无监督学习
 
@@ -71,11 +71,11 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 经典的`无监督学习`​任务包括`聚类`​，也就是把数据进行分组。比如拿一堆新闻文章，让模型根据主题或内容的特征自动把相似文章进行组织。
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113123237-5kmnmt3.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113123237-5kmnmt3.png" alt="image" style="zoom:33%;" />​
 
 #### 强化学习
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113123510-t5rochz.png)​![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113123532-95069to.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113123510-t5rochz.png" alt="image" style="zoom:33%;" />​<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113123532-95069to.png" alt="image" style="zoom:33%;" />​
 
 `强化学习`​则是让模型在环境里采取行动，获得结果`反馈`​，从反馈里学习，从而能在给定情况下采取最佳行动来最大化奖励或是最小化损失。
 
@@ -95,7 +95,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 `神经网络`​可以用于`监督学习`​、`无监督学习`​、`强化学习`​，所以`深度学习`​不属于它们的子集。
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113132654-q9eebzu.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113132654-q9eebzu.png" alt="image" style="zoom:33%;" />​
 
 ### 大语言（LLM）模型
 
@@ -120,11 +120,11 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 ##### 循环神经网络（RNN）
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113151522-pqezzi3.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113151522-pqezzi3.png" alt="image" style="zoom:50%;" />​
 
 在transformer架构被提出之前，语言模型的主流架构主要是`循环神经网络`​，简称`RNN`​。`RNN`​按顺序逐字处理，每一步的输出取决于先前的隐藏状态和当前的输入，要等上一个步骤完成后才能进行。当前的计算机因此无法并行，计算训练效率低。
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113151642-7f10tde.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113151642-7f10tde.png" alt="image" style="zoom:33%;" />​
 
 而且`RNN`​不擅长处理长序列，也就是长文本。由于`RNN`​的架构特点，此时间**距离**越远，前面对后面的影响越弱，所以它难以有效捕获到长距离的语义关系。但在人类自然语言中，依赖信息之间距离较远是很常见的情况。比如这句话里正确预测下一个词的关键词是距离很远的广东。如果由`RNN`​生成后续内容，到了这里的时候，他可能已经把前面的信息忘没了。
 
@@ -134,19 +134,19 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 ##### transformer
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113154844-34gw323.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113154844-34gw323.png" alt="image" style="zoom:33%;" />​
 
 ###### 自注意力机制
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113154330-8t6zb2x.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113154330-8t6zb2x.png" alt="image" style="zoom:33%;" />​
 
 能做到这一点的关键在于`transformer`​的自注意力机制。也正如论文标题所说，attention is all you need, 注意力就是你所需要的一切。即使两个词的位置隔得很远，`transformer`​依然可以捕获到它们之间的依赖关系。
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113154709-ubr5ura.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113154709-ubr5ura.png" alt="image" style="zoom: 50%;" />​
 
 简单来说，`transformer`​在处理每个词的时候，不仅会注意这个词本身以及它附近的词，还会去注意输入序列里所有其他的词，然后其余每个词不一样的注意力权重。权重是模型在训练过程中通过大量文本逐渐习得的，因此`transformer`​有能力知道当前这个词和其他词之间的相关性有多强，然后去专注于输入里真正重要的部分。
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113154818-a93w77y.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20250217171802304.png" alt="image-20250217171802304" style="zoom:50%;" />
 
 比如这个例子，单从语法上来讲，IT可以指的是离得更近的street，也可以是离得更远的animal。这里自注意力机制捕获到了IT和animal之间更强的关系，因此更集中在animal上。
 
@@ -156,7 +156,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 在语言里，顺序很重要，即使句子里包含的字都是一样的，但顺序不一样也能导致意思大相径庭。这也是为什么自然语言处理领域会用序列这个词，因为它表示一系列按照特定顺序排序的元素。前面提到`RNN`​和人类阅读文本一样，对输入序列同样是按顺序依次处理。这就造成了训练速度的瓶颈，因为只能串行，没办法并行，也就是没法同时去学习所有信息。
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113155325-gl10pl8.png)​​![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113155341-kn8774e.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113155325-gl10pl8.png" alt="image" style="zoom:50%;" />​​<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113155341-kn8774e.png" alt="image" style="zoom:50%;" />​
 
 在将词输入给神经网络之前，`Transformers`​不仅会先对词进行嵌入转换成向量，也就是把每个词用一串数字表示，还会把每个词在句子中的位置也用一串数字表示，添加到输入序列的表示中。这样，神经网络模型就能既理解每个词的意义，又能捕获词在句子中的位置关系，从而理解不同词之间的顺序关系。通过位置编码，词可以不按顺序输入给`Transformers`​模型，可以同时处理输入序列里的所有位置，而不需要像`RNN`​那样需要按顺序处理。因此，每个输出都可以独立计算，不需要等待其他位置的计算结果，这大大提高了训练速度。训练速度一快，训练出巨大的模型也不是那么难了。
 
@@ -164,7 +164,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 ##### GPT等生成式大语言模型是如何预测并生成下一个词的
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241114134921-donbedb.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241114134921-donbedb.png" alt="image" style="zoom:50%;" />​
 
 GPT等生成式大语言模型通过预测出现概率最高的下一个词来实现文本生成。它们主要依赖于`transformer`​架构，在该架构中，模型会根据已输入文本的`token`​序列，通过`嵌入层`​将每个`token`​转化为`向量`​表示，并进一步通过`位置编码`​和`自注意力机制`​来理解和捕捉词在句子中的顺序关系以及词与词之间的语义和语法相似性。最终，`解码器`​会基于`编码器`​输出的抽象表示以及自身已生成的文本信息，通过多头自注意力层和前馈神经网络等结构，逐步生成新的`token`​，直到生成结束符为止。
 
@@ -188,7 +188,7 @@ GPT等生成式大语言模型通过预测出现概率最高的下一个词来�
 
 1. 输入文本 `token`​ 化
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241114135447-xh1pge8.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241114135447-xh1pge8.png" alt="image" style="zoom:33%;" />​
 
 即将输入拆分成各个`token`​。
 
@@ -201,7 +201,7 @@ GPT等生成式大语言模型通过预测出现概率最高的下一个词来�
 
 2. 向量嵌入
 
-![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241224145418-z0bz413.png)​​![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241224150548-d98h0c3.png)​
+<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241224145418-z0bz413.png" alt="image" style="zoom: 80%;" />​​![image](./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241224150548-d98h0c3.png)​
 
 > `嵌入层`​的作用是将每个`token`​转化为向量表示
 
