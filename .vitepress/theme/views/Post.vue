@@ -98,7 +98,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "../style/post.scss";
+@use "../style/post.scss";
 
 .post-content {
   padding: 1.5rem; // 增加内边距
