@@ -47,7 +47,7 @@ mysql -h 127.0.0.1 -uroot -p123456
 
 ## 系统服务层
 
-<img src="./%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%85%A8%E8%A7%A3MySQL%E4%B9%8B%E6%9E%B6%E6%9E%84%E7%AF%87.assets/1c99681fa9ce43898dfc6e63ae1fd0bc~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="服务层" style="zoom:80%;" />
+<img src="./%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%85%A8%E8%A7%A3MySQL%E4%B9%8B%E6%9E%B6%E6%9E%84%E7%AF%87.assets/image-20250303142817860.png" alt="image-20250303142817860" style="zoom:80%;" />
 
 ### `SQL`接口组件
 
@@ -71,7 +71,7 @@ mysql -h 127.0.0.1 -uroot -p123456
 
 ##  文件系统层
 
-<img src="./%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%85%A8%E8%A7%A3MySQL%E4%B9%8B%E6%9E%B6%E6%9E%84%E7%AF%87.assets/cbeae8bd90704de9bcb99cb59d07d3df~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="文件层" style="zoom:80%;" />
+<img src="./%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%85%A8%E8%A7%A3MySQL%E4%B9%8B%E6%9E%B6%E6%9E%84%E7%AF%87.assets/image-20250303142850427.png" alt="image-20250303142850427" style="zoom:80%;" />
 
 这一层主要可分为两个板块：①日志板块。②数据板块。
 
