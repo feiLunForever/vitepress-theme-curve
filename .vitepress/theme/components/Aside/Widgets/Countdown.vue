@@ -1,10 +1,14 @@
 <template>
-  <!-- 倒计时 -->
+  <!-- 正向计时 -->
   <div class="count-down s-card">
     <div class="count-left">
-      <span class="text"> 距离 </span>
       <span class="name">{{ theme.aside.countDown.data.name }}</span>
-      <span class="time"> {{ getDaysUntil(theme.aside.countDown.data.date) }} </span>
+<!--      <span class="text"> 已经 </span>-->
+      <span class="time">
+        <span class="time-part">{{ getDaysSince(theme.aside.countDown.data.date).years }}年</span>
+        <span class="time-part">{{ getDaysSince(theme.aside.countDown.data.date).months }}月</span>
+        <span class="time-part">{{ getDaysSince(theme.aside.countDown.data.date).days }}天</span>
+      </span>
       <span class="date">{{ theme.aside.countDown.data.date }}</span>
     </div>
     <div v-if="remainData" class="count-right">
@@ -19,8 +23,8 @@
             {{ item.percentage }}%
           </span>
           <span :class="['remaining', { many: item.percentage >= 60 }]">
-            <span class="tip">还剩</span>
-            {{ item.remaining }}
+            <span class="tip">已过</span>
+            {{ item.passed }}
             <span class="tip">{{ tag === "day" ? "小时" : "天" }}</span>
           </span>
         </div>
@@ -30,7 +34,7 @@
 </template>
 
 <script setup>
-import { getTimeRemaining, getDaysUntil } from "@/utils/timeTools";
+import { getTimePassed, getDaysSince } from "@/utils/timeTools";
 
 const { theme } = useData();
 
@@ -40,9 +44,9 @@ const remainInterval = ref(null);
 
 // 获取倒计时数据
 const getRemainData = () => {
-  remainData.value = getTimeRemaining();
+  remainData.value = getTimePassed();
   remainInterval.value = setInterval(() => {
-    remainData.value = getTimeRemaining();
+    remainData.value = getTimePassed();
   }, 1000);
 };
 
@@ -77,10 +81,15 @@ onBeforeUnmount(() => {
       margin-top: 2px;
     }
     .time {
-      font-size: 30px;
-      font-weight: bold;
+      font-size: 16px;
+      font-weight: normal;
       margin: 4px 0;
       color: var(--main-color);
+      display: flex;
+      .time-part {
+        font-size: 14px;
+        margin: 0 4px;
+      }
     }
     .date {
       font-size: 12px;
