@@ -241,52 +241,116 @@ lock.unlock();
  
     long currentTime = System.currentTimeMillis();    
     if (command == RedisCommands.EVAL_LONG) {
-        return commandExecutor.evalWriteAsync(getName(), LongCodec.INSTANCE, command,
-                // remove stale threads
-                "while true do "
-                + "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);"
-                + "if firstThreadId2 == false then "
-                    + "break;"
-                + "end; "
-                + "local timeout = tonumber(redis.call('zscore', KEYS[3], firstThreadId2));"
-                + "if timeout <= tonumber(ARGV[4]) then "
-                    + "redis.call('zrem', KEYS[3], firstThreadId2); "
-                    + "redis.call('lpop', KEYS[2]); "
-                + "else "
-                    + "break;"
-                + "end; "
-              + "end;"
- 
-                  + "if (redis.call('exists', KEYS[1]) == 0) and ((redis.call('exists', KEYS[2]) == 0) "
-                        + "or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
-                        "redis.call('lpop', KEYS[2]); " +
-                        "redis.call('zrem', KEYS[3], ARGV[2]); " +
-                        "redis.call('hset', KEYS[1], ARGV[2], 1); " +
-                        "redis.call('pexpire', KEYS[1], ARGV[1]); " +
-                        "return nil; " +
-                    "end; " +
-                    "if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
-                        "redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
-                        "redis.call('pexpire', KEYS[1], ARGV[1]); " +
-                        "return nil; " +
-                    "end; " +
- 
-                    "local firstThreadId = redis.call('lindex', KEYS[2], 0); " +
-                    "local ttl; " + 
-                    "if firstThreadId ~= false and firstThreadId ~= ARGV[2] then " + 
-                        "ttl = tonumber(redis.call('zscore', KEYS[3], firstThreadId)) - tonumber(ARGV[4]);" + 
-                    "else "
-                      + "ttl = redis.call('pttl', KEYS[1]);" + 
-                    "end; " + 
- 
-                    "local timeout = ttl + tonumber(ARGV[3]);" + 
+            return commandExecutor.syncedEval(getRawName(), LongCodec.INSTANCE, command,
+                    // remove stale threads
+                    // 移除过期线程
+                    "while true do " +
+                            //list里面是否有线程存在
+                        "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);" +
+                        "if firstThreadId2 == false then " +
+                            //没有，跳出循环
+                            "break;" +
+                        "end;" +
+
+                            //如果存在，就去zset里面获取这个线程的超时时间
+                        "local timeout = tonumber(redis.call('zscore', KEYS[3], firstThreadId2));" +
+                        "if timeout <= tonumber(ARGV[4]) then " +
+                            // remove the item from the queue and timeout set
+                            // NOTE we do not alter any other timeout
+                            // 超时就从list以及zset中移除掉
+                            "redis.call('zrem', KEYS[3], firstThreadId2);" +
+                            "redis.call('lpop', KEYS[2]);" +
+                        "else " +
+                            "break;" +
+                        "end;" +
+                    "end;" +
+
+                    // check if the lock can be acquired now
+                    // 检查这把锁是否当前可以被获取到
+                    // 可以加锁的逻辑判断：当前不存在锁 && (当前不存在等待锁的线程 || 当前等待锁的第一个线程是当前线程)
+                    "if (redis.call('exists', KEYS[1]) == 0) " +
+                        "and ((redis.call('exists', KEYS[2]) == 0) " +
+                            //
+                            "or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
+
+                        // remove this thread from the queue and timeout set
+                        // 既然要获取到锁了，那就将当前元素从等待队列和超时队列中移除
+                        "redis.call('lpop', KEYS[2]);" +
+                        "redis.call('zrem', KEYS[3], ARGV[2]);" +
+
+                        // decrease timeouts for all waiting in the queue
+                        // 减少等待队列中其他线程的超时时间
+                        // 假设线程 A 持有锁，剩余时间为 T，线程 B 在等待队列中排队，其超时时间设置为 T + 等待时间。
+                        // 当线程 A 释放锁后，线程 B 的超时时间需要基于新的锁剩余时间重新计算。
+                        "local keys = redis.call('zrange', KEYS[3], 0, -1);" +
+                        "for i = 1, #keys, 1 do " +
+                            // -300s
+                            "redis.call('zincrby', KEYS[3], -tonumber(ARGV[3]), keys[i]);" +
+                        "end;" +
+
+                        // acquire the lock and set the TTL for the lease
+                        // 获取到了锁，并设置过期时间
+                        "redis.call('hset', KEYS[1], ARGV[2], 1);" +
+                        "redis.call('pexpire', KEYS[1], ARGV[1]);" +
+                        "return nil;" +
+                    "end;" +
+
+                    // check if the lock is already held, and this is a re-entry
+                    // 检查这把锁是否已经被持有，并且当前线程是否是持有锁的线程
+                    "if redis.call('hexists', KEYS[1], ARGV[2]) == 1 then " +
+                        // 如果当前线程已经持有锁，那就将锁的持有次数+1，并重新设置过期时间
+                        "redis.call('hincrby', KEYS[1], ARGV[2],1);" +
+                        "redis.call('pexpire', KEYS[1], ARGV[1]);" +
+                        "return nil;" +
+                    "end;" +
+
+                    // the lock cannot be acquired
+                    // 到这里说明当前线程不能获取到锁，那就将当前线程加入等待队列，并设置超时时间
+                    // check if the thread is already in the queue
+                    "local timeout = redis.call('zscore', KEYS[3], ARGV[2]);" +
+                    "if timeout ~= false then " +
+                        // the real timeout is the timeout of the prior thread
+                        // in the queue, but this is approximately correct, and
+                        // avoids having to traverse the queue
+                            //todo
+                        "return timeout - tonumber(ARGV[3]) - tonumber(ARGV[4]);" +
+                    "end;" +
+
+                    // add the thread to the queue at the end, and set its timeout in the timeout set to the timeout of
+                    // the prior thread in the queue (or the timeout of the lock if the queue is empty) plus the
+                    // threadWaitTime
+                    // 获取等待队列中最后一个元素
+                    "local lastThreadId = redis.call('lindex', KEYS[2], -1);" +
+                    "local ttl;" +
+                    // 如果等待队列中存在元素，那就获取最后一个元素的超时时间
+                    // 线程B在等待队列，超时时间是09:30:30 线程C在09:30:00来加锁，线程C的ttl是不是要等线程B释放，所以就是09:30:30 - 09:30:00 = 30s
+                    "if lastThreadId ~= false and lastThreadId ~= ARGV[2] then " +
+                        "ttl = tonumber(redis.call('zscore', KEYS[3], lastThreadId)) - tonumber(ARGV[4]);" +
+                    "else " +
+                    // 如果等待队列中不存在元素，那就获取锁的过期时间
+                    // 持有的线程是线程A,它的pexpire是09:30:20 ，那么线程B在09:30:10来加锁，09:30:20 - 09:30:10 = 10s
+                        "ttl = redis.call('pttl', KEYS[1]);" +
+                    "end;" +
+                    // 计算一个timeout = ttl + 300000ms + 当前时间
+                    "local timeout = ttl + tonumber(ARGV[3]) + tonumber(ARGV[4]);" +
                     "if redis.call('zadd', KEYS[3], timeout, ARGV[2]) == 1 then " +
                         "redis.call('rpush', KEYS[2], ARGV[2]);" +
-                    "end; " +
-                    "return ttl;", 
-                    Arrays.<Object>asList(getName(), threadsQueueName, timeoutSetName), 
-                                internalLockLeaseTime, getLockName(threadId), currentTime + threadWaitTime, currentTime);
-    }
+                    "end;" +
+                    "return ttl;",
+                    //线程A获取到锁，释放锁是11:01:30。5min 11:06:31
+                    // 现在11:01:10 是线程B来获取锁,那线程B的等待时间就是11:01:10 + 20s + 300s
+                    // 现在11:01:20 那线程C来获取锁，那线程C的等待时间就是(11:01:10 + 20s + 300s + 300s)
+                    // 11:01:30。线程A已经释放锁，线程B来获取锁了，那么线程B是list的第一个，lpop。重新计算后续线程的等待时间
+                    //    线程C的等待时间就 = (11:01:10 + 20s + 300s + 300s - 300s)
+                    // 11：02：00 线程A才释放锁，线程B这时候才获取到锁，lpop
+                    //    线程C的等待时间就 = (11:01:10 + 20s + 300s + 300s - 300s) 线程C只需要等待 11：02：00 + 270s
+                    // KEYS[1] = 锁名称 KEYS[2] = redisson_lock_queue_锁名称 KEYS[3] = redisson_lock_timeout_锁名称
+                    // redisson_lock_queue_锁名称：是一个list,里面存储的是第一次没有获取到锁的线程，会按照锁的获取顺序一个个的rpush到list里面
+                    // redisson_lock_timeout_锁名称：是一个zset，里面存储的是等待锁线程的超时时间，记录每一个线程到什么时间没获取到锁就超时了。分数score就是超时时间
+                    // ARGV[1] = 锁过期时间 ARGV[2] = 服务id + 线程id ARGV[3] = 等待时间300000ms ARGV[4]=当前时间
+                    Arrays.asList(getRawName(), threadsQueueName, timeoutSetName),
+                    unit.toMillis(leaseTime), getLockName(threadId), wait, currentTime);
+        }
  
     throw new IllegalArgumentException();
 }
@@ -297,8 +361,8 @@ lock.unlock();
 > KEYS = Arrays.asList(getName(), threadsQueueName, timeoutSetName)
 
 - KEYS[1] = getName() = 锁的名字，“anyLock”
-- KEYS[2] = threadsQueueName = redisson_lock_queue:{anyLock}，基于redis的数据结构实现的一个队列
-- KEYS[3] = timeoutSetName = redisson_lock_timeout:{anyLock}，基于redis的数据结构实现的一个Set数据集合，有序集合，可以自动按照你给每个数据指定的一个分数（score）来进行排序
+- KEYS[2] = threadsQueueName = redisson_lock_queue:{anyLock}，是一个list，里面存储的是第一次没有获取到锁的线程，会按照锁的获取顺序一个个的rpush到list里面
+- KEYS[3] = timeoutSetName = redisson_lock_timeout:{anyLock}，是一个zset，里面存储的是等待锁线程的超时时间，记录每一个线程到什么时间没获取到锁就超时了。分数score就是超时时间
 
 > ARGV = internalLockLeaseTime, getLockName(threadId), currentTime + threadWaitTime, currentTime
 
@@ -317,24 +381,67 @@ lock.unlock();
 
 thread01 在10:00:00 执行加锁逻辑，下面开始一点点分析lua脚本执行代码：
 
-```lua
-"while true do "
-+ "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);"
-+ "if firstThreadId2 == false then "
-    + "break;"
+##### 第一步，就是移除过期线程
+
+```java
+// remove stale threads
+// 移除过期线程
+"while true do " +
+    //list里面是否有线程存在
+    "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);" +
+    "if firstThreadId2 == false then " +
+        //没有，跳出循环
+        "break;" +
+    "end;" +
+
+    //如果存在，就去zset里面获取这个线程的超时时间
+    "local timeout = tonumber(redis.call('zscore', KEYS[3], firstThreadId2));" +
+    "if timeout <= tonumber(ARGV[4]) then " +
+        // remove the item from the queue and timeout set
+        // NOTE we do not alter any other timeout
+        // 超时就从list以及zset中移除掉
+      	"redis.call('zrem', KEYS[3], firstThreadId2);" +
+      	"redis.call('lpop', KEYS[2]);" +
+    "else " +
+      	"break;" +
+    "end;" +
+"end;" +
 ```
 
-就是从 `redisson_lock_queue:{anyLock}` 这个队列中弹出来第一个元素，刚开始，队列是空的，所以什么都获取不到，此时就会直接退出while true死循环
+就是从 `redisson_lock_queue:{anyLock}` 这个队列中弹出来第一个元素，刚开始，队列是空的，所以什么都获取不到，此时就会直接退出while true死循环。
 
-```lua
-"if (redis.call('exists', KEYS[1]) == 0) and ((redis.call('exists', KEYS[2]) == 0) "
-+ "or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
-"redis.call('lpop', KEYS[2]); " +
-"redis.call('zrem', KEYS[3], ARGV[2]); " +
-"redis.call('hset', KEYS[1], ARGV[2], 1); " +
-"redis.call('pexpire', KEYS[1], ARGV[1]); " +
-"return nil; " +
-"end; " +
+##### 第二步，尝试获取锁
+
+```java
+	// check if the lock can be acquired now
+  // 检查这把锁是否当前可以被获取到
+  // 可以加锁的逻辑判断：当前不存在锁 && (当前不存在等待锁的线程 || 当前等待锁的第一个线程是当前线程)
+  "if (redis.call('exists', KEYS[1]) == 0) " +
+  		"and ((redis.call('exists', KEYS[2]) == 0) " +
+  				//
+  				"or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
+
+  		// remove this thread from the queue and timeout set
+  		// 既然要获取到锁了，那就将当前元素从等待队列和超时队列中移除
+  		"redis.call('lpop', KEYS[2]);" +
+  		"redis.call('zrem', KEYS[3], ARGV[2]);" +
+
+  		// decrease timeouts for all waiting in the queue
+  		// 减少等待队列中其他线程的超时时间
+      // 假设线程 A 持有锁，剩余时间为 T，线程 B 在等待队列中排队，其超时时间设置为 T + 等待时间。
+      // 当线程 A 释放锁后，线程 B 的超时时间需要基于新的锁剩余时间重新计算。
+  		"local keys = redis.call('zrange', KEYS[3], 0, -1);" +
+  		"for i = 1, #keys, 1 do " +
+  				// -300s
+  				"redis.call('zincrby', KEYS[3], -tonumber(ARGV[3]), keys[i]);" +
+  		"end;" +
+
+      // acquire the lock and set the TTL for the lease
+      // 获取到了锁，并设置过期时间
+      "redis.call('hset', KEYS[1], ARGV[2], 1);" +
+      "redis.call('pexpire', KEYS[1], ARGV[1]);" +
+      "return nil;" +
+  "end;" +
 ```
 
 这段代码判断逻辑的意思是：
@@ -357,55 +464,57 @@ thread01 在10:00:00 执行加锁逻辑，下面开始一点点分析lua脚本�
 此时thread01 已经获取到了锁，如果thread02 在10:00:10分来执行加锁逻辑，具体的代码逻辑是怎样执行的呢？
 
 ```lua
-"while true do "
-+ "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);"
-+ "if firstThreadId2 == false then "
-    + "break;"
+	// check if the lock can be acquired now
+  // 检查这把锁是否当前可以被获取到
+  // 可以加锁的逻辑判断：当前不存在锁 && (当前不存在等待锁的线程 || 当前等待锁的第一个线程是当前线程)
+  "if (redis.call('exists', KEYS[1]) == 0) " +
+  		"and ((redis.call('exists', KEYS[2]) == 0) " +
+  				//
+  				"or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
 ```
 
-进入while true死循环，`lindex redisson_lock_queue:{anyLock} 0`，获取队列的第一个元素，此时队列还是空的，所以获取到的是false，直接退出while true死循环
-
-```lua
-"if (redis.call('exists', KEYS[1]) == 0) and ((redis.call('exists', KEYS[2]) == 0) "
-+ "or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
-"redis.call('lpop', KEYS[2]); " +
-"redis.call('zrem', KEYS[3], ARGV[2]); " +
-"redis.call('hset', KEYS[1], ARGV[2], 1); " +
-"redis.call('pexpire', KEYS[1], ARGV[1]); " +
-"return nil; " +
-"end; " +
-```
-
-此时anyLock这个锁key已经存在了，说明已经有人加锁了，这个条件首先就肯定不成立了；
+第二步中，尝试获取锁，此时anyLock这个锁key已经存在了，说明已经有人加锁了，这个条件首先就肯定不成立了；
 
 接着往下执行，看下另外的逻辑：
 
-```lua
-"if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
-    "redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
-    "redis.call('pexpire', KEYS[1], ARGV[1]); " +
-    "return nil; " +
-"end; " +
+##### 第三步，检查这把锁是否已经被持有，并且当前线程是否是持有锁的线程
+
+```java
+	// check if the lock is already held, and this is a re-entry
+  // 检查这把锁是否已经被持有，并且当前线程是否是持有锁的线程
+  "if redis.call('hexists', KEYS[1], ARGV[2]) == 1 then " +
+    	// 如果当前线程已经持有锁，那就将锁的持有次数+1，并重新设置过期时间
+      "redis.call('hincrby', KEYS[1], ARGV[2],1);" +
+      "redis.call('pexpire', KEYS[1], ARGV[1]);" +
+      "return nil;" +
+  "end;" +
 ```
 
-判断一下，此时这个第二个客户端是`UUID_02，threadId_02`，此时会判断一下，`hexists anyLock UUID_02:threadId_02`，判断一下在anyLock这个map中，是否存在`UUID_02:threadId_02`这个key？这个条件也不成立
+判断一下，此时这个第二个客户端是`UUID_02，threadId_02`，此时会判断一下，`hexists anyLock UUID_02:threadId_02`，判断一下在anyLock这个map中，是否存在`UUID_02:threadId_02`这个key？这个条件也不成立。
+
+##### 第四步，计算ttl，放入等待队列
 
 继续执行后续代码：
 
 ```lua
-"local firstThreadId = redis.call('lindex', KEYS[2], 0); " +
-"local ttl; " + 
-"if firstThreadId ~= false and firstThreadId ~= ARGV[2] then " + 
-    "ttl = tonumber(redis.call('zscore', KEYS[3], firstThreadId)) - tonumber(ARGV[4]);" + 
-"else "
-  + "ttl = redis.call('pttl', KEYS[1]);" + 
-"end; " + 
- 
-"local timeout = ttl + tonumber(ARGV[3]);" + 
+// 获取等待队列中最后一个元素
+"local lastThreadId = redis.call('lindex', KEYS[2], -1);" +
+"local ttl;" +
+// 如果等待队列中存在元素，那就获取最后一个元素的超时时间
+// 线程B在等待队列，超时时间是09:30:30 线程C在09:30:00来加锁，线程C的ttl是不是要等线程B释放，所以就是09:30:30 - 09:30:00 = 30s
+"if lastThreadId ~= false and lastThreadId ~= ARGV[2] then " +
+		"ttl = tonumber(redis.call('zscore', KEYS[3], lastThreadId)) - tonumber(ARGV[4]);" +
+"else " +
+		// 如果等待队列中不存在元素，那就获取锁的过期时间        
+		// 持有的线程是线程A,它的pexpire是09:30:20 ，那么线程B在09:30:10来加锁，09:30:20 - 09:30:10 = 10s
+		"ttl = redis.call('pttl', KEYS[1]);" +
+"end;" +
+// 计算一个timeout = ttl + 300000ms + 当前时间
+"local timeout = ttl + tonumber(ARGV[3]) + tonumber(ARGV[4]);" +
 "if redis.call('zadd', KEYS[3], timeout, ARGV[2]) == 1 then " +
-    "redis.call('rpush', KEYS[2], ARGV[2]);" +
-"end; " +
-"return ttl;", 
+		"redis.call('rpush', KEYS[2], ARGV[2]);" +
+"end;" +
+"return ttl;",
 ```
 
 `lindex redisson_lock_queue:{anyLock} 0`，从队列中获取第一个元素，此时队列是空的，所以什么都不会有。
@@ -433,47 +542,32 @@ thread01 在10:00:00 执行加锁逻辑，下面开始一点点分析lua脚本�
 
 此时thread03 在10:00:15来加锁，分析一下执行原理：
 
-```lua
-"while true do "
-+ "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);"
-+ "if firstThreadId2 == false then "
-    + "break;"
-+ "end; "
-+ "local timeout = tonumber(redis.call('zscore', KEYS[3], firstThreadId2));"
-+ "if timeout <= tonumber(ARGV[4]) then "
-    + "redis.call('zrem', KEYS[3], firstThreadId2); "
-    + "redis.call('lpop', KEYS[2]); "
-+ "else "
-    + "break;"
-+ "end; "
-+ "end;"
-```
-
-while true死循环，`lindex redisson_lock_queue:{anyLock} 0`，获取队列中的第一个元素，``UUID_02:threadId_02`，代表的是这个客户端02正在队列里排队。
-
-`zscore redisson_lock_timeout:{anyLock} UUID_02:threadId_02`，从有序集合中获取``UUID_02:threadId_02`对应的分数，timeout = 10:00:25
-
-判断：timeout <= 10:00:15？，这个条件不成立，退出死循环
+跟 thread02 的区别是设置的超时时间不一样：
 
 ```lua
-"local firstThreadId = redis.call('lindex', KEYS[2], 0); " +
-"local ttl; " + 
-"if firstThreadId ~= false and firstThreadId ~= ARGV[2] then " + 
-    "ttl = tonumber(redis.call('zscore', KEYS[3], firstThreadId)) - tonumber(ARGV[4]);" + 
-"else "
-  + "ttl = redis.call('pttl', KEYS[1]);" + 
-"end; " + 
- 
-"local timeout = ttl + tonumber(ARGV[3]);" + 
+// 获取等待队列中最后一个元素
+"local lastThreadId = redis.call('lindex', KEYS[2], -1);" +
+"local ttl;" +
+// 如果等待队列中存在元素，那就获取最后一个元素的超时时间
+// 线程B在等待队列，超时时间是09:30:30 线程C在09:30:00来加锁，线程C的ttl是不是要等线程B释放，所以就是09:30:30 - 09:30:00 = 30s
+"if lastThreadId ~= false and lastThreadId ~= ARGV[2] then " +
+		"ttl = tonumber(redis.call('zscore', KEYS[3], lastThreadId)) - tonumber(ARGV[4]);" +
+"else " +
+		// 如果等待队列中不存在元素，那就获取锁的过期时间        
+		// 持有的线程是线程A,它的pexpire是09:30:20 ，那么线程B在09:30:10来加锁，09:30:20 - 09:30:10 = 10s
+		"ttl = redis.call('pttl', KEYS[1]);" +
+"end;" +
+// 计算一个timeout = ttl + 300000ms + 当前时间
+"local timeout = ttl + tonumber(ARGV[3]) + tonumber(ARGV[4]);" +
 "if redis.call('zadd', KEYS[3], timeout, ARGV[2]) == 1 then " +
-    "redis.call('rpush', KEYS[2], ARGV[2]);" +
-"end; " +
-"return ttl;", 
+		"redis.call('rpush', KEYS[2], ARGV[2]);" +
+"end;" +
+"return ttl;",
 ```
 
 - firstThreadId 获取到的是队列中的第一个元素：`UUID_02:thread_02`
-- ttl = 10:00:25 - 10:00:15 = 5000毫秒 
-- timeout = 5000毫秒 + 10:00:15 + 5000毫秒 = 10:00:30
+- ttl = 10:00:25 - 10:00:15 = 10000毫秒 
+- timeout = 10000毫秒 + 10:00:15 + 5000毫秒 = 10:00:30
 
 将客户端C放入到对列和有序集合中： `zadd redisson_lock_timeout:{anyLock} 10:00:30 UUID_03:threadId_03` 然后 `rpush redisson_lock_queue:{anyLock} UUID_03:theadId_03`
 
@@ -488,14 +582,13 @@ while true死循环，`lindex redisson_lock_queue:{anyLock} 0`，获取队列中
 直接看核心逻辑：
 
 ```lua
-+ "if (redis.call('exists', KEYS[1]) == 0) and ((redis.call('exists', KEYS[2]) == 0) "
-+ "or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
-"redis.call('lpop', KEYS[2]); " +
-"redis.call('zrem', KEYS[3], ARGV[2]); " +
-"redis.call('hset', KEYS[1], ARGV[2], 1); " +
-"redis.call('pexpire', KEYS[1], ARGV[1]); " +
-"return nil; " +
-"end; " +
+	// check if the lock can be acquired now
+  // 检查这把锁是否当前可以被获取到
+  // 可以加锁的逻辑判断：当前不存在锁 && (当前不存在等待锁的线程 || 当前等待锁的第一个线程是当前线程)
+  "if (redis.call('exists', KEYS[1]) == 0) " +
+  		"and ((redis.call('exists', KEYS[2]) == 0) " +
+  				//
+  				"or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
 ```
 
 if中的判断： exists anyLock 是否不存在，此时客户端A已经释放锁，所以这个条件成立。
