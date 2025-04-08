@@ -39,9 +39,9 @@ Redisson 的分布式锁 RLock 是一种可重入锁。当一个线程获取到�
 
 > 废话不多说, 我们直接进入 Redisson的锁重入源码解读
 
-## 加锁流程分析
+### 加锁流程分析
 
-### tryLock
+#### tryLock
 
 <img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405161732437.png" alt="image-20250405161732437" style="zoom:60%;" />
 
@@ -49,7 +49,7 @@ Redisson 的分布式锁 RLock 是一种可重入锁。当一个线程获取到�
 - lease : 锁自动失效释放的时间
 - unit : 时间单位
 
-### tryAcquire
+#### tryAcquire
 
 ```java
 private Long tryAcquire(long leaseTime, TimeUnit unit, long threadId) {
@@ -74,7 +74,7 @@ private Long tryAcquire(long leaseTime, TimeUnit unit, long threadId) {
 }
 ```
 
-### tryLockInner
+#### tryLockInner
 
 继续看`tryLockInner`方法 - 它是最核心的加锁 Lua 脚本：
 
@@ -84,7 +84,7 @@ private Long tryAcquire(long leaseTime, TimeUnit unit, long threadId) {
 
 它的核心逻辑也很简单：**首先检查锁是否存在，如果不存在，则直接加锁，且设置重入次数为1；如果存在，先检查是否是当前线程的锁，如果是，则重入次数+1，如果不是，则返回锁的剩余过期时间。**
 
-### tryLock获取锁失败后续阻塞是如何实现的
+#### tryLock获取锁失败后续阻塞是如何实现的
 
 如果加锁失败，`tryLockInner` 会返回一个ttl时间，也就是锁的有效期。
 
@@ -131,15 +131,15 @@ public RedissonLockEntry(CompletableFuture<RedissonLockEntry> promise) {
 
 **这里设计的巧妙之处就在于利用了消息订阅, 信号量的机制, 它不是无休止的这种盲等机制, 也避免了不断的重试, 而是检测到锁被释放才去尝试重新获取, 这对CPU十分的友好。**
 
-## WatchDog 续约源码解读
+### WatchDog 续约源码解读
 
-### 场景
+#### 场景
 
 Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果我们的业务阻塞超时了ttl到期了, 别的线程看见我们的ttl到期了, 他重试他就会拿到本该属于我们的锁, 这时候就有安全问题了, 所以该怎么解决?
 
 我们必须确保锁是业务执行完释放的, 而不是因为阻塞而释放的。
 
-### tryAcquire
+#### tryAcquire
 
 <img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204341854.png" alt="image-20250405204341854" style="zoom:60%;" />
 
@@ -151,7 +151,7 @@ Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果�
 - 当ttlRemainingFuture的异步尝试获取锁完成以后, 先判断执行过程中是否有异常, 如果有异常就直接返回了结束执行.
 - 如果没有发生异常, 则判断ttlRemaining(剩余有效期)是否为空, 为空的话就代表获取锁成功, 执行锁到期续约的核心方法scheduleExpectationRenew
 
-### **scheduleExpectationRenew**
+#### **scheduleExpectationRenew**
 
 <img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204526114.png" alt="image-20250405204526114" style="zoom:60%;" />
 
@@ -173,7 +173,7 @@ Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果�
 
 这样做是为了保证同一个锁拿到的永远是同一个`entry`。
 
-### **renewExpectation**
+#### **renewExpectation**
 
 **internalLockLeaseTime是这样来的**
 
@@ -201,7 +201,7 @@ Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果�
 
 当然是在释放锁的时候。
 
-## 解锁流程分析
+### 解锁流程分析
 
 <img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405205224039.png" alt="image-20250405205224039" style="zoom:60%;" />
 
@@ -209,14 +209,297 @@ Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果�
 
 - 先从map中取出任务，先移除任务的线程Id，再取消这个任务，最后再移除entry。
 
-## 总结
+### 总结
 
-### 执行流程
+#### 执行流程
 
 <img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250406102459833.png" alt="image-20250406102459833" style="zoom:50%;" />
 
-### Redisson分布式锁原理
+#### Redisson分布式锁原理
 
 - 可重入：利用 `hash`结构记录 `线程id` 和 `重入次数`
 - 可重试：利用`信号量` 和 `PubSub` 功能实现等待、唤醒，获取锁失败的重试机制
 - 超时续约：利用`watchDog`，每隔一段时间（releaseTime)，重置超时时间
+
+## 公平锁的实现
+
+所谓公平锁，就是保证客户端获取锁的顺序，跟他们请求获取锁的顺序，是一样的。公平锁需要排队，谁先申请获取这把锁，谁就可以先获取到这把锁，是按照请求的先后顺序来的。
+
+非公平锁使用也很简单：
+
+```java
+RLock lock = redisson.getFairLock("anyLock");
+lock.lock();
+lock.unlock();
+```
+
+核心lua脚本代码：
+
+```java
+<T> RFuture<T> tryLockInnerAsync(long leaseTime, TimeUnit unit, long threadId, RedisStrictCommand<T> command) {
+    internalLockLeaseTime = unit.toMillis(leaseTime);
+ 
+    long currentTime = System.currentTimeMillis();    
+    if (command == RedisCommands.EVAL_LONG) {
+        return commandExecutor.evalWriteAsync(getName(), LongCodec.INSTANCE, command,
+                // remove stale threads
+                "while true do "
+                + "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);"
+                + "if firstThreadId2 == false then "
+                    + "break;"
+                + "end; "
+                + "local timeout = tonumber(redis.call('zscore', KEYS[3], firstThreadId2));"
+                + "if timeout <= tonumber(ARGV[4]) then "
+                    + "redis.call('zrem', KEYS[3], firstThreadId2); "
+                    + "redis.call('lpop', KEYS[2]); "
+                + "else "
+                    + "break;"
+                + "end; "
+              + "end;"
+ 
+                  + "if (redis.call('exists', KEYS[1]) == 0) and ((redis.call('exists', KEYS[2]) == 0) "
+                        + "or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
+                        "redis.call('lpop', KEYS[2]); " +
+                        "redis.call('zrem', KEYS[3], ARGV[2]); " +
+                        "redis.call('hset', KEYS[1], ARGV[2], 1); " +
+                        "redis.call('pexpire', KEYS[1], ARGV[1]); " +
+                        "return nil; " +
+                    "end; " +
+                    "if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
+                        "redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
+                        "redis.call('pexpire', KEYS[1], ARGV[1]); " +
+                        "return nil; " +
+                    "end; " +
+ 
+                    "local firstThreadId = redis.call('lindex', KEYS[2], 0); " +
+                    "local ttl; " + 
+                    "if firstThreadId ~= false and firstThreadId ~= ARGV[2] then " + 
+                        "ttl = tonumber(redis.call('zscore', KEYS[3], firstThreadId)) - tonumber(ARGV[4]);" + 
+                    "else "
+                      + "ttl = redis.call('pttl', KEYS[1]);" + 
+                    "end; " + 
+ 
+                    "local timeout = ttl + tonumber(ARGV[3]);" + 
+                    "if redis.call('zadd', KEYS[3], timeout, ARGV[2]) == 1 then " +
+                        "redis.call('rpush', KEYS[2], ARGV[2]);" +
+                    "end; " +
+                    "return ttl;", 
+                    Arrays.<Object>asList(getName(), threadsQueueName, timeoutSetName), 
+                                internalLockLeaseTime, getLockName(threadId), currentTime + threadWaitTime, currentTime);
+    }
+ 
+    throw new IllegalArgumentException();
+}
+```
+
+### **KEYS/ARGV参数分析**
+
+> KEYS = Arrays.asList(getName(), threadsQueueName, timeoutSetName)
+
+- KEYS[1] = getName() = 锁的名字，“anyLock”
+- KEYS[2] = threadsQueueName = redisson_lock_queue:{anyLock}，基于redis的数据结构实现的一个队列
+- KEYS[3] = timeoutSetName = redisson_lock_timeout:{anyLock}，基于redis的数据结构实现的一个Set数据集合，有序集合，可以自动按照你给每个数据指定的一个分数（score）来进行排序
+
+> ARGV = internalLockLeaseTime, getLockName(threadId), currentTime + threadWaitTime, currentTime
+
+- ARGV[1] = 30000毫秒
+- ARGV[2] = UUID:threadId
+- ARGV[3] = 当前时间（10:00:00） + 5000毫秒 = 10:00:05
+- ARGV[4] = 当前时间（10:00:00）
+
+### **模拟不同线程获取锁步骤**
+
+1. 客户端A thread01 10:00:00 获取锁(第一次加锁)
+2. 客户端B thread02 10:00:10 获取锁
+3. 客户端C therad03 10:00:15 获取锁
+
+#### **客户端A thread01 加锁分析**
+
+thread01 在10:00:00 执行加锁逻辑，下面开始一点点分析lua脚本执行代码：
+
+```lua
+"while true do "
++ "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);"
++ "if firstThreadId2 == false then "
+    + "break;"
+```
+
+就是从 `redisson_lock_queue:{anyLock}` 这个队列中弹出来第一个元素，刚开始，队列是空的，所以什么都获取不到，此时就会直接退出while true死循环
+
+```lua
+"if (redis.call('exists', KEYS[1]) == 0) and ((redis.call('exists', KEYS[2]) == 0) "
++ "or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
+"redis.call('lpop', KEYS[2]); " +
+"redis.call('zrem', KEYS[3], ARGV[2]); " +
+"redis.call('hset', KEYS[1], ARGV[2], 1); " +
+"redis.call('pexpire', KEYS[1], ARGV[1]); " +
+"return nil; " +
+"end; " +
+```
+
+这段代码判断逻辑的意思是：
+
+1. `exists anyLock`，锁不存在，也就是没人加锁，刚开始确实是没人加锁的，这个条件肯定是成立的；
+2. 或者是`exists redisson_lock_queue:{anyLock}`，这个队列不存在
+3. 或者是 `lindex redisson_lock_queue:{anyLock} 0`，队列的第一个元素是UUID:threadId，或者是这个队列存在，但是排在队头的第一个元素，是当前这个线程
+
+那么这个条件整体就可以成立了 anyLock和队列，都是不存在的，所以这个条件肯定会成立。接着执行if中的具体逻辑：
+
+- `lpop redisson_lock_queue:{anyLock}`，弹出队列的第一个元素，现在队列是空的，所以什么都不会干
+- `zrem redisson_lock_timeout:{anyLock} UUID:threadId`，从set集合中删除threadId对应的元素，此时因为这个set集合是空的，所以什么都不会干
+- `hset anyLock UUID:threadId_01 1`，加锁成功： anyLock: { "UUID_01:threadId_01": 1 }
+- `pexpire anyLock 30000`，将这个锁key的生存时间设置为30000毫秒
+
+返回一个nil，在外层代码中，就会认为是加锁成功，此时就会开启一个`watchdog`看门狗定时调度的程序，每隔10秒判断一下，当前这个线程是否还对这个锁key持有着锁，如果是，则刷新锁key的生存时间为30000毫秒。
+
+#### **客户端B thread02 加锁分析**
+
+此时thread01 已经获取到了锁，如果thread02 在10:00:10分来执行加锁逻辑，具体的代码逻辑是怎样执行的呢？
+
+```lua
+"while true do "
++ "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);"
++ "if firstThreadId2 == false then "
+    + "break;"
+```
+
+进入while true死循环，`lindex redisson_lock_queue:{anyLock} 0`，获取队列的第一个元素，此时队列还是空的，所以获取到的是false，直接退出while true死循环
+
+```lua
+"if (redis.call('exists', KEYS[1]) == 0) and ((redis.call('exists', KEYS[2]) == 0) "
++ "or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
+"redis.call('lpop', KEYS[2]); " +
+"redis.call('zrem', KEYS[3], ARGV[2]); " +
+"redis.call('hset', KEYS[1], ARGV[2], 1); " +
+"redis.call('pexpire', KEYS[1], ARGV[1]); " +
+"return nil; " +
+"end; " +
+```
+
+此时anyLock这个锁key已经存在了，说明已经有人加锁了，这个条件首先就肯定不成立了；
+
+接着往下执行，看下另外的逻辑：
+
+```lua
+"if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
+    "redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
+    "redis.call('pexpire', KEYS[1], ARGV[1]); " +
+    "return nil; " +
+"end; " +
+```
+
+判断一下，此时这个第二个客户端是`UUID_02，threadId_02`，此时会判断一下，`hexists anyLock UUID_02:threadId_02`，判断一下在anyLock这个map中，是否存在`UUID_02:threadId_02`这个key？这个条件也不成立
+
+继续执行后续代码：
+
+```lua
+"local firstThreadId = redis.call('lindex', KEYS[2], 0); " +
+"local ttl; " + 
+"if firstThreadId ~= false and firstThreadId ~= ARGV[2] then " + 
+    "ttl = tonumber(redis.call('zscore', KEYS[3], firstThreadId)) - tonumber(ARGV[4]);" + 
+"else "
+  + "ttl = redis.call('pttl', KEYS[1]);" + 
+"end; " + 
+ 
+"local timeout = ttl + tonumber(ARGV[3]);" + 
+"if redis.call('zadd', KEYS[3], timeout, ARGV[2]) == 1 then " +
+    "redis.call('rpush', KEYS[2], ARGV[2]);" +
+"end; " +
+"return ttl;", 
+```
+
+`lindex redisson_lock_queue:{anyLock} 0`，从队列中获取第一个元素，此时队列是空的，所以什么都不会有。
+
+因为我们是在10:00:10 分请求的，因为anyLock默认过期时间是30s，所以在thread02请求的时候ttl还剩下20s。
+
+- ttl = pttl anyLock = 20000毫秒，获取anyLock剩余的生存时间，ttl假设这里就被设置为了20000毫秒
+- timeout = ttl + 当前时间 + 5000毫秒 = 20000毫秒 + 10:00:00 + 5000毫秒 = 10:00:25
+
+接着执行： `zadd redisson_lock_timeout:{anyLock} 10:00:25 UUID_02:threadId_02`
+
+在set集合中插入一个元素，元素的值是UUID_02:threadId_02，他对应的分数是10:00:25（会用这个时间的long型的一个时间戳来表示这个时间，时间越靠后，时间戳就越大），sorted set，有序set集合，他会自动根据你插入的元素的分数从小到大来进行排序。
+
+继续执行： `rpush redisson_lock_queue:{anyLock} UUID_02:theadId_02`
+
+> 这个指令就是将`UUID_02:threadId_02`，插入到队列的头部去。
+
+返回的是ttl，也就是anyLock剩余的生存时间，如果拿到的返回值是ttl是一个数字的话，那么此时客户端B而言就会进入一个while true的死循环，每隔一段时间都尝试去进行加锁，重新执行这段lua脚本。
+
+**简单画图总结如下：**
+
+<img src="./redisson%E6%A1%86%E6%9E%B6.assets/d3c623257c79cbc9ba58a6d909f9b8e5.png" alt="img" style="zoom:80%;" />
+
+#### **客户端C thread03 加锁分析**
+
+此时thread03 在10:00:15来加锁，分析一下执行原理：
+
+```lua
+"while true do "
++ "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);"
++ "if firstThreadId2 == false then "
+    + "break;"
++ "end; "
++ "local timeout = tonumber(redis.call('zscore', KEYS[3], firstThreadId2));"
++ "if timeout <= tonumber(ARGV[4]) then "
+    + "redis.call('zrem', KEYS[3], firstThreadId2); "
+    + "redis.call('lpop', KEYS[2]); "
++ "else "
+    + "break;"
++ "end; "
++ "end;"
+```
+
+while true死循环，`lindex redisson_lock_queue:{anyLock} 0`，获取队列中的第一个元素，``UUID_02:threadId_02`，代表的是这个客户端02正在队列里排队。
+
+`zscore redisson_lock_timeout:{anyLock} UUID_02:threadId_02`，从有序集合中获取``UUID_02:threadId_02`对应的分数，timeout = 10:00:25
+
+判断：timeout <= 10:00:15？，这个条件不成立，退出死循环
+
+```lua
+"local firstThreadId = redis.call('lindex', KEYS[2], 0); " +
+"local ttl; " + 
+"if firstThreadId ~= false and firstThreadId ~= ARGV[2] then " + 
+    "ttl = tonumber(redis.call('zscore', KEYS[3], firstThreadId)) - tonumber(ARGV[4]);" + 
+"else "
+  + "ttl = redis.call('pttl', KEYS[1]);" + 
+"end; " + 
+ 
+"local timeout = ttl + tonumber(ARGV[3]);" + 
+"if redis.call('zadd', KEYS[3], timeout, ARGV[2]) == 1 then " +
+    "redis.call('rpush', KEYS[2], ARGV[2]);" +
+"end; " +
+"return ttl;", 
+```
+
+- firstThreadId 获取到的是队列中的第一个元素：`UUID_02:thread_02`
+- ttl = 10:00:25 - 10:00:15 = 5000毫秒 
+- timeout = 5000毫秒 + 10:00:15 + 5000毫秒 = 10:00:30
+
+将客户端C放入到对列和有序集合中： `zadd redisson_lock_timeout:{anyLock} 10:00:30 UUID_03:threadId_03` 然后 `rpush redisson_lock_queue:{anyLock} UUID_03:theadId_03`
+
+**最终执行完后 如下图：**
+
+<img src="./redisson%E6%A1%86%E6%9E%B6.assets/d23f20c53c2e298401289fe8dc17716b.png" alt="img" style="zoom:80%;" />
+
+上面已经知道了，多个线程加锁过程中实际会进行排队，根据加锁的时间来作为获取锁的优先级，如果此时客户端A释放了锁，来看下客户端B、C是如果获取锁的。
+
+#### **客户端A 释放锁**
+
+直接看核心逻辑：
+
+```lua
++ "if (redis.call('exists', KEYS[1]) == 0) and ((redis.call('exists', KEYS[2]) == 0) "
++ "or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then " +
+"redis.call('lpop', KEYS[2]); " +
+"redis.call('zrem', KEYS[3], ARGV[2]); " +
+"redis.call('hset', KEYS[1], ARGV[2], 1); " +
+"redis.call('pexpire', KEYS[1], ARGV[1]); " +
+"return nil; " +
+"end; " +
+```
+
+if中的判断： exists anyLock 是否不存在，此时客户端A已经释放锁，所以这个条件成立。
+
+然后判断队列不存在，或者队列中第一个元素为空，此时条件不成立，但是后面是or关联的判断，接着判断队列中的第一个元素是否为当前请求的`UUID_02:threadId_02`， 如果判断成功则开始加锁。
+
+> 因为客户端B 和 C 获取锁时返回的是ttl，也就是anyLock剩余的生存时间，如果拿到的返回值是ttl是一个数字的话，那么此时客户端B而言就会进入一个while true的死循环，每隔一段时间都尝试去进行加锁，重新执行这段lua脚本。
