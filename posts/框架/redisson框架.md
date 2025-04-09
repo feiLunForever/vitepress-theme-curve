@@ -466,7 +466,7 @@ thread01 在10:00:00 执行加锁逻辑，下面开始一点点分析lua脚本�
 
 - `lpop redisson_lock_queue:{anyLock}`，弹出队列的第一个元素，现在队列是空的，所以什么都不会干
 - `zrem redisson_lock_timeout:{anyLock} UUID:threadId`，从set集合中删除threadId对应的元素，此时因为这个set集合是空的，所以什么都不会干
-- `hset anyLock UUID:threadId_01 1`，加锁成功： anyLock: { "UUID_01:threadId_01": 1 }
+- `hset anyLock UUID:threadId_01 1`，加锁成功： `anyLock: { "UUID_01:threadId_01": 1 }`
 - `pexpire anyLock 30000`，将这个锁key的生存时间设置为30000毫秒
 
 返回一个nil，在外层代码中，就会认为是加锁成功，此时就会开启一个`watchdog`看门狗定时调度的程序，每隔10秒判断一下，当前这个线程是否还对这个锁key持有着锁，如果是，则刷新锁key的生存时间为30000毫秒。
