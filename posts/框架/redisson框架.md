@@ -790,3 +790,825 @@ public class RedissonMultiLock implements Lock {
 ```
 
 实现原理其实很简单，基于RedLock思想，遍历所有的Redis客户端，然后依次加锁，最后统计成功的次数来判断是否加锁成功。
+
+## ReadWriteLock 读写锁的实现
+
+所谓读写锁，就是多个客户端同时加读锁，是不会互斥的，多个客户端可以同时加这个读锁，读锁和读锁是不互斥的
+
+Redisson中使用 `RedissonReadWriteLock `来实现读写锁，它是 `RReadWriteLock`的子类，具体实现读写锁的类分别是：`RedissonReadLock `和 `RedissonWriteLock`。
+```java
+// 获取key为"rwLock"的锁对象，此时获取到的对象是 RReadWriteLock
+ RReadWriteLock rwLock = redissonClient.getReadWriteLock("rwLock");
+
+ RLock lock = rwLock.readLock();  // 获取读锁read
+ // or
+ RLock lock = rwLock.writeLock(); // 获取写锁write
+ // 2、加锁
+ lock.lock();
+ try {
+   // 进行具体的业务操作
+   ...
+ } finally {
+ 　　// 3、释放锁
+ 　　lock.unlock();
+ }
+```
+
+### 读写锁特性
+
+**读写锁的特性：**
+
+- 读读兼容、读写互斥、写写互斥、写读互斥
+- 锁可以降级(当线程先获取到写锁，然后再去获取读锁，接着再释放写锁)，但不能升级(先获取读锁，然后再获取写锁，再释放读锁）
+
+**为什么可以降级锁，而不能升级锁：**
+
+- 因为锁降级是从写锁降级为读锁，此时，同一时间拿到写锁的只有一个线程，可以直接降级为读锁，不会造成冲突；而升级锁是从读锁升级为写锁，此时，同一时间拿到读锁的可能会有多个线程(读读不互斥)，会造成冲突。
+
+> 同RedissonFairLock一样，RReadWriteLock也是RedissonLock的子类 ，主要也是基于 RedissonLock 做的扩展，主要扩展在于加锁和释放锁的地方，以及读锁的 wathcdog lua 脚本(经过重写的)，其他的逻辑都直接复用 RedissonLock
+
+### **RedissonReadLock 原理**
+
+#### 加锁逻辑分析
+
+**RedissonReadLock#tryLockInnerAsync**
+
+```java
+<T> RFuture<T> tryLockInnerAsync(long waitTime, long leaseTime, TimeUnit unit, long threadId, RedisStrictCommand<T> command) {
+    return evalWriteAsync(getRawName(), LongCodec.INSTANCE, command,
+              // 获取锁的mode值
+              "local mode = redis.call('hget', KEYS[1], 'mode'); " +
+              // 锁的模式为空，即当前锁尚未有线程获取，添加锁信息
+              "if (mode == false) then " +
+                  // 设置一个mode = read
+                  "redis.call('hset', KEYS[1], 'mode', 'read'); " +
+                  // 设置锁+可重用次数+1
+                  "redis.call('hset', KEYS[1], ARGV[2], 1); " +
+                  // 利用 set 命令为当前获取到锁的线程添加一条超时记录 String类型
+                  // set {rwLock}:UUID:threadId:rwlock_timeout:1 1
+                  "redis.call('set', KEYS[2] .. ':1', 1); " +
+                  // 设置过期时间
+                  "redis.call('pexpire', KEYS[2] .. ':1', ARGV[1]); " +
+                  // 设置过期时间
+                  "redis.call('pexpire', KEYS[1], ARGV[1]); " +
+                  "return nil; " +
+              "end; " +
+              // 如果当前mode是读锁，或者是（写锁，但是持有写锁的线程是本次加锁线程）
+              // 注意这里判断的是ARGV[3]=serverId+threadId:write 是写锁的线程
+              "if (mode == 'read') or (mode == 'write' and redis.call('hexists', KEYS[1], ARGV[3]) == 1) then " +
+                  // 增加锁的可重入次数，可能是第一个线程id 次数+1，也可能是新的线程Id 次数+1，就是所有线程的可重入次数都在这里了
+                  // 返回ind = 此时的重入次数
+                  // ARGV[2]需要注意，不同线程加锁，这个值都是不一样的
+                  "local ind = redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
+                   // 设置一个key = {lockName}:serverId:threadId:rwlock_timeout:重入次数 1
+                  "local key = KEYS[2] .. ':' .. ind;" +
+                  // 设置过期时间
+                  "redis.call('set', key, 1); " +
+                  "redis.call('pexpire', key, ARGV[1]); " +
+                  // 设置过期时间
+                  "local remainTime = redis.call('pttl', KEYS[1]); " +
+                  // ttl 和 30000 中选出最大值，设置为锁的过期时间
+                  "redis.call('pexpire', KEYS[1], math.max(remainTime, ARGV[1])); " +
+                  "return nil; " +
+              "end;" +
+              //  返回锁的过期时间
+              "return redis.call('pttl', KEYS[1]);",
+          Arrays.asList(getRawName(), getReadWriteTimeoutNamePrefix(threadId)),
+          unit.toMillis(leaseTime), getLockName(threadId), getWriteLockName(threadId));
+}
+```
+
+##### KEYS/ARGV参数分析
+
+**KEYS：**
+
+- KEYS[1]: `getName()` = key的名称，也就是 rwLock
+- KEYS[2]: `getReadWriteTimeoutNamePrefix(threadId)` = 锁超时key，即 {anyLock}:UUID_01:threadId_01:rwlock_timeout
+
+**ARGV：**
+
+- ARGV[1]: internalLockLeaseTime = 锁过期的时间，默认30s
+- ARGV[2]: getLockName(threadId) = UUID_01:threadId_01，当前线程，UUID来唯一标识一个客户端
+- ARGV[3]: getWriteLockName(threadId) = UUID_01:threadId_01:write，写锁名称
+
+##### **客户端A** 首次加读锁
+
+> - 也就是执行lua脚本的第一个分支，Redis中的数据有一个key为 `rwLock` 结构的Hash锁，包含锁的模式，以及加锁的线程；
+> - 一个以当前加锁线程的超时时间(String类型)。
+
+1. hget anyLock mode 第一次加锁时是空的
+2. mode = false，进入if逻辑
+3. hset anyLock UUID_01:threadId_01 1 anyLock是hash结构，设置hash的key、value
+4. set {anyLock}:UUID_01:threadId_01:rwlock_timeout:1 1 设置一个string类型的key value数据
+5. pexpire {anyLock}:UUID_01:threadId_01:rwlock_timeout:1 30000 设置key value的过期时间
+6. pexpire anyLock 30000 设置anyLock的过期时间
+
+此时 redis中存在的数据结构为：
+
+```java
+anyLock: {
+  "mode": "read",
+  "UUID_01:threadId_01": 1
+}
+ 
+{anyLock}:UUID_01:threadId_01:rwlock_timeout:1  1
+```
+
+##### **客户端A** 第二次来加读锁
+
+执行第二个分支
+
+- 锁模式为读锁，当前线程可获取读锁。即：redisson提供的读写锁支持不同线程重复获取锁
+- 锁模式为写锁，并且获取写锁的线程为当前线程，当前线程可获取读锁；**即：redisson 提供的读写锁，读写并不是完全互斥，而是支持同一线程先获取写锁再获取读锁，也就是 锁的降级**
+
+> 关于写锁判断，到分析获取写锁的lua脚本时再回头看；但是可以从这里提前知道，如果为写锁添加加锁次数记录，使用的 key 是 UUID:threadId:write，而读锁使用的 key 是 UUID:threadId
+
+1. hget anyLock mode 此时mode=read，会进入第二个if判断
+2. hincrby anyLock UUID_01:threadId_01 1 此时hash中的value会加1，变成2
+3. set {anyLock}:UUID_01:threadId_01:rwlock_timeout:2 1 ind 为hincrby结果，hincrby返回是2
+4. pexpire anyLock 30000
+5. pexpire {anyLock}:UUID_01:threadId_01:rwlock_timeout:2 30000
+
+> - 此时Redis中Hash结构的数据中，当前线程的的值加1，表示重入次数。
+>
+> - 并且在Redis中会再增加一条String类型的数据，表示第二次加锁的超时时间，可以看到，**当一个线程重入n次时，就会有n条对应的超时记录，并且key最后的数字是依次递增的**。
+
+此时redis中存在的数据结构为：
+
+```java
+anyLock: {
+  “mode”: “read”,
+  “UUID_01:threadId_01”: 2
+}
+ 
+{anyLock}:UUID_01:threadId_01:rwlock_timeout:1  1
+{anyLock}:UUID_01:threadId_01:rwlock_timeout:2  1
+```
+
+##### **客户端B** 第一次来加读锁
+
+基本步骤和上面一直，加锁后redis中数据为：
+
+```java
+anyLock: {
+  "mode": "read",
+  "UUID_01:threadId_01": 2,
+  "UUID_02:threadId_02": 1
+}
+ 
+{anyLock}:UUID_01:threadId_01:rwlock_timeout:1  1
+{anyLock}:UUID_01:threadId_01:rwlock_timeout:2  1
+{anyLock}:UUID_02:threadId_02:rwlock_timeout:1  1
+```
+
+##### 写读互斥
+
+已经加了读锁，此时写锁进来，不满足第一部分，也不满足第二部分，直接返回当前锁的过期时间，并订阅消息通道 redisson_rwlock:{rwLock}，然后就会在while(true)中进行自旋等待锁的释放。
+
+**至此**，整个加锁的流程完成，从上面可以看出，在读锁的时候：
+
+1. 锁 rwLock 是哈希表结构的
+2. 加锁时，会对哈希表设置 mode 字段来表示这个锁是读锁还是写锁，mode = read 表示读锁
+3. 加锁时，会对哈希表设置当前线程 rwLock 的 UUID:ThreadId 字段，值表示重入次数
+4. 每次加锁，会维护一个 key 表示这次锁的超时时间，这个 key 的结构是 {锁名字}:UUID:ThreadId:rwlock_timeout:重入次数
+
+#### watchdog续期lua脚本
+
+**RedissonReadLock#renewExpirationAsync**
+
+```java
+protected RFuture<Boolean> renewExpirationAsync(long threadId) {
+    // {rwLock}:UUID:threadId:rwlock_timeout
+    String timeoutPrefix = getReadWriteTimeoutNamePrefix(threadId);
+    // timeoutPrefix.split(":" + getLockName(threadId))[0] -> {rwLock}
+    String keyPrefix = getKeyPrefix(threadId, timeoutPrefix);
+    
+    return evalWriteAsync(getRawName(), LongCodec.INSTANCE, RedisCommands.EVAL_BOOLEAN,
+          // 利用 hget 命令获取当前当前线程的加锁次数  hget rwLock UUID:threadId
+          "local counter = redis.call('hget', KEYS[1], ARGV[2]); " +
+          "if (counter ~= false) then " +
+              // 当前线程获取锁次数大于0，刷新锁过期时间  pexpire rwLock 30000
+              "redis.call('pexpire', KEYS[1], ARGV[1]); " +
+              // 利用 hlen 命令获取锁集合里面的元素个数，然后判断是否大于1个以上key  hlen rwLock
+              "if (redis.call('hlen', KEYS[1]) > 1) then " +
+                 // 如果锁集合里面key大于1个，获取锁集合中的所有key  hkeys rwLock
+                 "local keys = redis.call('hkeys', KEYS[1]); " +
+                 // 遍历每一个key
+                 "for n, key in ipairs(keys) do " +
+                    // hegt rwLock key 获取其具体值
+                    "counter = tonumber(redis.call('hget', KEYS[1], key)); " + 
+                    // 如果值为数字类型，证明此key是加锁成功的线程，其值表示线程加锁的次数
+                    "if type(counter) == 'number' then " + 
+                        // 遍历加锁次数，刷新加锁线程对应的过期时间
+                        "for i=counter, 1, -1 do " +
+                            // pexpire {rwLock}:key:rwlock_timeout:i 30000
+                            "redis.call('pexpire', KEYS[2] .. ':' .. key .. ':rwlock_timeout:' .. i, ARGV[1]); " + 
+                        "end; " + 
+                    "end; " + 
+                "end; " +
+            "end; " +
+            "return 1; " +
+        "end; " +
+        "return 0;",
+    Arrays.<Object>asList(getRawName(), keyPrefix),
+    internalLockLeaseTime, getLockName(threadId));
+}
+```
+
+##### KEYS/ARGV参数分析
+
+**KEYS：**
+
+- KEYS[1]：getRawName()，就是key的名称，也就是获取锁对象时设置的"rwLock"
+- KEYS[2]：keyPrefix，{rwLock}
+
+**ARGV：**
+
+- ARGV[1]：internalLockLeaseTime，锁过期时间，其实就是watchdog超时时间，默认 30*1000 ms
+- ARGV[2]：getLockName(threadId)，UUID:ThreadId，UUID来唯一标识一个客户端
+
+在上述续期的lua脚本中有一个 `hlen KEYS[1]`(hlen rwLock) 的判断，做这个判断是因为 读写锁 集合中，包含2个以上的键值对，其中一个就是锁模式，也就是mode字段，来表示当前锁是读锁还是写锁；后面的操作获取锁集合中所有的key： `hget KEYS[1]`(hget rwLock key) ，遍历所有的key，并获取其值：``hget KEYS[1] key(hget rwLock key)``，如果key的值为数字，证明此key是加锁成功的线程，并且 `value` 的值表示线程加锁次数；遍历加锁次数利用 `pexpire` 为这个线程对应的加锁记录刷新过期时间。
+
+> 之所以遍历加锁次数，是因为在锁重入的时候，每成功加锁一次，redisson 都会为当前线程新增一条加锁记录，并且设置过期时间。
+
+#### 释放锁
+
+**RedissonReadLock#unlockInnerAsync**
+
+```java
+protected RFuture<Boolean> unlockInnerAsync(long threadId) {
+    // {myLock}:UUID:threadId:rwlock_timeout
+    String timeoutPrefix = getReadWriteTimeoutNamePrefix(threadId);
+    // timeoutPrefix.split(":" + getLockName(threadId))[0] -> {myLock}
+    String keyPrefix = getKeyPrefix(threadId, timeoutPrefix);
+
+    return evalWriteAsync(getRawName(), LongCodec.INSTANCE, RedisCommands.EVAL_BOOLEAN,
+         // 获取当前持有锁的mode
+        "local mode = redis.call('hget', KEYS[1], 'mode'); " +
+         // mode为空，说明没有线程持有锁，那么往读写锁对应的channel发送释放锁的消息
+        "if (mode == false) then " +
+            // publish redisson_rwlock:{rwLock} 0
+            "redis.call('publish', KEYS[2], ARGV[1]); " +
+            "return 1; " +
+        "end; " +
+        // 存在锁，但是持有锁的线程非否包含本线程
+        "local lockExists = redis.call('hexists', KEYS[1], ARGV[2]); " +
+        "if (lockExists == 0) then " +
+            // 不包含 return 0              
+            "return nil;" +
+        "end; " +
+        // 包含，那么就-1，减去可重入次数
+        "local counter = redis.call('hincrby', KEYS[1], ARGV[2], -1); " +
+        // 如果持有锁数量减1后等于0，证明当前线程不再持有锁，那么利用 hdel 命令将锁map中加锁次数记录删掉
+        "if (counter == 0) then " +
+             // 如果该线程对应的重入次数=0了，那么就值删除hset里面的单个线程key
+            "redis.call('hdel', KEYS[1], ARGV[2]); " + 
+        "end;" +
+        // 删除{lockName}:serverId:threadId:rwlock_timeout：重入次数 key，也就是删除表示第几次加锁的一个key，这个key主要用来记录超时时间
+        "redis.call('del', KEYS[3] .. ':' .. (counter+1)); " +
+
+        // 如果当前锁还被其他线程持有着。
+        "if (redis.call('hlen', KEYS[1]) > 1) then " +
+            "local maxRemainTime = -3; " +
+             // 拿到里面所有的key也就是线程id
+            "local keys = redis.call('hkeys', KEYS[1]); " + 
+            "for n, key in ipairs(keys) do " +
+                // 拿到各个线程对应的重入次数
+                "counter = tonumber(redis.call('hget', KEYS[1], key)); " +
+                // 如果值为数字
+                "if type(counter) == 'number' then " + 
+                    // 遍历加锁次数，刷新加锁线程对应的过期时间
+                    "for i=counter, 1, -1 do " +
+                       // 获取重入次数那次加锁设置的过期时间
+                       "local remainTime = redis.call('pttl', KEYS[4] .. ':' .. key .. ':rwlock_timeout:' .. i); " + 
+                       // 获取一个最大的过期时间
+                       "maxRemainTime = math.max(remainTime, maxRemainTime);" + 
+                    "end; " + 
+                "end; " + 
+            "end; " +
+            // 如果过期时间还没到，那么就延期锁过期时间
+            "if maxRemainTime > 0 then " +
+                // pexpire rwLock maxRemainTime
+                "redis.call('pexpire', KEYS[1], maxRemainTime); " +
+                "return 0; " +
+            "end;" + 
+            // 如果当前读写锁的锁模式是写锁，直接返回0结束lua脚本的执行
+            "if mode == 'write' then " + 
+                "return 0;" + 
+            "end; " +
+        "end; " +
+        // 到了这里，说明锁的过期时间到了，hset里面没有线程了，或者说里面线程的最大过期时间到了
+        // 直接将读写锁对应的key直接删掉，并且往读写锁对应的channel中发布释放锁消息  
+        // del rwLock
+        "redis.call('del', KEYS[1]); " +
+        // publish redisson_rwlock:{rwLock} 0
+        "redis.call('publish', KEYS[2], ARGV[1]); " +
+        "return 1; ",
+    Arrays.<Object>asList(getRawName(), getChannelName(), timeoutPrefix, keyPrefix),
+    LockPubSub.UNLOCK_MESSAGE, getLockName(threadId));
+}
+```
+
+##### KEYS/ARGV参数分析
+
+**KEYS：**
+
+- KEYS[1]：getRawName()，就是key的名称，也就是获取锁对象时设置的"rwLock"
+- KEYS[2]：getChannelName()，订阅消息的通道，redisson_rwlock:{rwLock}
+- KEYS[3]：timeoutPrefix，{rwLock}:UUID:threadId:rwlock_timeout
+- KEYS[4]：keyPrefix，{rwLock}
+
+**ARGV：**
+
+- ARGV[1]：LockPubSub.UNLOCK_MESSAGE，Redis发布事件时的message，为 0
+- ARGV[2]：getLockName(threadId)，UUID:ThreadId，UUID来唯一标识一个客户端
+
+##### 解锁分析
+
+###### **客户端A来释放锁**
+
+对应的KEYS和ARGV参数为：
+
+- KEYS[1] = anyLock
+- KEYS[2] = redisson_rwlock:{anyLock}
+- KEYS[3] = {anyLock}:UUID_01:threadId_01:rwlock_timeout
+- KEYS[4] = {anyLock}
+- ARGV[1] = 0
+- ARGV[2] = UUID_01:threadId_01
+
+接下来开始执行操作：
+
+1. hget anyLock mode，mode = read
+2. hexists anyLock UUID_01:threadId_01，肯定是存在的，因为这个客户端A加过读锁
+3. hincrby anyLock UUID_01:threadId_01 -1，将这个客户端对应的加锁次数递减1，现在就是变成1，counter = 1
+4. del {anyLock}:UUID_01:threadId_01:rwlock_timeout:2，删除了一个timeout key
+
+此时Redis中的数据结构为：
+
+```java
+anyLock: {
+  "mode": "read",
+  "UUID_01:threadId_01": 1,
+  "UUID_02:threadId_02": 1
+}
+ 
+{anyLock}:UUID_01:threadId_01:rwlock_timeout:1    1
+{anyLock}:UUID_02:threadId_02:rwlock_timeout:1    1
+```
+
+此时继续往下，具体逻辑如图：
+
+<img src="./redisson%E6%A1%86%E6%9E%B6.assets/911f59e7d56481e93cac580c53d2fb00.png" alt="img" style="zoom:80%;" />
+
+> 1. hlen anyLock > 1，就是hash里面的元素超过1个
+> 2. pttl {anyLock}:UUID_01:threadId_01:rwlock_timeout:1，此时获取那个timeout key的剩余生存时间还有多少毫秒，比如说此时这个key的剩余生存时间是20000毫秒
+
+这个for循环的含义是获取到了所有的timeout key的最大的一个剩余生存时间，假设最大的剩余生存时间是25000毫秒。
+
+###### **客户端A继续来释放锁**
+
+此时客户端A执行流程还会和上面一样，执行完成后Redis中数据结构为：
+
+```java
+anyLock: {
+  "mode": "read",
+  "UUID_02:threadId_02": 1
+}
+ 
+{anyLock}:UUID_02:threadId_02:rwlock_timeout:1    1
+```
+
+因为这里会走`counter == 0`的逻辑，所以会执行`"redis.call('hdel', KEYS[1], ARGV[2]); "`。
+
+###### **客户端B继续来释放锁**
+
+客户端B流程也和上面一直，执行完后就会删除anyLock这个key。
+
+**到这里**，整个读锁的流程全部结束，但是有三个小小的疑问？
+
+> 为什么给读锁扣减不需要先判断锁的模式？
+>
+> - 在锁map中记录加锁次数时，读锁的key是UUID:threadId，而写锁的key是UUID:threadId:write，那么就是说读锁的key和写锁的key是不一样的。所以解锁的时候，直接使用对应key来扣减持有锁次数即可。
+> - 相同线程，如果获取了写锁后，还是可以继续获取读锁的。所以只需要判断锁map有读锁加锁次数记录即可，就可以判断当前线程是持有读锁的，并不需要关心当前锁的模式。
+
+> 为什么锁map中的key都大于1了，证明肯定还有线程持有锁，那为什么还会存在 maxRemainTime 最后小于0的情况呢？
+>
+> - 有一个点我们还没学到，那就是其实读写锁中，如果是获取写锁，并不会新增一条写锁的超时记录，因为读写锁中，写锁和写锁是互斥的，写锁和读锁也是互斥的，即使支持当前线程先获取写锁再获取读锁，其实也不需要增加一条写锁的超时时间，因为读写锁 key 的超时时间就等于写锁的超时时间。
+
+> **当一个线程重入n次时，就会有n条对应的超时记录，并且key最后的数字是依次递增的**。为什么需要多条记录？
+>
+> - 解锁的时候，需要遍历多条记录，获取最大的一条超时时间，用来判断该锁是否过期
+
+### **RedissonWriteLock 原理**
+
+#### 加锁逻辑分析
+
+**RedissonWriteLock#tryLockInnerAsync**
+
+```java
+<T> RFuture<T> tryLockInnerAsync(long waitTime, long leaseTime, TimeUnit unit, long threadId, RedisStrictCommand<T> command) {
+    return evalWriteAsync(getRawName(), LongCodec.INSTANCE, command,
+           // 获取锁里面的mode
+          "local mode = redis.call('hget', KEYS[1], 'mode'); " +
+           // 如果mode不存在，说明第一次加写锁
+          "if (mode == false) then " +
+               // 设置写锁模式=write
+              "redis.call('hset', KEYS[1], 'mode', 'write'); " +
+               // 设置锁持有线程
+              "redis.call('hset', KEYS[1], ARGV[2], 1); " +
+               // 加过期时间
+              "redis.call('pexpire', KEYS[1], ARGV[1]); " +
+              "return nil; " +
+          "end; " +
+            // 如果mode当前是写锁，那说明之前是加的写锁
+          "if (mode == 'write') then " +
+                // 判断当前持有锁的线程是不是本线程
+              "if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
+                  // 锁可重入次数+1
+                  "redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
+                  / // 重新设置锁过期时间
+                  "local currentExpire = redis.call('pttl', KEYS[1]); " +
+                  "redis.call('pexpire', KEYS[1], currentExpire + ARGV[1]); " +
+                  "return nil; " +
+              "end; " +
+          "end;" +
+          // 返回当前锁过期时间
+          "return redis.call('pttl', KEYS[1]);",
+    Arrays.<Object>asList(getRawName()), unit.toMillis(leaseTime), getLockName(threadId));
+}
+```
+
+##### KEYS/ARGV参数分析
+
+**KEYS：**
+
+- KEYS[1]: `getName()` = key的名称，也就是 rwLock
+
+**ARGV：**
+
+- ARGV[1]: internalLockLeaseTime = 锁过期的时间，默认30s
+- ARGV[2]: getWriteLockName(threadId) = UUID_01:threadId_01:write，写锁名称
+
+##### **客户端A** 首次加写锁
+
+> 也就是执行lua脚本的第一个分支，Redis中的数据有一个key为rwLock结构的Hash锁，包含锁的模式，以及加锁的线程，**但是跟读锁不同的是，此时加锁的线程为: UUID:threadId:write，并且是不会就超时记录的，因为写锁在同一时间只有一个线程能够获取(写写互斥)，锁的超时时间就是线程持有锁的超时时间，所以不需要**
+
+1. hget anyLock mode，此时没人加锁，mode=false
+2. hset anyLock mode write
+3. hset anyLock UUID_01:threadId_01:write 1
+4. pexpire anyLock 30000
+
+此时redis中数据格式为：
+
+```java
+anyLock: {
+    "mode": "write",
+    "UUID_01:threadId_01:write": 1
+}
+```
+
+##### **客户端A** 再次来加写锁
+
+执行第二个分支
+
+- 锁模式为写锁并且持有写锁为当前线程，当前线程可再次获取写锁
+- 新的过期时间为已经持有锁的过期时间 + 30000ms，currentExpire + ARGV[1]
+
+> 此时Redis中Hash结构的数据中，当前线程的的值加1，表示重入次数，并且此时的过期时间是在已持有锁的过期时间 + 30s
+
+1. hexists anyLock UUID_01:threadId_01:write
+2. hincrby anyLock UUID_01:threadId_01:write 1
+3. pexpire anyLock pttl + 30000
+
+此时redis中数据格式为：
+
+```java
+anyLock: {
+    "mode": "write",
+    "UUID_01:threadId_01:write": 2
+}
+```
+
+##### 写写互斥、写读互斥
+
+已经加了写锁，此时不管写锁还是读锁进来，不满足第一部分，也不满足第二部分，直接返回当前锁的过期时间，并订阅消息通道 redisson_rwlock:{rwLock}，然后就会在while(true)中进行自旋等待锁的释放
+
+**至此**，整个加锁的流程完成，从上面可以看出，在读锁的时候：
+
+1. 锁 rwLock 是哈希表结构的
+2. 加锁时，会对哈希表设置 mode 字段来表示这个锁是读锁还是写锁，mode = write 表示读锁
+3. 在 rwLock 中再额外维护一个字段 UUID:ThreadId:write 表示重入次数
+
+#### watchdog续期lua脚本
+
+watchdog 的执行操作，还是和 RedissLock 保持一致。
+
+#### 释放锁
+
+**RedissonWriteLock#unlockInnerAsync**
+
+```java
+protected RFuture<Boolean> unlockInnerAsync(long threadId) {
+    return evalWriteAsync(getRawName(), LongCodec.INSTANCE, RedisCommands.EVAL_BOOLEAN,
+        // 利用 hget 命令获取锁的模式  hget rwLock mode
+        "local mode = redis.call('hget', KEYS[1], 'mode'); " +
+        // 如果锁模式为空，往读写锁对应的channel发送释放锁的消息
+        "if (mode == false) then " +
+            // publish redisson_rwlock:{rwLock} 0
+            "redis.call('publish', KEYS[2], ARGV[1]); " +
+            "return 1; " +
+        "end;" +
+        // 如果当前锁的模式为写锁
+        "if (mode == 'write') then " +
+            // 是否持有锁线程是本线程，不是，返回null
+            "local lockExists = redis.call('hexists', KEYS[1], ARGV[3]); " +
+             // 如果不存在直接返回null，表示释放锁失败
+            "if (lockExists == 0) then " +
+                "return nil;" +
+            "else " +
+                // 是本线程，做可重入次数--
+                "local counter = redis.call('hincrby', KEYS[1], ARGV[3], -1); " +
+                // 如果减之后还有可重入次数，那么就重新刷新锁过期时间
+                "if (counter > 0) then " +
+                    "redis.call('pexpire', KEYS[1], ARGV[2]); " +
+                    "return 0; " +
+                "else " +
+                    // 否则不再持有锁，删除锁里面的线程持有
+                    "redis.call('hdel', KEYS[1], ARGV[3]); " +
+                    // 如果hset的长度=1了，那么也就是里面只有mode了，那么就删除key
+                    "if (redis.call('hlen', KEYS[1]) == 1) then " +
+                        "redis.call('del', KEYS[1]); " +
+                        // 利用 publish 命令发布释放锁消息， public redisson_rwlock:{rwLock} 0
+                        "redis.call('publish', KEYS[2], ARGV[1]); " + 
+                    "else " +
+                        // 如果 key 数量大于1，证明当前线程还持有读锁(锁的降级)，利用 hset 命令将锁模式设置为读锁
+                        // 加写锁加的key = serverId + threadId +:write
+                        // 加了写锁，同一线程加读锁，key = serverId + threadId，可以区分出来是读锁还是写锁
+                        "redis.call('hset', KEYS[1], 'mode', 'read'); " +
+                    "end; " +
+                    "return 1; "+
+                "end; " +
+            "end; " +
+        "end; " +
+        "return nil;",
+    Arrays.<Object>asList(getRawName(), getChannelName()),
+    LockPubSub.READ_UNLOCK_MESSAGE, internalLockLeaseTime, getLockName(threadId));
+}
+```
+
+##### KEYS/ARGV参数分析
+
+**KEYS：**
+
+- KEYS[1]：getRawName()，就是key的名称，也就是获取锁对象时设置的"rwLock"
+- KEYS[2]：getChannelName()，订阅消息的通道，redisson_rwlock:{rwLock}
+
+**ARGV：**
+
+- ARGV[1]：LockPubSub.UNLOCK_MESSAGE，Redis发布事件时的message，为 0
+- ARGV[2]：internalLockLeaseTime，watchdog的超时时间，30*1000 ms
+- ARGV[3]：getLockName(threadId)，super.getLockName(threadId) + ":write" -> UUID:ThreadId:write
+
+##### 释放锁分析
+
+**TIPS：**
+
+> 以上释放锁的lua脚本，其中有一段逻辑，删除写锁记录之后(hdel rwLock UUID:threadId:write)，会判断当前锁集合中含有key的个数(hlen rwLock)，如果key的个数大于1，则会将锁模式设置为读锁(hset rwLock mode read)，这种情况是：**当前线程不但持有写锁，还持有读锁；如果持有读锁，那么在释放写锁后，需要设置锁模式为读锁，也就是进行了锁的降级操作**
+
+```java
+public void lockDegrade() {
+    // 获取写锁
+    writeLock.lock();
+    // do somrthing
+    ...
+    // 获取锁(开始锁降级)
+    readLock.lock();
+    // 锁降级完成
+    writeLock.unlock();
+    // 降级结束
+    readLock.unlock(); 
+}
+```
+
+回到RedissonReadLock加读锁的地方，第二段逻辑，就包含锁降级的操作，**但必须是同一线程才能够进行锁降级的操作**
+
+```java
+" if (mode == 'read') or (mode == 'write' and redis.call('hexists', KEYS[1], ARGV[3]) == 1) then " ...
+```
+
+##### 锁降级分析
+
+> - 锁可以降级(当线程先获取到写锁，然后再去获取读锁，接着再释放写锁)，但不能升级(先获取读锁，然后再获取写锁，再释放读锁）
+>
+> - **为什么可以降级锁，而不能升级锁：**
+>   - 因为锁降级是从写锁降级为读锁，此时，同一时间拿到写锁的只有一个线程，可以直接降级为读锁，不会造成冲突；而升级锁是从读锁升级为写锁，此时，同一时间拿到读锁的可能会有多个线程(读读不互斥)，会造成冲突。
+
+**客户端A先加写锁、客户端A接着加读锁**
+
+客户端A加完写锁后，再来加读锁：
+
+1. hget anyLock mode，mode = write 客户端A已经加了一个写锁
+2. hexists anyLock UUID_01:threadId_01:write，此时存在这个key，所以可以进入if分支
+3. hincrby anyLock UUID_01:threadId_01 1，也就是说此时，加了一个读锁
+4. set {anyLock}:UUID_01:threadId_01:rwlock_timeout:1 1,
+5. pexpire anyLock 30000
+6. pexpire {anyLock}:UUID_01:threadId_01:rwlock_timeout:1 30000
+
+此时redis中数据格式为：
+
+```java
+anyLock: {
+  "mode": "write",
+  "UUID_01:threadId_01:write": 1,
+  "UUID_01:threadId_01": 1
+}
+ 
+{anyLock}:UUID_01:threadId_01:rwlock_timeout:1    1
+```
+
+**当写锁线程释放(*writeLock*.unlock())后的数据 **
+
+```java
+anyLock: {
+  "mode": "read", // 模式更新为读
+  "UUID_01:threadId_01": 1 // 读锁计数
+}
+```
+
+之后会进行读锁相关的操作。
+
+>**降级锁时，在释放写锁的时候，没有发布通知**
+
+- 如果在释放写锁之前，已经有其他线程在等待获取读锁，由上面释放写锁的lua脚本可知，在释放写锁后，并不会发布事件通知，那么其他等待获取读锁的线程不能马上获取到读锁，还会继续等待，直到本线程的读锁程序手动释放或超时自动释放（上面已经讲了，降级锁释放写锁后不会自动续期，所以会存在程序还没有手动释放读锁而超时自动释放的情况），其他线程才能获取到读锁。
+
+## Semaphore 和 CountDownLatch 的实现
+
+### Semaphore
+
+先看下Semaphore原理图如下：
+
+<img src="./redisson%E6%A1%86%E6%9E%B6.assets/2pqgznoety.png" alt="img" style="zoom:80%;" />
+
+```java
+RSemaphore semaphore = redisson.getSemaphore("semaphore");
+// 同时最多允许3个线程获取锁
+semaphore.trySetPermits(3);
+
+for(int i = 0; i < 10; i++) {
+  new Thread(new Runnable() {
+
+    @Override
+    public void run() {
+      try {
+        System.out.println(new Date() + "：线程[" + Thread.currentThread().getName() + "]尝试获取Semaphore锁"); 
+        semaphore.acquire();
+        System.out.println(new Date() + "：线程[" + Thread.currentThread().getName() + "]成功获取到了Semaphore锁，开始工作"); 
+        Thread.sleep(3000);  
+        semaphore.release();
+        System.out.println(new Date() + "：线程[" + Thread.currentThread().getName() + "]释放Semaphore锁"); 
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }).start();
+}
+```
+
+**Semaphore源码解析**
+
+接着我们根据上面的示例，看看源码是如何实现的：
+
+- 第一步：` semaphore.trySetPermits(3);`
+
+```java
+public class RedissonSemaphore extends RedissonExpirable implements RSemaphore {
+    @Override
+    public boolean trySetPermits(int permits) {
+        return get(trySetPermitsAsync(permits));
+    }
+
+    @Override
+    public RFuture<Boolean> trySetPermitsAsync(int permits) {
+        return commandExecutor.evalWriteAsync(getName(), LongCodec.INSTANCE, RedisCommands.EVAL_BOOLEAN,
+                "local value = redis.call('get', KEYS[1]); " +
+                "if (value == false or value == 0) then "
+                    + "redis.call('set', KEYS[1], ARGV[1]); "
+                    + "redis.call('publish', KEYS[2], ARGV[1]); "
+                    + "return 1;"
+                + "end;"
+                + "return 0;",
+                Arrays.<Object>asList(getName(), getChannelName()), permits);
+    }
+
+}
+```
+
+执行流程为：
+
+1. get semaphore，获取到一个当前的值
+2. 第一次数据为0， 然后使用set semaphore 3，将这个信号量同时能够允许获取锁的客户端的数量设置为3
+3. 然后发布一些消息，返回1
+
+- 第二步：接着看看`semaphore.acquire();`和`semaphore.release();` 逻辑：
+
+```java
+public class RedissonSemaphore extends RedissonExpirable implements RSemaphore {
+    @Override
+    public RFuture<Boolean> tryAcquireAsync(int permits) {
+        if (permits < 0) {
+            throw new IllegalArgumentException("Permits amount can't be negative");
+        }
+        if (permits == 0) {
+            return RedissonPromise.newSucceededFuture(true);
+        }
+
+        return commandExecutor.evalWriteAsync(getName(), LongCodec.INSTANCE, RedisCommands.EVAL_BOOLEAN,
+                  "local value = redis.call('get', KEYS[1]); " +
+                  "if (value ~= false and tonumber(value) >= tonumber(ARGV[1])) then " +
+                      "local val = redis.call('decrby', KEYS[1], ARGV[1]); " +
+                      "return 1; " +
+                  "end; " +
+                  "return 0;",
+                  Collections.<Object>singletonList(getName()), permits);
+    }
+
+    @Override
+    public RFuture<Void> releaseAsync(int permits) {
+        if (permits < 0) {
+            throw new IllegalArgumentException("Permits amount can't be negative");
+        }
+        if (permits == 0) {
+            return RedissonPromise.newSucceededFuture(null);
+        }
+
+        return commandExecutor.evalWriteAsync(getName(), StringCodec.INSTANCE, RedisCommands.EVAL_VOID,
+            "local value = redis.call('incrby', KEYS[1], ARGV[1]); " +
+            "redis.call('publish', KEYS[2], value); ",
+            Arrays.<Object>asList(getName(), getChannelName()), permits);
+    }
+
+}
+```
+
+先看看加锁的逻辑`tryAcquireAsync()`：
+
+1. get semaphore，获取到一个当前的值，比如说是3，3 > 1
+2. decrby semaphore 1，将信号量允许获取锁的客户端的数量递减1，变成2
+3. decrby semaphore 1
+4. decrby semaphore 1
+5. 执行3次加锁后，semaphore值为0
+
+此时如果再来进行加锁则直接返回0，然后进入死循环去获取锁，如下图：
+
+<img src="./redisson%E6%A1%86%E6%9E%B6.assets/ovhix4txs5.png" alt="img" style="zoom:60%;" />
+
+接着看看解锁逻辑`releaseAsync()` ：
+
+1. incrby semaphore 1，每次一个客户端释放掉这个锁的话，就会将信号量的值累加1，信号量的值就不是0了
+
+### CountDownLatch
+
+```java
+RCountDownLatch latch = redisson.getCountDownLatch("anyCountDownLatch");
+latch.trySetCount(3);
+System.out.println(new Date() + "：线程[" + Thread.currentThread().getName() + "]设置了必须有3个线程执行countDown，进入等待中。。。"); 
+
+for(int i = 0; i < 3; i++) {
+  new Thread(new Runnable() {
+
+    @Override
+    public void run() {
+      try {
+        System.out.println(new Date() + "：线程[" + Thread.currentThread().getName() + "]在做一些操作，请耐心等待。。。。。。"); 
+        Thread.sleep(3000); 
+        RCountDownLatch localLatch = redisson.getCountDownLatch("anyCountDownLatch");
+        localLatch.countDown();
+        System.out.println(new Date() + "：线程[" + Thread.currentThread().getName() + "]执行countDown操作"); 
+      } catch (Exception e) {
+        e.printStackTrace(); 
+      }
+    }
+
+  }).start();
+}
+
+latch.await();
+System.out.println(new Date() + "：线程[" + Thread.currentThread().getName() + "]收到通知，有3个线程都执行了countDown操作，可以继续往下走"); 
+```
+
+**先分析`trySetCount()`方法逻辑：**
+
+1. exists anyCountDownLatch，第一次肯定是不存在的
+2. set redisson_countdownlatch__channel__anyCountDownLatch 3
+3. 返回1
+
+**接着分析`latch.await();`方法，如下图：**
+
+<img src="./redisson%E6%A1%86%E6%9E%B6.assets/7sy1pcoiyt.png" alt="img" style="zoom:60%;" />
+
+这个方法其实就是陷入一个while true死循环，不断的get anyCountDownLatch的值，如果这个值还是大于0那么就继续死循环，否则的话呢，就退出这个死循环。
+
+**最后分析`localLatch.countDown();`方法：**
+
+1. decr anyCountDownLatch，就是每次一个客户端执行countDown操作，其实就是将这个cocuntDownLatch的值递减1。
+2. `await()`方面已经分析过，死循环去判断anyCountDownLatch对应存储的值是否为0，如果为0则接着执行自己的逻辑。
