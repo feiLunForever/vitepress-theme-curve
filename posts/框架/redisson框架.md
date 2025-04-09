@@ -1,3 +1,15 @@
+---
+title: Redisson框架
+tags:
+  - 框架
+categories:
+  - 框架
+date: '2025-04-07'
+description: 欢迎使用 Curve 主题，这是你的第一篇文章
+articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明和须知。
+#cover: "/images/logo/logo.webp"
+---
+
 # Redisson框架
 
 ## 为什么使用Redisson
