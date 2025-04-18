@@ -12,6 +12,8 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 # Curator框架
 
+> Apache Curator是一个Zookeeper的开源客户端，它提供了Zookeeper各种应用场景（Recipe，如共享锁服务、master选举、分布式计数器等）的抽象封装，接下来将利用Curator提供的类来实现分布式锁。
+
 ## 可重入锁
 
 ### 加锁示例
@@ -82,28 +84,28 @@ private boolean internalLock(long time, TimeUnit unit) throws Exception {
 
 ```java
 String attemptLock(long time, TimeUnit unit, byte[] lockNodeBytes) throws Exception {
-    //获取当前时间
+    // 获取当前时间
     final long startMillis = System.currentTimeMillis();
-    //判断time是不是为null。如果不为空，做一次毫秒的转换
+    // 判断time是不是为null。如果不为空，做一次毫秒的转换
     final Long millisToWait = (unit != null) ? unit.toMillis(time) : null;
     //null
     final byte[] localLockNodeBytes = (revocable.get() != null) ? new byte[0] : lockNodeBytes;
-    //重入次数，默认是0
+    // 重入次数，默认是0
     int retryCount = 0;
 
-    //就是创建锁节点成功后的节点全路径
+    // 就是创建锁节点成功后的节点全路径
     String ourPath = null;
     boolean hasTheLock = false;
-    //如果他是true，就跳出以下循环
+    // 如果他是true，就跳出以下循环
     boolean isDone = false;
     while (!isDone) {
         //一进来，先设置为true
         isDone = true;
 
         try {
-            //创建锁
+            // 创建锁
             ourPath = driver.createsTheLock(client, path, localLockNodeBytes);
-            //内部锁循环判断是否获取锁成功的一个逻辑
+            // 内部锁循环判断是否获取锁成功的一个逻辑
             hasTheLock = internalLockLoop(startMillis, millisToWait, ourPath);
         } catch (KeeperException.NoNodeException e) {
             // gets thrown by StandardLockInternalsDriver when it can't find the lock node
@@ -122,7 +124,7 @@ String attemptLock(long time, TimeUnit unit, byte[] lockNodeBytes) throws Except
     }
 
     if (hasTheLock) {
-        //如果加锁成功，返回加锁的节点路径
+        // 如果加锁成功，返回加锁的节点路径
         return ourPath;
     }
 
@@ -172,46 +174,46 @@ String attemptLock(long time, TimeUnit unit, byte[] lockNodeBytes) throws Except
 
 ```java
 private boolean internalLockLoop(long startMillis, Long millisToWait, String ourPath) throws Exception {
-    //是否持有锁，如果后面获取到锁，那么它就是true,如果获取不到锁，那么就一直是false
+    // 是否持有锁，如果后面获取到锁，那么它就是true,如果获取不到锁，那么就一直是false
     boolean haveTheLock = false;
     try {
         if (revocable.get() != null) {
             client.getData().usingWatcher(revocableWatcher).forPath(ourPath);
         }
-        //判断当前客户端的一个状态是否STARTED，而且一直没有获取到锁
+        // 判断当前客户端的一个状态是否STARTED，而且一直没有获取到锁
         while ((client.getState() == CuratorFrameworkState.STARTED) && !haveTheLock) {
-            //获取到basePath下所有子节点的一个顺序集合
+            // 获取到basePath下所有子节点的一个顺序集合
             List<String> children = getSortedChildren();
-            //去掉basePath，留下的就是顺序节点的内容
+            // 去掉basePath，留下的就是顺序节点的内容
             String sequenceNodeName = ourPath.substring(basePath.length() + 1); // +1 to include the slash
 
-            //拿到加锁的结果
+            // 拿到加锁的结果
             PredicateResults predicateResults = driver.getsTheLock(client, children, sequenceNodeName, maxLeases);
             if (predicateResults.getsTheLock()) {
-                //如果获取锁成功，就haveTheLock设置成true,这样就可以跳出加锁的循环
+                // 如果获取锁成功，就haveTheLock设置成true,这样就可以跳出加锁的循环
                 haveTheLock = true;
             } else {
-                //我们需要去拼装全路径的待watch的节点
+                //我 们需要去拼装全路径的待watch的节点
                 String previousSequencePath = basePath + "/" + predicateResults.getPathToWatch();
 
                 synchronized (this) {
                     try {
                         // use getData() instead of exists() to avoid leaving unneeded watchers which is a type of
                         // resource leak
-                        //去添加watch到这个节点
+                        // 去添加watch到这个节点
                         client.getData().usingWatcher(watcher).forPath(previousSequencePath);
                         if (millisToWait != null) {
-                            //如果millisToWait时间有设置
+                            // 如果millisToWait时间有设置
                             millisToWait -= (System.currentTimeMillis() - startMillis);
                             startMillis = System.currentTimeMillis();
                             if (millisToWait <= 0) {
                                 break;
                             }
 
-                            //等待一定时间
+                            // 等待一定时间
                             wait(millisToWait);
                         } else {
-                            //如果没有设置，那么就一直等待。
+                            // 如果没有设置，那么就一直等待。
                             wait();
                         }
                     } catch (KeeperException.NoNodeException e) {
@@ -222,16 +224,16 @@ private boolean internalLockLoop(long startMillis, Long millisToWait, String our
         }
     } catch (Exception e) {
         ThreadUtils.checkInterrupted(e);
-        //删除当前客户端设置的一个节点。为什么要删除。
-        //因为我们创建的节点如果不删除，而且当前客户端没有挂掉，那么那个节点就一直存在。阻塞后续客户端的加锁
+        // 删除当前客户端设置的一个节点。为什么要删除。
+        // 因为我们创建的节点如果不删除，而且当前客户端没有挂掉，那么那个节点就一直存在。阻塞后续客户端的加锁
         deleteOurPathQuietly(ourPath, e);
         throw e;
     }
     if (!haveTheLock) {
-        //删除创建的节点
+        // 删除创建的节点
         deleteOurPath(ourPath);
     }
-    //返回是否加锁成功
+    // 返回是否加锁成功
     return haveTheLock;
 }
 ```
@@ -292,6 +294,9 @@ private boolean internalLockLoop(long startMillis, Long millisToWait, String our
 1. 基于 ZooKeeper 的分布式锁，是使用的临时顺序节点，父节点是持久节点；
 2. 创建临时节点时，父节点不存在，会先创建父节点（路径）；
 3. 锁的组成结构为：对 `/locks/lock_01` 加锁，实际锁住的是 `/locks/lock_01/_c_UUID-lock-序号`，举例为 `/locks/lock_01/_c_cc4fc045-5a1e-4378-b3c7-8a8d3fb9a37c-lock-0000000000`
+   1. 为了避免羊群效应，临时顺序节点，加锁失败后监听的是**前一个节点**；
+   2. 为了避免无效自旋，这里使用了 Java 的 `wait/notifyAll` 机制；
+   3. 可以看出，默认加锁就是**公平锁**。
 
 ### 锁释放
 
@@ -338,3 +343,253 @@ ZooKeeper 的 `InterProcessMutex` 锁是通过 Java 代码中维护了一个 `lo
 
 <img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418161447408.png" alt="image-20250418161447408" style="zoom:80%;" />
 
+## 分布式信号量和互斥锁
+
+### 示例
+
+```java
+public class CuratorDemo {
+
+    public static void main(String[] args) throws Exception {
+
+        String connectString = "127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183";
+
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+
+        CuratorFramework client = CuratorFrameworkFactory
+                .builder()
+                .connectString(connectString)
+                .retryPolicy(retryPolicy)
+                .build();
+        client.start();
+
+        InterProcessSemaphoreV2 semaphore = new InterProcessSemaphoreV2(client, "/semaphores/semaphore_01", 3);
+
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                try {
+                    System.out.println(Thread.currentThread() + " 线程 start - " + LocalTime.now());
+                    Lease lease = semaphore.acquire();
+                    System.out.println(Thread.currentThread() + " 线程 execute - " + LocalTime.now());
+                    Thread.sleep(3000);
+                    System.out.println(Thread.currentThread() + " 线程 over -" + LocalTime.now());
+                    semaphore.returnLease(lease);
+                } catch (Exception e) {
+
+                }
+
+            }).start();
+        }
+
+        Thread.sleep(1000000);
+
+    }
+}
+```
+
+控制台输出数据如下：
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418163243094.png" alt="image-20250418163243094" style="zoom:80%;" />
+
+### 源码分析
+
+#### 获取凭证
+
+`InterProcessSemaphoreV2#internalAcquire1Lease`
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418163345829.png" alt="image-20250418163345829" style="zoom:80%;" />
+
+lock 是 `InterProcessMutex`，`InterProcessSemaphoreV2` 信号量，也是借助于最基础的加锁。
+
+![image-20250418163417079](./curator%E6%A1%86%E6%9E%B6.assets/image-20250418163417079.png)
+
+通过图也可以看出，使用 `InterProcessSemaphoreV2` 时，会先创建 `/semaphores/semaphore_01` 路径，并在路径下创建 `locks` 节点。也就是 `/semaphores/semaphore_01/locks` 路径下，有 10 个临时顺序节点。
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418170350516.png" alt="image-20250418170350516" style="zoom:80%;" />
+
+紧接着会在 `/semaphores/semaphore_01` 路径下创建 `leases` 节点，所以创建锁的临时顺序节点之后，会紧接着在 `/semaphores/semaphore_01/leases` 下创建临时顺序节点。
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418170431075.png" alt="image-20250418170431075" style="zoom:80%;" />
+
+对 `/semaphores/semaphore_01/leases` 节点进行监听，同时获取 `/semaphores/semaphore_01/leases` 下面的子节点数量。
+
+1. 如果子节点数量小于等于信号量计数，则直接结束循环；
+2. 如果大于，则会进入 wait 等待唤醒。
+
+#### 释放凭证
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418170510166.png" alt="image-20250418170510166" style="zoom:80%;" />
+
+释放凭证就是调用 Lease 的 close 方法，删除节点，这样 `/semaphores/semaphore_01/leases` 上的监听器就会触发，然后其他线程获取凭证。
+
+### 互斥锁
+
+互斥锁 `InterProcessSemaphoreMutex`，不支持重入，其他的和可重入锁并没有什么区别。就是基于 `InterProcessSemaphoreV2` 实现的。
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418170651967.png" alt="image-20250418170651967" style="zoom:80%;" />
+
+就是把计数的值 `maxLeases` 设置为了 1。
+
+### 总结
+
+- 信号量 `InterProcessSemaphoreV2` 其实是通过判断节点下的子节点数量来实现控制信号量，同时内部加锁是基于可重入锁 `InterProcessMutex` 实现的。
+- 互斥锁 `InterProcessSemaphoreMutex` 则是将信号量的技术设置为 1 来实现互斥功能。
+
+## 分布式读写锁和联锁
+
+### 示例
+
+Curator 同样支持分布式`读写锁` 和`联锁`，只需要使用 `InterProcessReadWriteLock` 即可，来一起看看它的源码以及实现方式。
+
+```java
+public class CuratorDemo {
+
+    public static void main(String[] args) throws Exception {
+
+        String connectString = "127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183";
+
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+
+        CuratorFramework client = CuratorFrameworkFactory
+                .builder()
+                .connectString(connectString)
+                .retryPolicy(retryPolicy)
+                .build();
+        client.start();
+
+        InterProcessReadWriteLock lock = new InterProcessReadWriteLock(client, "/locks/lock_01");
+        lock.readLock().acquire();
+        lock.readLock().release();
+        lock.writeLock().acquire();
+        lock.writeLock().release();
+
+    }
+}
+```
+
+### 源码
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171004738.png" alt="image-20250418171004738" style="zoom:80%;" />
+
+读锁写锁都是基于 `InterProcessMutex` 实现的，所以基本都和 `InterProcessMutex` 没有区别。不过这里生成的锁名字不再是 `-lock-` 而是换成了 `__WRIT__` 和 `__READ__`。
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171040238.png" alt="image-20250418171040238" style="zoom:80%;" />
+
+- 读锁加锁节点名为 `/locks/lock_01/_c_44a8eaf8-f177-403a-92bf-9119591b54d5-__READ__0000000000`，写锁解锁节点名为 `_c_2e5dde98-c548-4f8b-a798-821ee8330eb6-__WRIT__0000000001`。
+- 其中创建节点时和可重入锁 `InterProcessMutex` 没有区别，唯一的区别就是在 `internalLockLoop` 方法中，判断锁获取结果时有区别。
+- 当可重入锁时是在 `StandardLockInternalsDriver#getsTheLock` 判断当前节点是否为最小节点。
+- 而读写锁是在 `InterProcessReadWriteLock#InterProcessReadWriteLock` 中重写了 `getsTheLock` 方法。
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171139742.png" alt="image-20250418171139742" style="zoom:80%;" />
+
+#### 读锁加锁
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171206563.png" alt="image-20250418171206563" style="zoom:80%;" />
+
+```java
+public static class ReadLock extends InternalInterProcessMutex {
+    public ReadLock(CuratorFramework client, String basePath, byte[] lockData, WriteLock writeLock) {
+        super(client, basePath, READ_LOCK_NAME, lockData, Integer.MAX_VALUE, new SortingLockInternalsDriver() {
+            @Override
+            protected String getSortingSequence() {
+                String writePath = writeLock.getLockPath();
+                //如果writePath不为空，也就是说当前线程已经持有一把写锁
+                if (writePath != null) {
+                    //拿到顺序节点的编号
+                    return fixForSorting(writePath, WRITE_LOCK_NAME);
+                }
+                return null;
+            }
+
+            @Override
+            public PredicateResults getsTheLock(
+                CuratorFramework client, List<String> children, String sequenceNodeName, int maxLeases)
+            throws Exception {
+                //首先当前线程持有写锁，那么就直接加读锁成功
+                if (writeLock.isOwnedByCurrentThread()) {
+                    return new PredicateResults(null, true);
+                }
+
+                //
+                int index = 0;
+                //记录第一个写锁的位置
+                int firstWriteIndex = Integer.MAX_VALUE;
+                //记录当前客户端创建读锁的index
+                int ourIndex = -1;
+                for (String node : children) {
+                    if (node.contains(WRITE_LOCK_NAME)) {
+                        //记录第一个写锁的位置
+                        firstWriteIndex = Math.min(index, firstWriteIndex);
+                    } else if (node.startsWith(sequenceNodeName)) {
+                        //记录当前客户端的位置
+                        ourIndex = index;
+                        break;
+                    }
+
+                    ++index;
+                }
+
+                validateOurIndex(sequenceNodeName, ourIndex);
+
+                //判断读锁的位置是否<第一个写锁的位置，如果小于就加锁成功
+                //比如当前客户端B来加写锁， 客户端A加读锁。然后客户端C也来加读锁。
+                boolean getsTheLock = (ourIndex < firstWriteIndex);
+                //而是第一个写锁节点。
+                String pathToWatch = getsTheLock ? null : children.get(firstWriteIndex);
+                return new PredicateResults(pathToWatch, getsTheLock);
+
+                //第一客户端A来加读锁，客户端B来加读锁。读读不互斥
+                //客户A来加读锁，客户端B加写锁。读写互斥
+                //客户端A来加读锁，客户端A再来加写锁。同一线程读写是互斥
+                //客户端A来加写锁，客户端A再来加读锁。同一线程写读不互斥。
+                //客户端A来加写锁，客户端A再来加写锁，重入同一线程写写不互斥。
+            }
+        });
+    }
+
+    @Override
+    public String getLockPath() {
+        return super.getLockPath();
+    }
+}
+```
+
+- 读锁加锁，当前线程直接返回成功，也就是说**当前线程读写不互斥的**。
+- 如果是其他线程，则遍历所有子节点。
+  - 子节点包含写锁，当前节点在子节点有序集合的索引小于写锁的索引则直接获得锁，否则获取失败；
+  - 子节点不包含写锁，则当前节点在子节点的有序集合的 index < Integer.MAX_VALUE (2147483647) 即可。
+
+> 就是说读锁最多支持 2147483647 个。
+
+#### 写锁加锁
+
+写锁加锁直接复用的可重入锁 `InterProcessMutex` 的逻辑，所以这里写锁和写锁，以及读锁和写锁都是互斥的。
+
+#### 联锁
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171330216.png" alt="image-20250418171330216" style="zoom:80%;" />
+
+联锁的使用，就是将 `InterProcessLock` 放到集合中，然后进行统一加锁。
+
+<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171356153.png" alt="image-20250418171356153" style="zoom:80%;" />
+
+加锁就遍历集合，依次进行加锁。
+
+### 总结
+
+- 客户端A来加读锁，客户端B来加读锁。读读不互斥
+  - zk节点变化：`/locks/lock_01/_c_44a8eaf8-f177-403a-92bf-9119591b54d5-__READ__0000000000`
+  - `/locks/lock_01/_c_44a8eaf8-f177-403a-92bf-9119591b54d5-__READ__0000000001`
+- 客户A来加读锁，客户端B加写锁。读写互斥
+  - zk节点变化：`/locks/lock_01/_c_44a8eaf8-f177-403a-92bf-9119591b54d5-__READ__0000000000`
+  - 此时获取写锁时，发现存在读锁A（序号更小），因此监听A的节点，等待其释放后才能获取锁 `/locks/lock_01/_c_44a8eaf8-f177-403a-92bf-9119591b54d5-__WRITE__0000000001`
+- 客户端A来加读锁，客户端A再来加写锁。同一线程读写是互斥
+  - 同上
+  - 同一线程在已持有读锁时，若未释放直接申请写锁，需检查是否存在前置读锁（即使属于自己）。此时写锁需等待读锁释放，形成互斥
+- 客户端A来加写锁，客户端A再来加读锁。同一线程写读不互斥
+  - zk节点变化：`/locks/lock_01/_c_44a8eaf8-f177-403a-92bf-9119591b54d5-__WRITE__0000000000`
+  - `/locks/lock_01/_c_44a8eaf8-f177-403a-92bf-9119591b54d5-__READ__0000000001`
+  - 同一线程持有写锁时，申请读锁会直接通过（`writeLock.isOwnedByCurrentThread()`返回`true`），无需检查写锁前置节点
+- 客户端A来加写锁，客户端A再来加写锁，重入同一线程写写不互斥
+  - zk节点变化：`/locks/lock_01/_c_44a8eaf8-f177-403a-92bf-9119591b54d5-__WRITE__0000000000`
+  - 相当于可重入，也就是计数器+1
