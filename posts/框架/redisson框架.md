@@ -151,6 +151,8 @@ Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果�
 
 我们必须确保锁是业务执行完释放的, 而不是因为阻塞而释放的。
 
+<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250421172522354.png" alt="image-20250421172522354" style="zoom:80%;" />
+
 #### tryAcquire
 
 <img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204341854.png" alt="image-20250405204341854" style="zoom:60%;" />
