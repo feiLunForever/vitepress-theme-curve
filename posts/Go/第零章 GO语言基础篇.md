@@ -1,435 +1,962 @@
----
-title: 第零章 GO语言基础篇
-tags:
-  - Go
-categories:
-  - Go
-date: '2025-01-03'
-description: 欢迎使用 Curve 主题，这是你的第一篇文章
-articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明和须知。
-#cover: "/images/logo/logo.webp"
----
+# 基础篇
 
-# 第零章 GO语言基础篇
+## 环境搭建
 
+> https://golang.google.cn/dl/ 中文镜像
 
+### 第一个Go程序
 
-## 包
-
-在一开始配置好开发环境后，我们一起编写了一个能输出“Hello World”的程序：
+使用 vi 或启动任何一个纯文本编辑器，输入如下内容：
 
 ```go
 package main
 import "fmt"
 func main(){
-    fmt.Println("Hello World!")
+    fmt.Println("Hello World!")
 }
 ```
 
-尽管那个程序非常简单，只有5行，但有些细节还是值得深入挖掘的。比如，第一行的package时什么意思，第二行的import到底做了什么……
+将其保存为 hello.go。 接下来，启动终端，导航至 hello.go 所在目录，然后执行以下命令，编译 hello.go 程序：
 
-这些问题看似互相独立，但都和一个话题有关，它就是——**Go程序源码的组织结构**。本讲就来带大家彻底搞清楚一个Go程序的源码是如何组织起来的。
-
-### 包的声明
-
-在Go源码中，**package的意思就是包，后面跟着的就是包名。Go语言通过包来组织源码，拥有相同包名的Go源码属于同一个包。每一个包就相当于一个目录。**
-
-“封装”和“复用”等就可以用包来实现。
-
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250428163217788.png" alt="image-20250428163217788" style="zoom:25%;" />
-
-
-
-在Hello World的源码中，第一行的内容是：
-
-```go
-package main
+```bash
+go build hello.go
 ```
 
-这句话就表示这个源码属于main包。Go语言有一个强制性要求，就是**源码文件的第一行有效代码必须声明自己所在的包**。
+稍等片刻，程序编译完成。编译完成后将生成名为 hello 的可执行文件。在终端执行这个文件，可以看到 “Hello World!” 字样的文本输出，如下图所示：
 
-> 需要特别指出的是：**main包是一个比较特殊的包。一个Go程序必须有main包，且只能有一个main包**。
+```shell
+(base) jiangbolun@jiangbolundeMacBook-Pro-2 main % ./hello 
+Hello Word!% 
+```
 
-### 包的使用
+> 注意：
+> Go 语言要求包含 `main` 函数的文件必须声明为 `package main`。这是生成可执行文件的关键。
 
-使用`import` 导入包。go自己会默认从GO的安装目录和`GOPATH`环境变量中的目录，检索`src`下的目录进行检索包是否存在。所以导入包的时候路径要从`src`目录下开始写。`GOPATH` 就是我们自己定义的包的目录。
+### GOPATH 环境变量
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250428163257209.png" alt="image-20250428163257209" style="zoom:25%;" />
+1. `GOPATH`环境变量，是Go语言用来查找项目和第三方库的路径。
+2. 刚安装完Go后，`GOPATH`环境变量默认未设置，需手动配置；如果不设置，Go默认在本地的特定目录下查找，如Unix/Linux下的用户主目录下的`go`，Windows下的`documents and settings`下的用户名下的`go`。
+3. 建议即便在默认路径下工作，也应设置`GOPATH`环境变量，以便更好地管理项目和第三方库。
+4. `GOPATH`目录下可以存放个人的多个项目和所有拉取的第三方库，尽管也可以为每个项目设置不同的`GOPATH`。
+5. `GOPATH`作为一个环境变量，可以指示多个路径，Go在编译时会遍历这些路径来查找所需的依赖包。
 
-我们导入包目的是要使用写在其他包内的函数，或者包里面的结构体方法等等，如果在同一个包下的内容不需要导包，可以直接使用。也可以给包起别名，如果包原有名称太长不方便使用，则可以在导入包之前加上别名。
+### debug
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250428163413839.png" alt="image-20250428163413839" style="zoom:25%;" />
+goland debug 时会失效：
 
-### 包管理方案
+> undefined behavior - version of Delve is too old for Go version 1.23.5 (maximum supported version 1.20) 15
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250428163722716.png" alt="image-20250428163722716" style="zoom:25%;" />
+因依赖问题要求GO版本需要从1.18.x版本升级到1.23.x，升级后，Test 启动 debug时，发现打断点的红点一闪而过，出现一个失效的标志（一个灰色圆圈+斜杠），在经过百度大法后，原来高版本（1.20及以上版本）会出现debug断点无效的现象。
 
-#### GOPATH 模式
+经过资料查阅，发现是因为go高版本问题，导致dlv插件失效，[github](https://so.csdn.net/so/search?q=github&spm=1001.2101.3001.7020)上提供了源代码，可以clone下来打包，并把dlv文件放到指定的目录。
 
-1. `GOPATH` 是Go语言最早的依赖包管理方式，自2009年11月10日Go开源版本发布时即存在。
-2. 实质上，`GOPATH` 不完全算作包管理工具，它主要提供了一个用于存放包的路径环境变量。
-3. 使用的是 `go get`，执行命令后会拉取代码放入 `GOPATH/src` 下面。
-4. 但是它是作为 `GOPATH` 下全局的依赖，并且 `go get` 还不能进行版本控制，以及隔离项目的包依赖，因为相同包的导入路径一致，无法区分不同版本。
+1. Git clone
 
-#####  `GOPATH` 与 `GOROOT`
+   ```shell
+   git clone https://github.com/go-delve/delve.git
+   ```
 
-- `GOPATH` 模式与`GOPATH` 路径的区别
-  - `GOPATH` 模式指通过`GOPATH` 管理包的方式；`GOPATH` 路径指的是`GOPATH` 这个环境变量的路径
-- `GOROOT` 和 `GOPATH` 路径的区别
-  - `GOROOT` 是 Golang 的按照目录，包含内置开发包与工具，类似Java的JDK
-  - `GOPATH` 则由开发者指定，用于存放Go工程代码及第三方依赖包
-  - 二者不能是同一个路径，因为可能会导致第三方依赖包和内置包重名
-- `GOPATH` 目录结构
-  - `src` 存放源代码文件
-  - `pkg` 存放编译后的文件
-  - `bin` 存放编译后的可执行文件
+2. #### 编译并打包成dlv可执行文件
 
-##### `GOPATH` 模式方案
+   ```
+   cd cmd/dlv
+   
+   go build
+   ```
 
-> 开启`GOPATH`模式后，工程代码需放置在`GOPATH`下的`src`目录内，以确保正确识别和运行。
+   执行完毕后，当前目录下多出一个dlv可执行文件 
+
+3. #### 复制dlv文件到goland插件目录
+
+   - goland 新版本（大于等于23年版本）
+
+     ```
+     cp dlv /Applications/GoLand.app/Contents/plugins/go-plugin/lib/dlv/mac
+     ```
+
+     
+
+   - goland老版本（小于23年版本）
+
+     ```
+     cp dlv /Applications/GoLand.app/Contents/plugins/go/lib/dlv/mac
+     ```
+
+## Go SDK 命令行工具
+
+### go build
+
+> go build 命令的作用是编译 Go 源码，并生成可执行的文件。
+
+从原理上说，Go SDK 自 1.9 版本开始就支持并发编译了，能尽可能地发挥电脑的最大性能完成编译，所以 Go 源码的编译速度是非常快的。在编译过程中，除了我们自己写的代码外，如果使用了第三方的包，这些包会被一同编译。当我们执行 go build 命令后，会搜索当前目录下的 go 源码并完成编译。
+
+go build 命令还允许附加参数，方便开发者对编译参数进行配置，具体如下表所示：
+
+| 参数名 | 作用                                                         |
+| ------ | ------------------------------------------------------------ |
+| -v     | 编译时显示包名                                               |
+| -p x   | 指定编译时并发的数量（使用x表示），该值默认为CPU的逻辑核心数 |
+| -a     | 强制进行重新构建                                             |
+| -n     | 仅输出编译时执行的所有命令                                   |
+| -x     | 执行编译并输出编译时执行的所有命令                           |
+| -race  | 开启竞态检测                                                 |
+
+此外，如果我们希望只编译某个 go 源码文件或包，可在 go build 命令后添加文件或包名。例如，现有 file1.go、file2.go 和file3.go，我们只希望编译 file1.go，便可如下执行：
+
+```bash
+go build file1.go
+```
+
+### go clean
+
+go clean 命令可以清理当前目录内的所有编译生成的文件，具体包括：
+
+-   当前目录下生成的与包名或者 Go 源码文件同名的可执行文件，以及当前目录中 _obj 和 _test 目录中名为 _testmain.go、test.out、build.out、a.out 以及后缀为 .5、.6、.8、.a、.o和 .so 的文件，这些文件通常是执行go build命令后生成的；
+-   当前目录下生成的包名加 “.test” 后缀为名的文件，这些文件通常是执行 go test 命令后生成的；
+-   工作区中 pkg 和 bin 目录的相应归档文件和可执行文件，这些文件通常是执行 go install 命令后生成的。
+
+go clean 命令还允许附加参数，具体参数和作用如下表所示：
+
+| 参数名     | 作用                                                         |
+| ---------- | ------------------------------------------------------------ |
+| -i         | 清除关联的安装的包和可运行文件，这些文件通常是执行go install命令后生成的 |
+| -n         | 仅输出清理时执行的所有命令                                   |
+| -r         | 递归清除在 import 中引入的包                                 |
+| -x         | 执行清理并输出清理时执行的所有命令                           |
+| -cache     | 清理缓存，这些缓存文件通常是执行go build命令后生成的         |
+| -testcache | 清理测试结果                                                 |
+
+在团队式开发中，通常在每次提交代码前执行 go clean 命令，防止提交编译时生成的文件。
+
+### go run
+
+go run 命令的作用是直接运行 go 源码，不在当前目录下生成任何可执行的文件。
+
+从原理上讲，go run 只是将编译后生成的可执行文件放到临时目录中执行，工作目录仍然为当前目录。同时，go run 命令允许添加参数，这些参数将作为 go 程序的可接受参数使用。
+
+由此可见，go run 命令同样会执行编译操作。但要注意的是，go run 不适用于包的执行。
+
+### gofmt
+
+gofmt 命令的作用是将代码按照Go语言官方提供的代码风格进行格式化操作。
+
+请大家注意，**gofmt和go fmt是两个不同的命令**。go fmt 命令是 gofmt 的封装，go fmt 支持两个参数：-n 和 -x，分别表示仅输出格式化时执行的命令，以及执行格式化并输出格式化时执行的命令。
+
+执行 gofmt 命令时，可指定文件或目录，也可不指定。当不指定时，gofmt 命令会搜索当前目录中的 go 源码文件，并执行相应的格式化操作。
+
+gofmt 命令还允许附加参数，具体参数和作用如下表所示：
+
+| 参数名               | 作用                                                         |
+| -------------------- | ------------------------------------------------------------ |
+| -l                   | 仅输出需要进行代码格式化的源码文件的绝对路径                 |
+| -w                   | 进行代码格式化，并用改写后的源码覆盖原有源码                 |
+| -r rule              | 添加自定义的代码格式化规则（使用rule表示），格式为：pattern -> replacement |
+| -s                   | 开启源码简化                                                 |
+| -d                   | 对比输出代码格式化前后的不同，依赖diff命令                   |
+| -e                   | 输出所有的语法错误，默认只会打印每行第1个错误，且最多打印10个错误 |
+| -comments            | 是否保留代码注释，默认值为true                               |
+| -tabwidth x          | 用于指定代码缩进的空格数量（使用x表示），默认值为8，该参数仅在-tabs参数为false时生效 |
+| -tabs                | 用于指定代码缩进是否使用tab（“\t”），默认值为true            |
+| -cpuprofile filename | 是否开启CPU用量分析，需要给定记录文件（使用filename表示），分析结果将保存在这个文件中 |
+
+`💡 提示：使用-s参数进行源码简化的规则请参考：https://pkg.go.dev/cmd/gofmt#hdr-The_simplify_command`
+
+### go install
+
+go install 命令的作用和 go build 类似，都是将源码编译为可执行的文件，附加参数也基本通用，这里就不再赘述了。区别在于：
+
+-   go install 命令在编译源码后，会将可执行文件或库文件安装到约定的目录下；
+-   go install 命令生成的可执行文件使用包名来命名；
+-   默认情况下，go install 命令会将可执行文件安装到 GOPATH\bin 目录下，依赖的三方包会被安装到 GOPATH\bin 目录下。
+
+### go get
+
+go get 命令的作用是获取源码包，这一操作包含两个步骤，分别是下载源码和执行 go install 命令进行安装。使用时，仅需将源码仓库地址追加到 go get 后即可（访问<https://pkg.go.dev/>，搜索包名，在包详情页可以找到仓库地址），例如：
+
+```bash
+go get github.com/ethereum/go-ethereum
+```
+
+
+
+go get 命令还允许附加参数，具体参数和作用如下表所示：
+
+| 参数名    | 作用                                             |
+| --------- | ------------------------------------------------ |
+| -d        | 仅下载源码包，不安装                             |
+| -f        | 在执行-u参数操作时，不验证导入的每个包的获取状态 |
+| -fix      | 在下载源码包后先执行fix操作                      |
+| -t        | 获取运行测试所需要的包                           |
+| -u        | 更新源码包到最新版本                             |
+| -u=patch  | 只小版本地更新源码包，如从1.1.0到1.1.16          |
+| -v        | 执行获取并显示实时日志                           |
+| -insecure | 允许通过未加密的HTTP方式获取                     |
+
+若要指定所获取源码包的版本，可以通过添加 “@版本号” 的方式执行。如：
+
+```bash
+go get github.com/ethereum/go-ethereum@v1.10.1
+```
+
+在使用 Go SDK 1.17 版本时，有一点需要额外注意：执行 go get 命令可能会收到警告，大意是 go get 命令是不建议使用的。此时，使用go install替换 go get 即可，原因是在未来的 Go SDK 版本中 go get 的作用等同于 go get -d。
+
+如果你对 “go get” 命令感兴趣，可以阅读官方对它的说明，写的非常详细：<https://docs.studygolang.com/doc/go-get-install-deprecation>
+
+## 基础语法
+
+### 命名规范
+
+> 对于变量，除了首个单词外，每个单词的首字母用大写表示
 >
-> 当用到第三方依赖包时，需通过`go get`方式拉取。
+> - 这种命名法通常被称为小驼峰式命名法；
+> - 若所有单词的首字母均大写，则成为大驼峰式命名法（又被称为帕斯卡命名法）。
 
-###### go get 命令
-
-- 先将远程代码克隆到`$GOPATH/src`目录下
-- 执行 `go install`
-  - 如果指定的包可生成二进制文件，该文件会被保存到``GOPATH`的`bin`目录下。
-- 可以指定 `-d`参数，仅下载不安装
-
-###### go install 命令
-
-- 可生成可执行的二进制文件，则存储在`$GOPATH/bin`目录下
-- 普通包，则会将编译生成的`.a`结尾的文件，放到`$GOPATH/pkg`目录下
-  - 相当于编译缓存，提升后续的编译速度
-
-> **那如何判断一个包是否能生成可执行的文件呢？**
-
-在 GO 语言中，只有`main`包中存在`main`函数的情况下，才能生成可执行的二进制文件。
-
-> 注意
-
-- `go install` 是建立在`GOPATH`上的，无法在单独的目录中使用该命令
-- `go install` 生成的可执行文件的名称与包名一致
-- `go install` 输出的目录是不支持通过命令指定的
-
-> 既然`go get`包含了`go install `的操作，那为什么还需要`go install`?
-
-- 我们知道`go get`的第一步是下载远程的依赖包，如果你想使用本地的版本，就不需要下载了。那这个时候我们就可以直接使用`go install`。
-- 需要注意的是在 go 的 1.15版本以后，如果没有本地包，`go install`也会从远程下载依赖包。
-
-###### go build 命令
-
-- `go build` 执行后，它默认会在 **当前目录** 下编译生成可执行文件。我们也可以通过参数去指定路径。
-- 跟`go install`不同的是，`go build` 不会将任何可执行文件复制到`$GOPATH/bin`目录下
-
-###### go run 命令
-
-- 编译并运行 go 文件
-- `go run` 不依赖 `GOPATH`
-- 只能编译可执行的 go 文件
-  - 即文件中包含`main`包和`main`方法
-
-#### Govendor 模式
-
-1. 所谓 `vendor` 机制，就是每个项目的根目录下可以有一个 `vendor` 目录，里面存放了该项目的依赖的 `package`。
-   - 通过 `vendor/vendor.json` 记录依赖版本，并将依赖包存储在 `vendor` 目录。
-2. `go build` 的时候会先从`vender`目录中搜索依赖包，`vender`目录中找不到，再到 `GOPATH` 中查找，最后才是在 `GOROOT` 中去查找。
-3. `vendor` 将原来放在 `$GOPATH/src` 的第三方包放到当前工程的 `vendor` 目录中进行管理。
-   - 它为工程独立的管理自己所依赖第三方包提供了保证，多个工程独立地管理自己的第三方依赖包，它们之间不会相互影响。 这种隔离和解耦的设计思路是一大进步。
-4. `Govendor`将第三方依赖包，完全整合到工程里面，加快了项目构建速度。 
-5. 但 `vendor` 也有缺点，那就是对外部依赖的第三方包的版本管理。
-   - 我们通常使用 `go get -u` 更新第三方包。默认的是将工程的默认分支的最新版本拉取到本地，但并不能指定第三方包的版本。
-   - 而在实际包升级过程中，如果发现新版本有问题，则不能很快回退。
-   - 而且依赖不能重用，使得包的冗余度提升，依赖冲突不好解决
-
-#### 第三方管理工具
-
-- 在 Go 1.11 之前，很多优秀的第三方包管理工具起到了举足轻重的作用，弥补了 Go 在依赖管理方面的不足，比如 [godep](https://cloud.tencent.com/developer/tools/blog-entry?target=https%3A%2F%2Fgithub.com%2Ftools%2Fgodep&objectId=2020911&objectType=1&isNewArticle=undefined)、[govendor](https://cloud.tencent.com/developer/tools/blog-entry?target=https%3A%2F%2Fgithub.com%2Fkardianos%2Fgovendor&objectId=2020911&objectType=1&isNewArticle=undefined)、[glide](https://cloud.tencent.com/developer/tools/blog-entry?target=https%3A%2F%2Fgithub.com%2FMasterminds%2Fglide&objectId=2020911&objectType=1&isNewArticle=undefined)、[dep](https://cloud.tencent.com/developer/tools/blog-entry?target=https%3A%2F%2Fgithub.com%2Fgolang%2Fdep&objectId=2020911&objectType=1&isNewArticle=undefined) 等。其中 dep 拥趸众多，而且也得到了 Go 官方的支持，项目也放在 Golang 组织之下 [golang/dep](https://cloud.tencent.com/developer/tools/blog-entry?target=https%3A%2F%2Fgithub.com%2Fgolang%2Fdep&objectId=2020911&objectType=1&isNewArticle=undefined)。
-- 但是蜜月期没有多久，2018 年 Russ Cox 经过深思熟虑以及一些早期的试验，决定 Go 库版本的方式需要从头再来，深度集成 Go 的各种工具（go get、go list等)，实现精巧的最小化版本选择算法，解决 broken API 共存等问题，所以 dep 就被废弃了，这件事还导致 dep 的作者相当的失望和数次争辩。
-- 随着历史车轮的滚滚向前，这些工具均淹没在历史长河之终，完成了它们的使命后，光荣地退出历史舞台。
-
-#### Go Modules 模式
-
-- `Golang 1.11`版本新引入的官方包管理工具用于解决之前没有地方记录依赖包具体版本的问题，方便依赖包的管理。
-- 使用`go mod` 管理项目，不需要非得把项目放到 `GOPATH` 指定目录下，可以在电脑上任何位置新建一个项目。
-- 其思想类似 `maven`：摒弃`vendor`和`GOPATH`，拥抱本地库。
-
-##### mod 初始化
-
-使用mod需要注意的是：
-
-* 如果Go的版本太低不能使用，建议将Go的版本升级到最新。
-* 环境变量中可以增加`GOPROXY=https://goproxy.io` 这样没有梯子的情况下可以正确的加载相应的包文件。
-* 在项目的根目录下使用命令`go mod init projectName`。
-
-##### go mod 常用命令
-
-- go mod init 
-  - 初始化一个新的 `Go modules`工程，并创建 `go.mod` 文件。
-- go mod tidy
-  - 用来解决工程中包的依赖关系
-  - 对于缺少的包，该指令会进行下载，并将依赖包信息维护到`go.mod` 中。
-  - 同时，如果项目中未使用的依赖包，这些包的信息将会从 `go.mod` 和 `go.sum` 文件中移除。
-- Go mod download
-  - 用于将依赖包下载到本地缓存。
-  - 如果 `go.mod` 和 `go.sum`文件中已经包含了新的依赖包信息，而这些依赖包尚未下载到本地，执行该指令可实现依赖包的下载。
-- go mod vendor
-  - 为了兼容 `govendor`模式，将依赖包复制到项目中的 `vendor` 中
-
-##### go.mod 文件
-
-go.mod 提供了`module`, `require`、`replace`和`exclude` 四个命令
-
-- `module` 语句指定包的名字（路径）
-- `require` 语句指定的依赖项模块
-- `replace` 语句可以替换依赖项模块
-- `exclude` 语句可以忽略依赖项模块
+- 对于对外可见的变量，使用大驼峰法；
+- 对于对外不可见的变量，使用小驼峰法。
+- 特别地，若变量/常量是布尔类型，最好以is、allow、has、can之类来开头；
+- 对于常量，单词均用大写字母来表示，每个字母之间使用下划线来分割。
 
 ```go
-module github.com/panicthis/modfile/v2
-go 1.20
-require (
-	github.com/cenk/backoff v2.2.1+incompatible
-	github.com/coreos/bbolt v1.3.3
-	github.com/edwingeng/doublejump v0.0.0-20200330080233-e4ea8bd1cbed
-	github.com/stretchr/objx v0.3.0 // indirect
-	github.com/stretchr/testify v1.7.0
-	go.etcd.io/bbolt v1.3.6 // indirect
-	go.etcd.io/etcd/client/v2 v2.305.0-rc.1
-	go.etcd.io/etcd/client/v3 v3.5.0-rc.1
-	golang.org/x/net v0.0.0-20210610132358-84b48f89b13b // indirect
-	golang.org/x/sys v0.0.0-20210611083646-a4fc73990273 // indirect
-)
-exclude (
-	go.etcd.io/etcd/client/v2 v2.305.0-rc.0
-	go.etcd.io/etcd/client/v3 v3.5.0-rc.0
-)
-retract (
-    v1.0.0 // 废弃的版本，请使用v1.1.0
-)
+// 变量声明
+var exampleNumberA int = 10
+var isDarkMode bool = false
+// 常量声明
+const WIDTH_OF_RECT int = 12
+const ALLOW_DOWNLOAD_WHEN_WIFI bool = true
 ```
 
-###### module path
+### 声明与赋值
 
-`go.mod` 的第一行是`module path`, 一般采用`仓库+module name`的方式定义。
+**在Go语言中，变量或常量的数据类型必须先声明，才能使用**，且无法将不相关的数据赋值给它们。
 
-这样我们获取一个`module`的时候，就可以到它的仓库中去查询，或者让`go proxy`到仓库中去查询。
+#### 变量的声明与赋值
 
-```go
-module github.com/panicthis/modfile/v2
+在Go语言中，声明变量的一般格式为：
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430171127725.png" alt="image-20250430171127725" style="zoom:20%;" />
+
+```Go
+var name type
 ```
 
-这是一个很奇怪的约定，带来的好处是你一个项目中可以使用依赖库的不同的 `major` 版本，它们可以共存。
+- 其中，var是声明变量的关键字，固定不变，表明意图——要声明一个变量
+- type表示该变量所属的数据类型。
 
-###### go directive
+```Go
+// 声明一个名为number的变量，类型为int（整数类型）
+var number int
+// 为number赋值
+number = 100
 
-第二行是 `go directive`。格式是 `go 1.xx`,它并不是指你当前使用的Go版本，而是指名你的代码所需要的Go的最低版本。
-
-```go
-go 1.20
+// 变量声明
+var number int = 100
 ```
 
-这一行不是必须的，你可以不写。
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430171500066.png" alt="image-20250430171500066" style="zoom:20%;" />
 
-###### require
+##### 匿名变量
 
-`require` 段中列出了项目所需要的各个依赖库以及它们的版本。
-
-除了正规的`v1.3.0`这样的版本外，还有一些奇奇怪怪的版本和注释，那么它们又是什么意思呢？
-
-正式的版本号我们就不需要介绍了，大家都懂:
-
-```go
-github.com/coreos/bbolt v1.3.3
-```
-
-`伪版本号`
-
-```go
-github.com/edwingeng/doublejump v0.0.0-20200330080233-e4ea8bd1cbed
-```
-
-上面这个库中的版本号就是一个伪版本号`v0.0.0-20200330080233-e4ea8bd1cbed`，这是`go module`为它生成的一个类似符合语义化版本2.0.0版本，实际这个库并没有发布这个版本。
-
-正式因为这个依赖库没有发布版本，而`go module`需要指定这个库的一个确定的版本，所以才创建的这样一个伪版本号。
-
-`go module`的目的就是在`go.mod`中标记出这个项目所有的依赖以及它们确定的某个版本。
-
-这里的`20200330080233`是这次提交的时间，格式是`yyyyMMddhhmmss`，而`e4ea8bd1cbed`就是这个版本的commit id，通过这个字段，就可以确定这个库的特定的版本。
-
-###### indirect注释
-
-有些库后面加了`indirect`后缀，这又是什么意思的。
-
-```go
-   go.etcd.io/bbolt v1.3.6 // indirect
-golang.org/x/net v0.0.0-20210610132358-84b48f89b13b // indirect
-golang.org/x/sys v0.0.0-20210611083646-a4fc73990273 // indirect
-```
-
-如果用一句话总结，间接的使用了这个库，但是又没有被列到某个`go.mod`中，当然这句话也不算太准确，更精确的说法是下面的情况之一就会对这个库加indirect后缀：
-
-- 当前项目依赖A，但是A的`go.mod`遗漏了B，那么就会在当前项目的`go.mod`中补充B， 加`indirect`注释。
-- 当前项目依赖A，但是A没有`go.mod`，同样就会在当前项目的`go.mod`中补充B，加`indirect`注释
-- 当前项目依赖A，A又依赖B，当对A降级的时候，降级的A不再依赖B，这个时候B就标记`indirect`注释
-
-###### incompatible
-
-有些库后面加了incompatible后缀，但是你如果看这些项目，它们只是发布了v2.2.1的tag,并没有`+incompatible`后缀。
-
-```go
-github.com/cenk/backoff v2.2.1+incompatible
-```
-
-这些库采用了`go.mod`的管理，但是不幸的是，虽然这些库的版major版本已经大于等于2了，但是他们的`module path`中依然没有添加v2、v3这样的后缀。
-
-所以`go module`把它们标记为`incompatible`的，虽然可以引用，但是实际它们是不符合规范的。
-
-###### exclude
-
-如果你想在你的项目中跳过某个依赖库的某个版本，你就可以使用这个段。
-
-```go
-exclude (
-	go.etcd.io/etcd/client/v2 v2.305.0-rc.0
-	go.etcd.io/etcd/client/v3 v3.5.0-rc.0
-)
-```
-
-这样，Go在版本选择的时候，就会主动跳过这些版本，比如你使用`go get -u ......`或者`go get github.com/xxx/xxx@latest`等命令时，会执行 `version query` 的动作，这些版本不在考虑的范围之内。
-
-###### replace
-
-replace也是常用的一个手段，用来解决一些错误的依赖库的引用或者调试依赖库。
-
-```go
-replace github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.3
-replace github.com/panicthis/A v1.1.0 => github.com/panicthis/R v1.8.0
-replace github.com/coreos/bbolt => ../R
-```
-
-比如etcd v3.3.x的版本中错误的使用了`github.com/coreos/bbolt`作为bbolt的`module path`，其实这个库在它自己的`go.mod`中声明的`module path`是`go.etcd.io/bbolt`，又比如etcd使用的grpc版本有问题，你也可以通过`replace`替换成所需的grpc版本。
-
-甚至你觉得某个依赖库有问题，自己`fork`到本地做修改，想调试一下，你也可以替换成本地的文件夹。
-
-`replace`可以替换某个库的所有版本到另一个库的特定版本，也可以替换某个库的特定版本到另一个库的特定版本。
-
-###### retract
-
-`retract`是go 1.16中新增加的内容，借用学术界期刊撤稿的术语，宣布撤回库的某个版本。
-
-如果你误发布了某个版本，或者事后发现某个版本不成熟，那么你可以推一个新的版本，在新的版本中，声明前面的某个版本被撤回，提示大家都不要用了。
-
-撤回的版本tag依然还存在，`go proxy`也存在这个版本，所以你如果强制使用，还是可以使用的，否则这些版本就会被跳过。
-
-和`exclude`的区别是`retract`是这个库的owner定义的， 而`exclude`是库的使用者在自己的`go.mod`中定义的。
-
-##### go.sum 文件
-
- `go.sum` 则是记录了所有依赖的 `module` 的校验信息，以防下载的依赖被恶意篡改，主要用于安全校验。
-
-每行的格式如下：
-
-```go
-<module> <version> <hash>
-<module> <version>/go.mod <hash>
-```
-
-比如：
-
-```go
-github.com/spf13/cast v1.4.1 h1:s0hze+J0196ZfEMTs80N7UlFt0BDuQ7Q+JDnHiMWKdA=
-github.com/spf13/cast v1.4.1/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=
-```
-
-其中 `module` 是依赖的路径，`version` 是依赖的版本号。
-
-如果 version 后面跟`/go.mod`表示对哈希值是 module 的 `go.mod` 文件；否则，哈希值是 module 的`.zip`文件。
-
-###### go.sum 是如何做包校验的
-
-- 若本地缓存有依赖包，计算包的`hash`并于`go.sum`记录对比
-- 依赖包版本中任何一个文件（包括`go.mod`）都会改变`hash`
-  - 不用下载整个依赖树，直接根据`hash`计算
-- `hash`是由算法 **SHA-256** 计算出来的
-- **校验目的** 是保证项目中所依赖的那些模块 **版本** 不会被篡改
-- 公网可下载的包会去 GO 校验数据库获取模块的校验和（sum.golang.org/sum.golang.google.cn）
-
-###### 不会对依赖包做 hash 校验
-
-- `GOPRIVATE`匹配的包
-  - 主要是用来设置内部包，不走`GOPROXY`代理（不上传git）
-- 打包到 `vendor`目录中的包
-- `GOSUMDB`设置为 off
-
-###### 为什么 go.sum 中版本数量会比 go.mod多呢
-
-- `go.mod`只在依赖包不含`go.mod`文件时，才会记录间接依赖包版本
-- `go.sum`则是要记录构建用到的所有依赖包版本
-
-### 构建Go项目时的原则和建议
-
-- 一个目录名下只能有一个 `package`
-- 一个 `package`名的内容放在一个目录下面
-- 目录名和`package`名相同
-
-### Go 程序是怎么跑的
-
-#### main()函数
-
-从示例的第3行开始到最后，都是main()函数了：
-
-```go
-func main(){
-    fmt.Println("Hello World!")
-}
-```
-
-在Go语言中，**main()函数是程序的入口函数，它位于main包中。如果想要编译生成可执行文件，main()函数则是必须的**。如果将示例代码中的main()函数去掉直接编译，可以看到控制台会输出如下错误：
-
-> runtime.main_main·f: function main is undeclared in the main package
-
-大意就是说main()函数没有在main包中声明。
-
-我们还可以看到在main()函数中可以调用fmt包中的函数，这正是由于我们导入了fmt包才能做到的。
-
-####  Go源码的启动流程
-
-我们都知道，main()函数是Go程序的入口函数。实际上，Go程序还有一个init()函数，被称为“初始化”函数。我们来看下面这段代码：
+- 匿名变量也就是没有名字的变量, 开发过程中可能会遇到有些变量不是必须的。
+- 匿名变量使用下划线" \_ " 表示。 
+- "\_" 也称为空白标识符，任何类型都可以使用它进行赋值，而且任何类型赋值后都将直接被抛弃，所以在使用匿名变量时，表示后续代码不需要再用此变量。
 
 ```go
 package main
-import "fmt"
-func init() {
-   fmt.Println("Hello")
-}
+
+import (
+    "fmt"
+)
+
 func main() {
-   fmt.Println("World")
+    a, _ := 100, 200
+    //这里第二个值200赋给了匿名变量_ 也就忽略了不需要再次打印出来
+    fmt.Println(a)
 }
 ```
 
-上述代码运行后，控制台将输出：
+##### 变量的作用域
 
-> Hello
+- 如果一个变量声明在函数体的外部，这样的变量被认为是**全局变量**
+  - 全局变量在整个包内，也就是当前的`package`内都可以被调用得到。
+- 如果变量定义在函数体内部，则被称之为**局部变量**。
+
+例如下面代码:
+
+```go
+package main
+
+import (
+    "fmt"
+    "os"
+)
+
+//全局变量
+var name = "zhangsan"
+
+//主函数 程序的入口
+func main() {
+    fmt.Println(name) //可以访问到全局变量name
+
+    myfunc()
+}
+
+//自定义函数 
+func myfunc() {
+    fmt.Println(name) //这里也可以访问到全局变量name
+
+    age := 30
+    fmt.Println(age) //age为myfunc的局部变量 只能够在函数内部使用
+
+    if t, err := os.Open("file.txt"); err != nil {
+        fmt.Print(t) //t作为局部变量 只能在if内部使用
+    }
+    fmt.Println(t) //在if外部使用变量则会报错 undefined: t  未声明的变量t
+}
+```
+
+#### 常量的声明与赋值
+
+常量声明和赋值的一般格式为：
+
+```Go
+const name type = value
+```
+
+- `const`是声明常量的关键字，固定不变，表明意图，要声明一个常量；
+- `name` 和 `type` 的意义与声明变量时一样；
+- `value` 是常量的值。
+
+如：
+
+```Go
+// 声明一个名为PI的常量，类型为float64（浮点数类型）
+const PI float64 = 3.14
+```
+
+> ❗️ 注意： 声明常量时，必须为其赋值，且后续无法修改。
+
+#### Go语言的类型推断
+
+使用Go语言可简化代码，类型推断体现了这一点。当声明与赋值一并进行时，如果数据为Go内置的基础类型，则可无需指定类型。如：
+
+```Go
+// 变量声明
+var number = 100
+// 常量声明
+const PI = 3.14
+```
+
+无需担心，由于number的值为100，Go语言会推断出它的类型为整数型。同理，PI也会被推断为浮点数型。
+
+对于变量，还有一种超级精简的声明和赋值方式，示例如下：
+
+```Go
+//变量声明
+number := 100
+```
+
+> ❗️ 注意： 冒号等于号 “:=” 的作用是声明和赋值，若number是已经声明过的变量，则无法使用 := 的方式赋值。
+
+#### 批量声明/赋值
+
+为了方便多个 变量/常量 的声明和赋值，我们还可以批量处理它们。
+
+示例如下：
+
+```Go
+// 变量
+var a1,a2,a3 int = 10,20,30
+// 也可以省略类型 根据数据进行类型推导
+var a1,a2,a3 = 10,20,"ago"
+var (
+        // 声明 + 赋值
+        number int = 100
+        // 声明 + 赋值（类型推断）
+        text = "Hello"
+        // 只声明
+        name string
+)
+// 常量
+const (
+        // PI 声明 + 赋值
+        PI float64 = 3.14
+        // WIDTH 声明 + 赋值（类型推断）
+        WIDTH  = 5
+        // HEIGHT 声明 + 赋值（类型推断）
+        HEIGHT = 10
+)
+```
+
+### 占位符类型
+
+- 占位符 表示在程序中输出一行字符串时候，或者格式化输出字符串的时候使用。
+- go内置包 `fmt` 中 `Printf` 方法可以在控制台格式化打印出用户输入的内容。`fmt.Printf("%T",x)`
+
+| 占位符 | 说明           | 举例                           | 输出         |
+| ------ | -------------- | ------------------------------ | ------------ |
+| %d     | 十进制的数字   | fmt.Printf("%d",10)            | 10           |
+| %T     | 取类型         | b :=true fmt.Printf("%T",b)    | bool         |
+| %s     | 取字符串       | s :="123" fmt.Printf("%s",s)   | 123          |
+| %t     | 取bool类型的值 | b:=true fmt.Printf("%t",b)     | true         |
+| %p     | 取内存地址     | p :="123" fmt.Printf("%p", &p) | 0xc0000461f0 |
+
+### 指针类型
+
+> 我们不妨先了解一下Go语言中的指针，它主要由两大核心概念构成：**类型指针**和**切片指针**。
 >
-> World
 
-发现规律了吗？没错，init()函数在main()函数之前执行，经常做一些程序初始化的工作，因此它被称为初始化函数。
+- ### **类型指针：高效传递数据与安全控制**
 
-对于一个较为复杂的软件代码而言，通常会按照前面介绍过的“分而治之”的编码方式进行开发。特别是在多人协同开发场景中，由于每个人负责的功能模块不同，通常会将一个完整的软件产品代码分为多个包。一旦Go程序开始运行，main包中的代码便会首先得到执行，所有导入的包会执行其中的init()初始化函数。
+  - **避免副本**：传递大型结构体时直接使用指针，避免内存复制。
 
-下图较为清晰地描述了Go源码的启动过程：
+  - **禁止偏移运算**：确保指针只能操作目标数据，防止非法修改其他内存区域。
+  - **垃圾回收友好**：指针明确指向目标内存，便于 GC 快速识别和回收。
 
-![image.png](./%E9%9B%B6%E5%9F%BA%E7%A1%80%E9%80%9A%E5%85%B3.assets/6c91ccc186824ea8b8ad06dc2b28faf8~tplv-k3u1fbpfcp-watermark.png)
 
-我们从左上角的开始处分析这张图，可以发现Go源码的启动流程是这样的：
+```go
+// 修改用户状态的函数（传递指针）
+func activateUser(u *User) {
+    u.IsActive = true // 直接修改原始数据
+}
+```
 
-1. 程序开始运行后，首先来到main包，检索所有导入的包。发现代码中导入了A包，于是来到A包；
-2. 发现A包代码中导入了B包，于是又来到B包；
-3. B包代码没有导入任何其它的包，于是开始声明B包内的常量和变量，并执行B包中的init()函数；
-4. 回到A包，进行A包内的常量和变量的声明，并执行A包中的init()函数；
-5. 回到main包，执行main包内的常量和变量的声明，并执行main包中的init()函数；
-6. 执行main包中的main()函数。
+- ### **切片指针：动态管理与越界恢复**
 
-> `💡 提示：了解Go源码的启动加载过程，有助于编写更高效率的代码，排查程序启动缓慢等性能问题。`
+  - **本质**：指向切片结构体的指针，切片本身是包含三个字段的复合类型（底层数组指针、长度、容量）。
+  - **核心特性**：
+    - 支持动态扩容和收缩（如通过 `append` 修改容量）；
+    - 通过共享底层数组实现高效数据共享；
+    - 越界访问会触发 `panic`，但可通过 `recover` 恢复程序
+
+> 在Go语言中，“`&`” 运算符的作用是获取变量的内存地址，而“`*`” 运算符的作用是获取某个地址对应的值。
+
+具体请看下面的示例：
+
+```Go
+// exampleNumberA变量（整数型变量）声明和赋值
+var exampleNumberA int = 10
+// 获取exampleNumberA的地址，并赋值给exampleNumberAPtr变量（exampleNumberAPtr的类型是指针类型）
+exampleNumberAPtr := &exampleNumberA
+//输 出exampleNumberAPtr变量的值（将输出内存地址）
+fmt.Println(exampleNumberAPtr)
+// 获取exampleNumberAPtr（指针变量）表示的实际数据值，并赋值给exampleNumberAPtrValue变量（整数型变量）
+exampleNumberAPtrValue := *exampleNumberAPtr
+// 输出exampleNumberAPtrValue变量（整数型变量）的值
+fmt.Println(exampleNumberAPtrValue)
+```
+
+运行后，控制台输出：
+
+> 0xc00001a088 
+> 10
+
+另外，我们还可以使用`new()`函数直接创建指针变量，相当于在内存中创建了**没有变量名**的**某种类型**的**变量**。
+
+这样做无需产生新的数据“代号”，取值和赋值转而通过指针变量完成。常用在无需变量名或必须要传递指针变量值的场景中。
+
+`new()`函数的使用格式如下：
+
+```Go
+new(type)
+```
+
+其中，`type`是所在地址存放的数据类型。一旦完成创建，便会在内存中“安家”，完成内存分配，即使没有赋值。
+
+具体代码示例如下：
+
+```Go
+// 使用new()函数创建名为exampleNumberAPtr指针类型变量，表示int64型值
+exampleNumberAPtr := new(int64)
+// 修改exampleNumberAPtr表示的实际数据值
+*exampleNumberAPtr = 100
+// 获取exampleNumberAPtr表示的实际数据值
+fmt.Println(*exampleNumberAPtr)
+```
+
+程序运行后，控制台将输出：
+
+> 100
+
+## 流程控制
+
+### if 语句
+
+条件语句的格式如下：
+
+```go
+if condition {
+    
+}
+```
+
+> 另外：if 语句后面可以跟多个语句条件，允许先赋值再判断，其作用域仅限于当前F语句块内，一旦离开该块，所定义的变量将不再有效。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430180859402.png" alt="image-20250430180859402" style="zoom:20%;" />
+
+```go
+if contents, err := ioutil.ReadFile(`test.txt`); err == nil {
+		fmt.Println(string(contents))
+} else {
+    fmt.Println("cannot print file contents:", err)
+}
+```
+
+### switch 语句
+
+>  - `switch`语句默认在每个`case`之后包含`break`，无需显式添加
+>
+>  - 如果在`switch`语句中不希望执行`break`，反而需要使用特定结构如`for through`来实现。
+
+```go
+// switch语法一
+switch 变量名 {
+    case 数值1: 分支1
+    case 数值2: 分支2
+    case 数值3: 分支3
+    ...
+    default:
+        最后一个分支
+}
+
+
+// 语法二 省略变量 相当于作用在了bool 类型上
+func grade(score int) string {
+    switch {
+      case score < 60:
+         return "F"
+      case score < 80:
+         return "C"
+      case score < 90:
+         return "B"
+      default:
+         return "A"
+    }
+}
+
+// 语法三 case 后可以跟随多个数值， 满足其中一个就执行
+switch num  {
+    case 1,2,3:
+        fmt.Println("num符合其中某一个 执行代码")
+    case 4,5,6:
+        fmt.Println("执行此代码")
+}
+
+// 语法四 可以添加初始化变量 作用于switch内部
+switch name:="huangrong"; name{
+    case "guojing":
+        fmt.Println("shideguojing")
+    case "huangrong":
+        fmt.Println("shidehuangrong")
+} 
+```
+
+### for 循环语句
+
+循环结构的格式如下：
+
+```go
+for init; condition; post {
+    //循环体代码块
+}
+```
+
+```go
+sum := 0
+for i:= 1; i <= 100; i++ {
+  sum += i
+}
+```
+
+>  注意：go 语言没有`while`关键字，其功能被 `for` 循环所涵盖，因此去掉了`while`。
+
+```go
+for {
+   fmt.Println("abc")
+}
+```
+
+#### 多层嵌套中的break和continue
+
+默认都只结束当前一层循环，如果想要结束到指定循环，需要给循环体前贴上标签。
+
+```go
+flag:
+    for i := 1; i < 10; i++ {
+        for j := 1; j < i; j++ {
+            fmt.Println(i, j)
+            if j == 5 {
+                break flag
+            }
+        }
+        fmt.Println(i)
+    }
+```
+
+#### goto语句
+
+可以跳转到程序中指定的行和嵌套循环里的`break`标签是一样的，不管后面还有多少代码都不再执行。
+
+```go
+//语法
+lable:func1
+    ...
+goto label
+```
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430181247832.png" alt="image-20250430181247832" style="zoom:30%;" />
+
+```go
+TestLabel: //标签
+    for a := 20; a < 35; a++ {
+       if a == 25 {
+          a += 1
+          goto TestLabel
+       }
+       fmt.Println(a)
+       a++
+    }
+}
+```
+
+## 数组、切片和集合
+
+### 数组
+
+#### 声明
+
+Go语言中声明数组的一般格式为：
+
+```go
+var array_name [quantity]Type
+```
+
+例如：
+
+```go
+var resultArray [4]int
+```
+
+声明后即可为单个元素赋值了。和其它的编程语言类似。
+
+例如：
+
+```go
+resultArray[2] = 5
+```
+
+* 数组有长度限制，访问和复制不能超过数组定义的长度，否则就会下标越界。
+* 数组的长度，用内置函数 `len()`来获取。
+* 数组的容量，用内置函数 `cap()`来获取。
+
+```go
+fmt.Println("数组的长度为：",len(arr))//  数组中实际存储的数据量
+fmt.Println("数组的容量为：",cap(arr))//容器中能够存储的最大数据量  因为数组是定长的 所以长度和容量是相同的
+```
+
+#### 创建
+
+```go
+//  默认情况下 数组中每个元素初始化时候 根据元素的类型 对应该数据类型的零值，
+arr1 := [3]int{1,2}
+fmt.Println(arr1[2])// 下标为2的元素没有默认取int类型的零值
+
+// 数组创建方式1 创建时 直接将值赋到数组里
+arr2 := [5]int{1,2,3,4}    // 值可以少 默认是0  但是不能超过定长
+
+// 在指定位置上存储值
+arr3 := [5]int{1:2,3:5}// 在下标为1的位置存储2，在下标为3的位置存储5
+```
+
+在创建数组时候长度可以省略，用 ... 代替，表示数组的长度可以由初始化时候数组中的元素的个数来决定。
+
+```go
+// 长度可以用...代替  根据数值长度程序自动填充数值的大小
+arr4 :=  [...]int{1,2,3,4}
+
+// 简短声明方式
+arr5 := [...]int{2:3,6:3}//在固定位置存储固定的值
+```
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430181620045.png" alt="image-20250430181620045" style="zoom:25%;" />
+
+#### 遍历
+
+使用`for range` 进行循环数组中的元素，依次打印数组中的元素。
+
+1. `range` 不需要操作下标，每次循环自动获取元素中的下标和对应的值。如果到达数组的末尾，自动结束循环。
+
+```go
+arr := [5]int{1,2,3,4,5}
+// range方式循环数组
+for index,value:=range arr {
+    fmt.Println(index,value)
+}
+```
+
+2. 可以通过 for循环 配合下标来访问数组中的元素。
+
+```go
+arr := [5]int{1,2,3,4,5}
+// for循环
+for i:=0; i<len(arr);i++ {
+    fmt.Println(arr[i])
+}
+```
+
+### 切片
+
+使用数组来存放一些结果，很容易引发下标越界错误。和数组相对，Go语言还提供了一种专门存放**不定元素个数**的数据结构——切片。
+
+#### 声明
+
+在Go语言中，切片的声明一般格式为：
+
+```go
+var slice_name []Type
+```
+
+> 💡 提示： 注意到了吗？声明切片和数组的区别仅仅是去掉了中括号中的元素个数！
+
+例如：
+
+```go
+var resultSlice []int
+```
+
+> ❗️ 注意： 和数组类似，切片中的元素也不限制值的类型，但要求所有元素均为相同的类型。
+
+通常情况下，使用`make`函数来创建一个切片，切片有长度和容量，默认情况下它的容量与长度相等。所以可以不用指定容量。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430181831702.png" alt="image-20250430181831702" style="zoom: 25%;" />
+
+```go
+// 使用make函数来创建切片
+slice :=make([]int,3,5)// 长度为3 容量为5  容量如果省略 则默认与长度相等也为3
+fmt.Println(slice)// [0,0,0] 
+fmt.Println(len(slice),cap(slice))// 长度3,容量5
+```
+
+#### 切片追加元素append()
+
+完成切片的声明后，就来到赋值环节。
+
+与数组不同，为切片赋值可以理解为“**扩充**”。
+
+在一开始，切片里面的元素个数为0。“扩充”一个值，就相当于为切片中的第一个元素赋值。赋值后，切片的元素个数就变成了1。若再次“扩充”，则相当于为切片中的第二个元素赋值。赋值后，切片的元素个数就变成了2，以此类推……
+
+> 在Go语言中，为切片“扩充”需要使用`append()`函数，使用格式如下：
+
+```go
+slice_name = append(slice_name, value...)
+```
+
+例如：
+
+```go
+// 使用append() 给切片末尾追加元素
+var slice []int
+slice = append(slice, 1, 2, 3)
+fmt.Println(slice) // [1, 2, 3]
+
+// 使用make函数创建切片
+s1:=make([]int,0,5)
+fmt.Println(s1)// [] 打印空的切片
+s1=append(s1,1,2)
+fmt.Println(s1)// [1,2]
+// 因为切片可以扩容  所以定义容量为5 但是可以加无数个数值
+s1=append(s1,3,4,5,6,7)
+fmt.Println(s1)// [1,2,3,4,5,6,7] 
+
+// 添加一组切片到另一切片中
+s2:=make([]int,0,3)
+s2=append(s2,s1...) //...表示将另一个切片数组完整加入到当前切片中
+```
+
+#### make()与new() 的区别
+
+- `make()`是Go语言中的内置函数，主要用于创建并初始化`slice`切片类型，或者`map`字典类型，或者`channel`通道类型数据。
+- 他与`new`方法的区别是：
+  - `new`用于各种数据类型的内存分配，在Go语言中认为他返回的是一个指针。指向的是一个某种类型的零值。
+  - `make` 返回的是一个有着初始值的非零值。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430182157366.png" alt="image-20250430182157366" style="zoom:25%;" />
+
+```go
+// 测试使用new方法新建切片
+slice1 := new([]int)
+fmt.Println(slice1) // 输出的是一个地址  &[]
+
+// 使用make创建切片
+slice2 := make([]int, 5)
+fmt.Println(slice2)// 输出初始值都为0的数组， [0 0 0 0 0]
+
+fmt.Println(slice1[0])// 结果出错 slice1是一个空指针 invalid operation: slice1[0] (type *[]int does not support indexing)
+fmt.Println(slice2[0])// 结果为 0 因为已经初始化了
+```
+
+#### 切片是如何扩容的
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    s1 := make([]int, 0, 3)
+    fmt.Printf("地址%p,长度%d,容量%d", s1, len(s1), cap(s1))
+    s1 = append(s1, 1, 2)
+    fmt.Printf("地址%p,长度%d,容量%d", s1, len(s1), cap(s1))
+    s1 = append(s1, 3, 4, 5)
+    fmt.Printf("地址%p,长度%d,容量%d", s1, len(s1), cap(s1))
+}
+```
+
+```shel
+//地址0xc000010540,长度0,容量3
+//地址0xc000010540,长度2,容量3
+//地址0xc00000e4b0,长度5,容量6
+```
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430182312640.png" alt="image-20250430182312640" style="zoom:30%;" />
+
+容量成倍数扩充 3--->6--->12--->24......
+
+> - 如果添加的数据容量够用, 地址则不变。
+> - 如果实现了扩容， 地址就会发生改变成新的地址，旧的则自动销毁。
+
+### Map
+
+#### 声明
+
+Go语言中声明集合的一般格式为：
+
+```go
+var map_name = make(map[key_type]value_type)
+```
+
+例如：
+
+```go
+//  1, 声明map 默认值是nil
+var m1 map[key_data_type]value_data_type
+//  2，使用make声明
+m2:=make(map[key_data_type]value_data_type)
+// 3,直接声明并初始化赋值map方法
+m3:=map[string]int{"语文":89,"数学":23,"英语":90}
+```
+
+#### 使用
+
+- `map` 是引用类型的，如果声明没有初始化值，默认是nil。
+- 空的切片是可以直接使用的，因为他有对应的底层数组，空的`map`不能直接使用。需要先`make`之后才能使用。
+
+```go
+var m1 map[int]string         //  只是声明 nil
+var m2 = make(map[int]string) // 创建
+m3 := map[string]int{"语文": 89, "数学": 23, "英语": 90}
+
+fmt.Println(m1 == nil) //true
+fmt.Println(m2 == nil) //false
+fmt.Println(m3 == nil) //false
+
+// map 为nil的时候不能使用 所以使用之前先判断是否为nil
+if m1 == nil {
+    m1 = make(map[int]string)
+}
+
+// 1存储键值对到map中  语法:map[key]=value
+m1[1]="小猪"
+m1[2]="小猫"
+
+//2获取map中的键值对  语法:map[key]
+val := m1[2]
+fmt.Println(val)
+
+//  3判断key是否存在   语法：value,ok:=map[key]
+val, ok := m1[1]
+fmt.Println(val, ok) // 结果返回两个值，一个是当前获取的key对应的val值。二是当前值否存在，会返回一个true或false。
+
+//4修改map  如果不存在则添加， 如果存在直接修改原有数据。
+m1[1] = "小狗"
+
+// 5删除map中key对应的键值对数据 语法: delete(map, key)
+delete(m1, 1)
+
+// 6 获取map中的总长度 len(map)
+fmt.Println(len(m1))
+```
+
+### 循环遍历
+
+除了for循环外，Go语言还提供了range关键字。与for结合，也可以实现循环遍历，其使用格式如下：
+
+```go
+for index, value := range variable {
+    // 循环体
+}
+```
+
+其中，index表示索引或键的值；value表示元素的值；variable表示数组、切片或集合变量；由大括号包裹的部分是循环体，可以使用index和value变量。
+
+for 循环对比 for-range：
+
+- 使用`for`循环：
+
+```
+slice := []int{1, 2, 3, 4, 5}
+for i := 0; i < len(slice); i++ {
+    fmt.Println(slice[i])
+}
+```
+
+- 使用`range`：
+
+```
+slice := []int{1, 2, 3, 4, 5}
+for i, v := range slice {
+    fmt.Println(i, v)
+}
+```
+
+`range`自动处理了索引`i`和值`v`的赋值，并且代码更加简洁。
+
+这种for与range结合实现循环遍历的结构，也被称为**for-range结构**。这种结构同样适用于数组和切片。
+
+### 值传递与引用传递
+
+数据如果按照数据类型划分
+
+* 基本类型:`int、float、string、bool`
+* 复合类型:`array、slice、map、struct、pointer、function、chan`
+
+按照数据特点划分分为
+
+* 值类型：`int、float、string、bool、array、struct` 值传递是传递的数值本身，不是内存地，将数据备份一份传给其他地址，本身不影响，如果修改不会影响原有数据。
+* 引用类型: `slice、pointer、map、chan` 等都是引用类型。 引用传递因为存储的是内存地址，所以传递的时候则传递是内存地址，所以会出现多个变量引用同一个内存。
+
+```go
+// 数组为值传递类型
+// 定义一个数组 arr1
+arr1 := [4]int{1, 2, 3, 4}
+arr2 := arr1            // 将arr1的值赋给arr2
+fmt.Println(arr1, arr2) // [1 2 3 4] [1 2 3 4]  输出结果 arr1与arr2相同，
+arr1[2] = 200           // 修改arr1中下标为2的值
+fmt.Println(arr1, arr2) // [1 2 200 4] [1 2 3 4] 结果arr1中结果改变,arr2中不影响
+// 说明只是将arr1中的值给了arr2 修改arr1中的值后并不影响arr2的值
+
+// 切片是引用类型
+// 定义一个切片 slice1
+slice1 := []int{1, 2, 3, 4}
+slice2 := slice1            // 将slice1的地址引用到slice2
+fmt.Println(slice2, slice2) // [1 2 3 4] [1 2 3 4]   slice1输出结果 slice2输出指向slice1的结果，
+slice1[2] = 200             // 修改slice1中下标为2的值
+fmt.Println(slice1, slice2) // [1 2 200 4] [1 2 200 4] 结果slice1中结果改变,因为修改的是同一份数据
+// 说明只是将slice1中的值给了slice2 修改slice1中的值后引用地址用的是同一份 slice1 和slice2 同时修改
+
+fmt.Printf("%p,%p", slice1, slice2)// 0xc000012520,0xc000012520
+// 切片引用的底层数组是同一个 所以值为一个地址 是引用的底层数组的地址
+fmt.Printf("%p,%p", &slice1, &slice2)// 0xc0000044a0,0xc0000044c0
+// 切片本身的地址
+```
