@@ -347,6 +347,33 @@ github.com/spf13/cast v1.4.1/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkU
 
 如果 version 后面跟`/go.mod`表示对哈希值是 module 的 `go.mod` 文件；否则，哈希值是 module 的`.zip`文件。
 
+###### go.sum 是如何做包校验的
+
+- 若本地缓存有依赖包，计算包的`hash`并于`go.sum`记录对比
+- 依赖包版本中任何一个文件（包括`go.mod`）都会改变`hash`
+  - 不用下载整个依赖树，直接根据`hash`计算
+- `hash`是由算法 **SHA-256** 计算出来的
+- **校验目的** 是保证项目中所依赖的那些模块 **版本** 不会被篡改
+- 公网可下载的包会去 GO 校验数据库获取模块的校验和（sum.golang.org/sum.golang.google.cn）
+
+###### 不会对依赖包做 hash 校验
+
+- `GOPRIVATE`匹配的包
+  - 主要是用来设置内部包，不走`GOPROXY`代理（不上传git）
+- 打包到 `vendor`目录中的包
+- `GOSUMDB`设置为 off
+
+###### 为什么 go.sum 中版本数量会比 go.mod多呢
+
+- `go.mod`只在依赖包不含`go.mod`文件时，才会记录间接依赖包版本
+- `go.sum`则是要记录构建用到的所有依赖包版本
+
+### 构建Go项目时的原则和建议
+
+- 一个目录名下只能有一个 `package`
+- 一个 `package`名的内容放在一个目录下面
+- 目录名和`package`名相同
+
 ### Go 程序是怎么跑的
 
 #### main()函数
