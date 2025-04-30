@@ -890,7 +890,7 @@ fmt.Println(len(m1))
 
 ### 循环遍历
 
-除了for循环外，Go语言还提供了range关键字。与for结合，也可以实现循环遍历，其使用格式如下：
+除了for循环外，Go语言还提供了`range`关键字。与`for`结合，也可以实现循环遍历，其使用格式如下：
 
 ```go
 for index, value := range variable {
@@ -898,9 +898,11 @@ for index, value := range variable {
 }
 ```
 
-其中，index表示索引或键的值；value表示元素的值；variable表示数组、切片或集合变量；由大括号包裹的部分是循环体，可以使用index和value变量。
+- `index`表示索引或键的值；
+- `value`表示元素的值；
+- `variable`表示数组、切片或集合变量
 
-for 循环对比 for-range：
+> for 循环对比 for-range：
 
 - 使用`for`循环：
 
@@ -928,12 +930,12 @@ for i, v := range slice {
 
 数据如果按照数据类型划分
 
-* 基本类型:`int、float、string、bool`
-* 复合类型:`array、slice、map、struct、pointer、function、chan`
+* 基本类型: `int、float、string、bool`
+* 复合类型: `array、slice、map、struct、pointer、function、chan`
 
 按照数据特点划分分为
 
-* 值类型：`int、float、string、bool、array、struct` 值传递是传递的数值本身，不是内存地，将数据备份一份传给其他地址，本身不影响，如果修改不会影响原有数据。
+* 值类型：`int、float、string、bool、array、struct` 值传递是传递的数值本身，不是内存地址，将数据备份一份传给其他地址，本身不影响，如果修改不会影响原有数据。
 * 引用类型: `slice、pointer、map、chan` 等都是引用类型。 引用传递因为存储的是内存地址，所以传递的时候则传递是内存地址，所以会出现多个变量引用同一个内存。
 
 ```go
@@ -960,3 +962,239 @@ fmt.Printf("%p,%p", slice1, slice2)// 0xc000012520,0xc000012520
 fmt.Printf("%p,%p", &slice1, &slice2)// 0xc0000044a0,0xc0000044c0
 // 切片本身的地址
 ```
+
+## 函数
+
+### 普通函数的定义和调用
+
+在Go语言中，定义一个普通函数的格式如下：
+
+```go
+func function_name([params_list])([return_values_list]){
+    // 函数体
+}
+```
+
+- `func`关键字表示定义一个函数；
+- `function_name`是函数名；
+- `params_list`表示参数列表；
+- `return_values_list`表示函数的返回值列表；
+
+> 参数列表和返回值列表是可选的。有些函数无需参数，有些参数运行后并不会有任何返回值，有些函数则无需参数也无需返回值。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430214245142.png" alt="image-20250430214245142" style="zoom:25%;" />
+
+### 函数的可见性
+
+- 函数的首字母区分大小写，如果是大写的表示公共的函数，其他包内可以调用到
+  - 相当于其他语言中的 `public` 
+  - 前提是在别的包中引入了当前包。
+- 如果是小写的，表示私有的函数，仅能够在本包中调用
+  - 相当于其他语言中的 `private`。
+
+### **值传递**和**引用传递**
+
+> 在 Go 语言中，**所有函数参数都是值传递**，但引用类型（如切片、map、指针等）的“值”包含指向数据的地址。
+
+#### 值传递的陷阱
+
+```go
+func main() {
+    s := []int{1, 2}
+    modify(s)
+    fmt.Println(s) // 输出 [1, 2]，未改变！
+}
+
+func modify(s []int) {
+    s = append(s, 3) // 扩容导致底层数组重新分配，s指向新地址
+}
+```
+
+- 虽然切片是引用类型，但传递的是切片的**副本**（包含原指针、长度、容量）。
+- `append` 可能触发底层数组扩容，此时函数内的 `s` 指向新地址，但外部的切片仍指向旧地址。
+
+#### 如何正确修改外部数据
+
+传递**指针**（即引用传递）：
+
+```go
+func main() {
+    s := []int{1, 2}
+    modify(&s)
+    fmt.Println(s) // 输出 [1, 2, 3]
+}
+
+func modify(s *[]int) {
+    *s = append(*s, 3) // 直接修改原切片的指针
+}
+```
+
+- 传递切片的地址，函数内操作指针指向的真实数据。
+- 即使扩容导致底层数组变化，原指针也会被更新。
+
+### 函数的延迟调用（defer）
+
+接下来，我们保持findPrimeNumber()函数不变，在main()函数伊始添加两行神奇的代码：
+
+```go
+func main() {
+   defer fmt.Print("素数")
+   defer fmt.Print("查找")
+   var resultSlice []int
+   findPrimeNumber(&resultSlice, 10)
+   fmt.Println(resultSlice)
+}
+```
+
+很明显，main()函数开头的两行代码和普通的代码不同，前面有个“defer”。**“defer”的作用是让整句代码延迟执行，且多个defer存在时，它们的顺序是反向的。**
+
+根据这一规律，我们便可推测上述代码运行的结果将是：
+
+>[2 3 5 7]   
+>查找素数
+
+defer的典型应用场景是执行一些**收尾工作**，通常是在常规逻辑执行结束后释放系统资源。如文件读写、网络IO等等。也用于程序在**发生宕机时的恢复**。
+
+### 匿名函数的定义和调用
+
+> 回调保证了程序运行的正确性和及时性。**匿名函数则是实现回调的核心技能**。
+
+在Go语言中，匿名函数的定义格式如下：
+
+```go
+func ([params_list])([return_values_list]){
+    // 函数体
+}
+```
+
+其中，params_list表示参数列表；return_values_list表示函数的返回值列表；使用大括号包裹起来的部分称为函数体，是匿名函数内部要执行的代码。其中，参数列表和返回值列表是可选的。有些函数无需参数，有些参数运行后并不会有任何返回值，有些函数则无需参数也无需返回值。
+
+> ```
+> ❗️ 注意： 请大家注意普通函数与匿名函数在定义时的区别，普通函数在定义时仅比匿名函数多了函数名。
+> ```
+
+定义了函数后，接下来便是如何调用它。根据使用时机的不同，Go语言提供了两种调用匿名函数的方式：一是在定义时调用；二是将匿名函数赋值给变量，通过变量调用。
+
+举例来说，下面的代码定义了一个匿名函数，实际作用便是在控制台输出传入的参数，类型是string：
+
+```go
+func main() {
+   // 定义匿名函数
+   func(text string) {
+      fmt.Println(text)
+   }
+}
+```
+
+> ```
+> 💡 提示：注意到了吗？和普通函数不同，匿名函数可以在某个普通函数内定义和使用。
+> ```
+
+如果要在该函数定义时便调用它，只需在大括号结束后，使用小括号将要传入的参数值包裹起来即可，比如：
+
+```go
+func main() {
+   // 定义匿名函数
+   func(text string) {
+      fmt.Println(text)
+   }("定义时就调用")
+}
+```
+
+这段代码中，“定义时就调用”便是要传入的参数了。运行这段代码，控制台将输出这些文字。
+
+<img src="./%E9%9B%B6%E5%9F%BA%E7%A1%80%E9%80%9A%E5%85%B3.assets/image-20250214174710013.png" alt="image-20250214174710013" style="zoom:30%;" />
+
+另一种调用匿名函数的方法是将匿名函数赋值给某个变量，然后通过变量调用。这听起来很神奇，写起来其实非常简单：
+
+```go
+func main() {
+   // 定义匿名函数
+   exampleVal := func(text string) {
+      fmt.Println(text)
+   }
+   exampleVal("通过变量调用匿名函数")
+}
+```
+
+如上代码所示，声明了变量exampleVal，并将匿名函数赋值给了它。在后续的代码中，即可随时使用exampleVal变量调用匿名函数了。
+
+* 匿名函数可以作为另一个函数的参数
+* 匿名函数可以作为另一个函数的返回值
+
+下面讲解一下匿名函数实现回调的例子（很像java中的函数式编程）
+
+```go
+package main
+import (
+    "fmt"
+)
+func main() {
+    res2 := oper(20, 12, add)
+    fmt.Println(res2)
+    
+    // 匿名函数作为回调函数直接写入参数中
+    res3 := oper(2, 4, func(a, b int) int {
+        return a + b
+    })
+    fmt.Println(res3) 
+}
+func add(a, b int) int {
+    return a + b
+}
+func reduce(a, b int) int {
+    return a - b
+}
+// oper就叫做高阶函数
+// fun 函数作为参数传递则fun在这里叫做回调函数
+func oper(a, b int, fun func(int, int) int) int {
+    fmt.Println(a, b, fun) // 20 12 0x49a810A   第三个打印的是传入的函数体内存地址
+    res := fun(a, b)// fun 在这里作为回调函数 程序执行到此之后才完成调用
+    return res
+}
+```
+
+是不是很像 java中的function函数？
+
+### 闭包
+
+go语言支持将一个函数作为参数传递，也支持将一个函数作为返回值。一个外层函数当中有内层函数，这个内层函数会操作外层函数的局部变量。并且，外层函数把内层函数作为返回值，则这里内层函数和外层函数的局部变量，统称为 **闭包结构** 。 这个外层函数的局部变量的生命周期会随着发生改变，原本当一个函数执行结束后，函数内部的局部变量也会随之销毁。但是闭包结构内的局部变量不会随着外层函数的结束而销毁。
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("--------")
+    res := closure()
+    fmt.Println(res) // 0xf8375c0  返回内层函数函数体地址
+    r1 := res()      // 执行closure函数返回的匿名函数
+    fmt.Println(r1)  // 1
+    r2 := res()
+    fmt.Println(r2) // 2
+    // 普通的函数应该返回1，而这里存在闭包结构所以返回2 。
+    // 一个外层函数当中有内层函数，这个内层函数会操作外层函数的局部变量,并且外层函数把内层函数作为返回值,则这里内层函数和外层函数的局部变量,统称为闭包结构。这个外层函数的局部变量的生命周期会发生改变，不会随着外层函数的结束而销毁。
+    // 所以上面打印的r2 是累计到2 。
+    fmt.Println("--------")
+    res2 := closure() // 再次调用则产生新的闭包结构 局部变量则新定义的
+    fmt.Println(res2) // 0xf8375c0
+    r3 := res2()
+    fmt.Println(r3) // 1
+}
+
+// 定义一个闭包结构的函数 返回一个匿名函数
+func closure() func() int { // 外层函数
+    // 定义局部变量a
+    a := 0 // 外层函数的局部变量
+    // 定义内层匿名函数 并直接返回
+    return func() int { //内层函数
+       a++ // 在匿名函数中将变量自增。内层函数用到了外层函数的局部变量，此变量不会随着外层函数的结束销毁
+       return a
+    }
+}
+```
+
+<img src="./%E9%9B%B6%E5%9F%BA%E7%A1%80%E9%80%9A%E5%85%B3.assets/image-20250214181412228.png" alt="image-20250214181412228" style="zoom:40%;" />
+
+<img src="./%E9%9B%B6%E5%9F%BA%E7%A1%80%E9%80%9A%E5%85%B3.assets/image-20250214181417710.png" alt="image-20250214181417710" style="zoom:40%;" />
