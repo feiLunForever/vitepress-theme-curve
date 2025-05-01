@@ -1210,3 +1210,1049 @@ r2 := res()       // 再存一次 → a=2（因为存钱罐还在）
 <img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430231455022.png" alt="image-20250430231455022" style="zoom:50%;" />
 
 <img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430231502512.png" alt="image-20250430231502512" style="zoom:50%;" />
+
+🛠 **技术原理：**
+
+当Go发现 **内部函数** 引用了 **外层变量** 时，会把这些变量分配到 `堆内存（而非栈）`，这样它们的生命周期就不再受外层函数控制，而是跟随闭包本身存在。这就像给你的“小背包”单独找了个保险箱存放。
+
+## 指针
+
+Go语言中通过`&`获取变量的地址。通过`*`获取指针所对应的变量存储的数值。
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+
+    //定义一个变量
+    a := 2
+    fmt.Printf("变量A的地址为%p", &a) //通过%p占位符, &符号获取变量的内存地址。
+    //变量A的地址为0xc000072090
+    
+
+    //创建一个指针
+    // 指针的声明 通过 *T 表示T类型的指针
+    var i *int     //int类型的指针
+    var f *float64 //float64类型的指针
+    fmt.Println(i) // < nil >空指针
+    fmt.Println(f)
+
+    //因为指针存储的变量的地址 所以指针存储值
+    i = &a
+    fmt.Println(i)  //i存储a的内存地址0xc000072090
+    fmt.Println(*i) //i存储这个指针存储的变量的数值2
+    *i = 100
+    fmt.Println(*i) //100
+    fmt.Println(a)  //100通过指针操作 直接操作的是指针所对应的数值
+
+}
+```
+
+指针的指针，也就是存储的不是具体的数值了，而是另一个指针的地址。
+
+```go
+func main(){
+    a := 2
+		var i *int         //声明一个int类型的指针
+		fmt.Println(&a)	   //0xc00000c1c8
+		i = &a             //将a的地址取出来放到i里面
+		fmt.Println(&i)    //0xc000006028
+		var a2 **int       //声明一个指针类型的指针
+		a2 = &i            //再把i的地址放进a2里面
+		fmt.Println(a2)    //获取的是a2所对应的数值0xc000006028也就是i的地址
+}
+```
+
+### 数组指针
+
+意思为，数组的指针。 首先是他是一个指针， 指向一个数组，存储数组的地址。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501061222851.png" alt="image-20250501061222851" style="zoom:20%;" />
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    //创建一个普通的数组
+    arr := [3]int{1, 2, 3}
+    fmt.Println(arr)
+
+    //创建一个指针 用来存储数组的地址 即：数组指针
+    var p *[3]int
+    p = &arr        //将数组arr的地址，存储到数组指针p上。
+    fmt.Println(p)  //数组的指针 &[1 2 3] 后面跟数组的内容 
+    
+    
+    //获取数组指针中的具体数据 和数组指针自己的地址    
+    fmt.Println(*p) //指针所对应的数组的值
+    fmt.Println(&p) //该指针自己的地址0xc000006030
+
+
+    //修改数组指针中的数据
+    (*p)[0] = 200
+    fmt.Println(arr) //修改数组中下标为0的值为200   结果为：[200 2 3]
+    
+    //简化写法
+    p[1] = 210       //意义同上修改下标为1的数据
+    fmt.Println(arr) //结果： [200 210 3]  
+}
+```
+
+### 指针数组
+
+其实就是一个普通数组，只是存储数据类型是指针。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501062906188.png" alt="image-20250501062906188" style="zoom:25%;" />
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    //定义四个变量
+    a, b, c, d := 1, 2, 3, 4
+    
+    arr1 := [4]int{a, b, c, d}
+    arr2 := [4]*int{&a, &b, &c, &d} //将所有变量的指针，放进arr2里面
+
+    fmt.Println(arr1)   //结果为：[1 2 3 4]
+    fmt.Println(arr2)   //结果为：[0xc00000c1c8 0xc00000c1e0 0xc00000c1e8 0xc00000c1f0]
+
+    arr1[0] = 100  //修改arr1中的值
+    fmt.Println("arr1的值：", arr1)  //修改后的结果为：[100 2 3 4]
+    
+    fmt.Println("a=", a) //变量a的值还是1，相当于值传递，只修改了数值的副本。
+
+    //修改指针数组
+    *arr2[0] = 200 //修改指针的值
+    fmt.Println(arr2)
+    fmt.Println("a=", a) //200  引用传递 修改的是内存地址所对应的值 所以a也修改了
+    
+    //循环数组，用*取数组中的所有值。 
+    for i := 0; i < len(arr2); i++ {
+        fmt.Println(*arr2[i])
+    }
+}
+```
+
+### 指针函数
+
+如果一个函数返回结果是一个指针，那么这个函数就是一个指针函数。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501063707547.png" alt="image-20250501063707547" style="zoom:30%;" />
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    //函数默认为指针 只是不需要用 *
+    a := fun1
+    fmt.Println(a) //0x49c670 函数默认为指针类型
+    a1 := fun1()
+    fmt.Printf("a1的类型：%T,a1的地址是%p 数值为%v ", a1, &a1, a1) // []int,a1的地址是0xc0000044c0 数值为[1 2 3]
+
+    a2 := fun2()
+    fmt.Printf("a2的类型：%T,a2的地址是%p 数值为%v ", a2, &a2, a2) // *[]int,a1的地址是0xc000006030 数值为&[1 2 3 4]
+    fmt.Printf("a2的值为：%p", a2)  // 0xc000004520 指针函数返回的就是指针
+}
+
+//一般函数
+func fun1() []int {
+    c := []int{1, 2, 3}
+    return c
+}
+
+//指针函数 返回指针
+func fun2() *[]int {
+    c := []int{1, 2, 3, 4}
+    fmt.Printf("c的地址为%p：", &c) // 0xc000004520
+    return &c
+}
+```
+
+### 指针参数
+
+指针属于引用类型的数据， 所以在传递过程中是将参数的地址传给函数。
+
+将指针作为参数传递时，只有值类型的数据，需要传递指针，而引用类型的数据本身就是传递的地址，所以数组传递可以使用指针，切片是引用类型数据，则不需要传递指针传递。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501064500868.png" alt="image-20250501064500868" style="zoom:30%;" />
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    s := 10
+    fmt.Println(s) //调用函数之前数值是10
+    fun1(&s)
+    fmt.Println(s) //调用函数之后再访问则被修改成2
+}
+
+// 接收一个int类型的指针作为参数
+func fun1(a *int) {
+    *a = 2
+}
+```
+
+## 结构体
+
+### 定义
+
+在Go语言中，定义结构体的标准格式为：
+
+```go
+type StructName struct {
+   // 属性字段
+}
+```
+
+- 开头的`type`表示要定义自定义的类型；
+- `StructName`代表结构体的名称；
+- `struct`表示结构体类型；
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501064948392.png" alt="image-20250501064948392" style="zoom:30%;" />
+
+### 使用
+
+#### 声明与初始化
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+//定义结构体
+type Person struct {
+    name    string
+    age     int
+    sex     string
+    address string
+}
+
+func main() {
+    // 实例化后并使用结构体
+    p := Person{} // 使用简短声明方式，后面加上{}代表这是结构体
+    
+    p.age = 2     // 给结构体内成员变量赋值
+    p.address = "陕西"
+    p.name = "好家伙"
+    p.sex = "女"
+    
+    fmt.Println(p.age, p.address, p.name, p.sex) // 使用点.来访问结构体内成员的变量的值。
+
+}
+```
+
+> 不论地址还是结构体本身，一律使用 `. ` 来访问成员
+
+还可以在结构体后面大括号内，直接给结构体成员变量赋值。
+
+```go
+ // 直接给成员变量赋值
+ p2 := Person{age: 2, address: "陕西", name: "老李头", sex: "女"}
+ fmt.Println(p2.age, p2.address, p2.name, p2.sex)
+```
+
+在Go语言中有一个关键字`new`可以用来实例化结构体。
+
+本质上是分配了一个某种类型的内存空间，所以使用`new`关键字默认就会返回一个指针。
+
+使用`new`创建结构体，默认就是一个指针类型的结构体。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501065107952.png" alt="image-20250501065107952" style="zoom:30%;" />
+
+```go
+// 使用new 创建结构体指针
+p := new(Person)
+p.name = "好家伙"
+fmt.Println(p.name)
+```
+
+> 在Go语言中，使用`&`符号取地址时候，默认就对该类型进行了一次 **实例化** 操作。
+
+在开发过程中经常会以下面这种使用函数封装写法，来实例化一个结构体。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501065210009.png" alt="image-20250501065210009" style="zoom:40%;" />
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+//定义结构体
+type Person struct {
+    name string
+    age  int
+    sex  string
+}
+
+func main() {
+    p := newPerson("好家伙", 18, "男")
+    fmt.Println(p.name, p.age, p.sex)
+}
+
+//使用函数来实例化结构体 
+func newPerson(name string, age int, sex string) *Person {
+    return &Person{
+       name: name,
+       age:  age,
+       sex:  sex,
+    }
+}
+```
+
+### 匿名结构体
+
+在实际开发中，还有一类情况，就是某个结构体的作用域很小，甚至只存在于某个函数内部，或是无需创建太多的该结构体变量等等。对于上述情况，Go语言允许我们使用匿名结构体简化编码，即使用匿名结构体。
+
+匿名结构体就是没有类型名称，也不需要type关键字可以直接使用。
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501065317799.png" alt="image-20250501065317799" style="zoom:40%;" />
+
+### 构造函数
+
+其实就是用工厂函数新建结构体
+
+```go
+type treeNode struct {
+	value       int
+	left, right *treeNode
+}
+
+func createTreeNode(value int) *treeNode {
+	return &treeNode{value: value} // 返回的是局部变量的地址，但跟C不一样，不会导致程序崩溃
+}
+
+func main() {
+  root1 := treeNode{value: 3}
+
+	root2 := createTreeNode(4)
+}
+```
+
+> 1. 在工厂函数中，我们通常返回一个结构的地址，无需特别考虑其在何处分配，只需返回局部变量的地址即可。
+> 2. 局部变量的存储位置（栈或堆）由编译器和运行环境决定，这在Go语言中尤其如此，因为Go具有自动垃圾回收机制。
+> 3. 如果局部变量被取地址并返回，编译器会认为它需要在堆上分配，以便外部使用，从而参与垃圾回收过程。
+> 4. 这种机制简化了程序设计，开发者无需关心对象的具体分配位置，只要确保不再使用时，指针会被正确处理，对象将被自动回收。
+> 5. 与C++等需要手动管理内存的语言不同，Go语言的这一特性使得返回局部变量的地址成为可能，同时也简化了内存管理的复杂性。
+
+### 为对象定义方法
+
+在Go语言中，方法和函数的定义格式非常像，大家可不要搞混了。由于方法和对象存在紧密的关系，因此在定义的格式上需要**接收器**，具体格式如下：
+
+```go
+func (接收器变量 接收器类型) 方法名(参数列表) (返回参数) {
+    函数体
+}
+```
+
+<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501082915246.png" alt="image-20250501082915246" style="zoom:35%;" />
+
+- **接收器变量和接收器类型共同构成了接收器**；
+- 参数列表是可选的；
+- 返回参数也是可选的；
+
+```go
+type treeNode struct {
+    value       int
+    left, right *treeNode
+}
+
+func (node treeNode) print() {
+    fmt.Println(node)
+}
+
+func main() {
+
+    root2 := createTreeNode(4)
+
+    root2.print() // root2 对象 就可以 直接使用了
+}
+```
+
+其实跟正常函数一样：
+
+```go
+type treeNode struct {
+    value       int
+    left, right *treeNode
+}
+
+func (node treeNode) print() {
+    fmt.Println(node)
+}
+
+func print(node treeNode) {
+    fmt.Println(node)
+}
+```
+
+#### 对象定义方法是否使用指针
+
+为对象定义方法时，需要注意接收器的类型。使用指针与否，将决定了是否对原始变量产生影响。
+
+本例使用了\*Dog，即指针类型，在方法中对该类型变量（d变量）的任何影响都将影响原始变量（fatShibaInu）；反之，若使用Dog类型，则不会影响。
+
+> 其原因是当不使用指针类型变量时，方法中的接收器变量实际上是对原始数据的“拷贝”，所做出的改变也仅仅会作用于这份“拷贝”的数据上，并不会影响到原始数据。
+
+对比来说，我们分别定义两个不同的方法——GrowUp()和GrowUp2()，前者使用指针类型接收器，后者不使用。方法体均是对相应变量中的年龄属性自增1，然后在控制台输出运行结果。测试代码关键部分如下：
+
+```go
+func (d *Dog) GrowUp() {
+   d.Age++
+}
+
+func (d Dog) GrowUp2() {
+   d.Age++
+}
+
+func main() {
+   fatShibaInu := NewDog("Shiba Inu", 2, 12.0, "公")
+
+   fatShibaInu.GrowUp()
+   fmt.Println(fatShibaInu)
+
+   fatShibaInu.GrowUp2()
+   fmt.Println(fatShibaInu)
+}
+```
+
+运行结果为：
+
+> Shiba Inu 3 12 0
+>
+> Shiba Inu 3 12 0
+
+显然，虽然GrowUp2()方法也对d变量中的Age属性做了自增1计算，但并未影响原始数据。
+
+### 结构体的嵌套
+
+> 在Go语言中，没有直接等同于Java中`extends`的关键字，因为Go不支持传统的类继承。Go使用组合（composition）来复用代码，而不是继承。
+
+我们先来实现作为父结构体的动物（Animal），这个结构体具有名字（Name）、年龄（Age）和性别（Gender）属性。
+
+示例代码如下：
+
+```go
+type Animal struct {
+   Name   int
+   Age    int
+   Gender string
+}
+```
+
+接下来，以子结构体鸟（Bird）为例，它还具有翅膀颜色的属性。因此，Bird的结构体定义示例如下：
+
+```go
+type Bird struct {
+   WingColor    string
+   CommonAnimal Animal
+}
+```
+
+很明显地，Bird结构体中包含了一个名为CommonAnimal的Animal类型成员，而Animal类型就是我们刚刚定义好的结构体。
+
+如此，便完成了结构体的嵌套，即把Animal嵌入Bird中。从此，Bird也具有了Animal中的Name、Age和Gender属性了。
+
+```go
+func NewBird(name string, age int, gender string, wingColor string) *Bird {
+   return &Bird{
+      WingColor: wingColor,
+      CommonAnimal: Animal{
+         Name:   name,
+         Age:    age,
+         Gender: gender,
+      },
+   }
+}
+```
+
+接着，鸟还有“飞行”的动作。使用上一讲中“方法”的知识，创建Bird类型的“飞行”方法：
+
+```go
+func (b *Bird) Fly() {
+   fmt.Println("我起飞啦！")
+}
+```
+
+关于“鸟”的结构体定义、构造函数和方法的实现到此先告一段落。我们回到main()函数中使用它们。
+
+在main()函数中，首先声明一个变量，名为bird，使用NewBird()构造函数为其赋值，然后再调用Fly()方法，让小鸟执行飞行动作。完整的代码如下：
+
+```go
+type Animal struct {
+   Name   string
+   Age    int
+   Gender string
+}
+
+type Bird struct {
+   WingColor    string
+   CommonAnimal Animal
+}
+
+func NewBird(name string, age int, gender string, wingColor string) *Bird {
+   return &Bird{
+      WingColor: wingColor,
+      CommonAnimal: Animal{
+         Name:   name,
+         Age:    age,
+         Gender: gender,
+      },
+   }
+}
+
+func (b *Bird) Fly() {
+   fmt.Println("我起飞啦！")
+}
+
+func main() {
+   bird := *NewBird("小鸟", 1, "公", "绿色")
+   fmt.Println(bird)
+   bird.Fly()
+}
+```
+
+从输出的格式上，我们也可看出，Animal类型确实被Bird类型嵌入其中。那么，问题也随之而来：若想访问Bird中的Animal中的Name属性值，该怎么做呢？
+
+思路其实非常简单，也是层层嵌套地访问就可以了。就拿本例来说，bird.CommonAnimal访问到的是CommonAnimal属性，它是Animal类型；bird.CommonAnimal.Name，访问到的就是CommonAnimal中的Name属性了。
+
+类似地，我们继续定义子结构体狗（Dog），它拥有毛色（Color）属性。还有犬吠（Bark）动作。请读者参考上面小鸟（Bird）部分的代码，独立完成狗（Dog）部分的代码，要求依然使用构造函数（NewDog()）和方法（Bark()）。
+
+完整的代码如下：
+
+```go
+type Animal struct {
+   Name   string
+   Age    int
+   Gender string
+}
+
+type Dog struct {
+   Color        string
+   CommonAnimal Animal
+}
+
+func NewDog(name string, age int, gender string, color string) *Dog {
+   return &Dog{
+      Color: color,
+      CommonAnimal: Animal{
+         Name:   name,
+         Age:    age,
+         Gender: gender,
+      },
+   }
+}
+
+func (d *Dog) Bark() {
+   fmt.Println("汪汪汪！")
+}
+
+func main() {
+   dog := *NewDog("小狗", 2, "公", "黄色")
+   fmt.Println(dog)
+   dog.Bark()
+}
+```
+
+### 匿名结构体嵌套
+
+Go语言语法还允许开发者以一种更为简单的方式嵌套结构体使用，这种更简单的方式便是嵌套匿名结构体。在后期使用时，也会被简化。以Bird类型结构体为例，下面的写法是完全合法的：
+
+```go
+type Animal struct {
+   Name   string
+   Age    int
+   Gender string
+}
+
+func (a *Animal) Eat() {
+   fmt.Println(a.Name, "我要吃到饱！")
+}
+
+type Bird struct {
+   string
+   Animal
+}
+
+func NewBird(name string, age int, gender string, wingColor string) *Bird {
+   return &Bird{
+      wingColor,
+      Animal{
+         name,
+         age,
+         gender,
+      },
+   }
+}
+
+func (b *Bird) Fly() {
+   fmt.Println("我起飞啦！")
+}
+
+func main() {
+   bird := *NewBird("小鸟", 1, "公", "绿色")
+   //访问string类型成员
+   fmt.Println(bird.string)
+   //访问Name成员
+   fmt.Println(bird.Name)
+   bird.Eat()
+```
+
+上述代码运行后，控制台将输出：
+
+> 绿色
+>
+> 小鸟             
+>
+> 小鸟 我要吃到饱！
+
+请大家将这种简化写法与普通的写法对比，重点关注Bird结构体的定义方式、NewBird()构造函数的实现方式以及main()函数中，bird变量的字段取值和方法调用方式。
+
+## 接口
+
+### 定义
+
+在Go语言中，定义接口的格式如下：
+
+```go
+type interface_name interface {
+    function_name( [params] ) [return_values]
+    ...
+}
+```
+
+- `type`关键字表示要自定义类型；
+- `interface_name` 是自定义的接口名；
+- `interface` 表示接口类型；
+- `function_name` 是方法名；
+- `params` 是方法所需的参数；
+- `return_values` 是方法的返回值。
+  - `params` 和 `return_values` 可以省略，也可以存在一个或多个。
+
+对于本例而言，接口的目的在于规范图片加载的流程。为了讲解方便，我在此将图片加载的过程简化为查找并下载图片一个步骤。
+
+具体代码如下：
+
+```go
+// ImageDownloader 图片加载接口
+type ImageDownloader interface {
+    // FetchImage 获取图片，需要传入图片地址，方法返回图片数据
+    FetchImage(url string) string
+}
+```
+
+如此，接口的定义便完成了。
+
+> `💡 提示： 注意到接口的命名（imageLoader）特点了吗？在为接口命名时，一般会在单词后面加上er后缀。接口中的方法名（FetchImage()）首字母大小写决定了该方法的可访问范围。`
+
+### 接口的实现
+
+在Go语言中，实现接口的格式如下：
+
+```go
+func (struct_variable struct_name) function_name([params]) [return_values] {
+   // 方法实现 
+}
+```
+
+- `struct_name_variable` 和 `struct_name` 一起，表示作用的对象。
+  - 对于本例而言，则是 `*fileCache` 类型的变量。
+- `function_name` 是方法名
+- `params` 指的是方法所需的参数
+- `return_values` 指的是方法的返回值。
+  - `params` 和 `return_values` 是可选的，也允许有多个值。
+
+代码如下：
+
+```go
+// 定义从网络下载图片的结构体
+type netFetch struct {
+}
+// FetchImage接口实现
+func (n *netFetch) FetchImage(url string) string {
+	return "从网络下载图片：" + url
+}
+```
+
+对比FetchImage()方法的接口声明：
+
+```go
+// FetchImage 获取图片，需要传入图片地址，方法返回图片数据
+FetchImage(url string) string
+```
+
+发现了吗？在实现方法时，需要满足两个条件：
+
+- 第一是**接口中定义的的方法与实现接口的类型方法格式一致**。这要求不仅方法名称相同，参数和返回值也要相同；
+
+- 第二就是**接口中定义的所有方法全部都要实现**。
+
+### 空接口与泛型
+
+什么时候该使用泛型呢？
+
+举个例子，如果我们想要封装一个函数，该函数的作用便是实现传入参数数据的原样输出，该如何做呢？
+
+利用我们已经掌握的知识，写出的代码可能会是这样：
+
+```go
+func main() {
+   dataOutput("Hello")
+}
+
+func dataOutput(data string) {
+   fmt.Println(data)
+}
+```
+
+直接运行这段程序，控制台会输出：
+
+> Hello
+
+看似没有问题，但如果传入的参数不是string类型，而是数字型、布尔型呢？显然，程序是无法编译通过的，因为类型不匹配。
+
+当然，我们也可以编写多个函数，来匹配不同的参数类型，比如：
+
+```go
+func main() {
+   stringDataOutput("Hello")
+   intDataOutput(123)
+}
+
+func stringDataOutput(data string) {
+   fmt.Println(data)
+}
+
+func intDataOutput(data int) {
+   fmt.Println(data)
+}
+```
+
+如此确实可以实现，但代码整体不够优雅。况且这还只是两种类型，要是更多，日后的代码维护成本就会直线飙升了。
+
+细心的朋友会发现，尽管类型不同，但函数体内实际执行的逻辑都是相通的。那么，有没有一种办法使函数的参数不再受限呢？
+
+当然有，那就是使用泛型。
+
+**泛型是类型中的“万能牌”**，使用泛型作为函数参数，实际上就相当于告诉调用者：“我能兼容任何类型的参数，尽管将数据传给我就是了。”泛型以超级宽广的胸怀接纳所有类型的数据。
+
+> **在Go语言中的泛型，则使用空接口来实现。** 
+
+而所谓的“空接口”，使用代码表示非常简单，就是：
+
+```go
+interface{}
+```
+
+和普通接口的定义格式不同，空接口内部无需填写任何方法。
+
+**空接口能接纳所有类型的数据，因此可以将任何类型的数据赋值给它的变量**，请大家阅读下面这段代码：
+
+```go
+var anyTypeValue interface{}
+
+func main() {
+   anyTypeValue = 123
+   anyTypeValue = true
+   anyTypeValue = "Hello"
+}
+```
+
+这段代码完全合法，可以编译、运行。
+
+另一方面，**在函数参数中使用空接口，可以使其能接受所有类型的数据传入。** 以本讲一开始的示例举例，若要编写一个函数，实现传入参数数据的原样输出，只需按如下编写代码即可：
+
+```go
+func main() {
+   dataOutput("Hello")
+   dataOutput(123)
+   dataOutput(true)
+}
+
+func dataOutput(data interface{}) {
+   fmt.Println(data)
+}
+```
+
+程序运行结果为：
+
+> Hello
+>
+> 123
+>
+> true
+
+如此编码，是不是比写一堆类似的函数要方便、简洁很多呢？还能节省开发和维护的时间。
+
+### 灵活运用接口
+
+#### 接口的嵌套组合
+
+我们都知道，结构体是允许嵌套使用的。实际上，接口也可以。
+
+> 举例来说，我们使用浏览器进行下载文件的时候，通常会在保存、另存为和取消之间做出选择。抛开取消不谈，选择保存时，浏览器会自动执行下载和保存两个步骤；选择另存为时，浏览器会先询问文件保存的路径，再开始下载和保存。
+
+如果我们把选择路径、下载、保存看作是待下载文件的3个接口，并用代码来表示，它很可能会是这样的：
+
+```go
+// ChooseDest 选择保存路径
+type ChooseDest interface {
+    chooseDest(localFile string)
+}
+
+// Download 执行下载
+type Download interface {
+    download()
+}
+
+// Save 保存文件
+type Save interface {
+    save()
+}
+```
+
+细心的朋友会发现，无论何种方式下载文件，其中的下载和保存都是必需且顺序不变的。所以，我们不妨再创建一个接口，使其包含下载和保存两个接口，代码如下：
+
+```go
+// DownloadAndSave 下载和保存
+type DownloadAndSave interface {
+   Download
+   Save
+}
+```
+
+在使用时，我们便可直接声明DownloadAndSave类型的变量去执行下载和保存了，示例代码如下：
+
+```go
+func main() {
+   // 声明一个file类型的变量，命名为downloadFileExample
+   downloadFileExample := new(file)
+   // 使用ChooseDest接口
+   var chooseDest ChooseDest
+   chooseDest = downloadFileExample
+   chooseDest.chooseDest("")
+   // 使用DownloadAndSave接口
+   var downloadAndSave DownloadAndSave
+   downloadAndSave = downloadFileExample
+   downloadAndSave.download()
+   downloadAndSave.save()
+}
+```
+
+如上代码所示，无需单独声明Download和Save接口变量，仅使用DownloadAndSave接口变量便可调用download()和save()两个方法。
+
+#### 从空接口取值
+
+在上一讲中，曾经使用过类似下面这样的案例：
+
+```go
+func main() {
+   dataOutput("Hello")
+}
+
+func dataOutput(data interface{}) {
+   fmt.Println(data)
+}
+```
+
+为了实现“将传入的参数按原样输出”的需求，我们编写了dataOutput()函数。该函数所需的参数是空接口，能接纳所有类型的数据，然后通过调用fmt.Println()将数据输出，满足了需求。
+
+现在，如果想从data中获取数据，并赋值给某个变量，该如何做呢？显然，可以如下实现：
+
+```go
+func dataOutput(data interface{}) {
+   fmt.Println(data)
+   var stringValue string = data
+   fmt.Println(stringValue)
+}
+```
+
+暂且将上述方法当作方法A。
+
+再看如下实现：
+
+```go
+func dataOutput(data interface{}) {
+   fmt.Println(data)
+   stringValue := data.(string)
+   fmt.Println(stringValue)
+}
+```
+
+暂且将该方法当作方法B。
+
+猜一猜，哪种方法可以呢？
+
+答案是：**方法B**。
+
+是不是很奇怪，为什么方法A不行呢？实际上，当我们按照方法A去写时，GoLand会自动识别出问题，提示：`Cannot use 'data' (type interface{}) as the type string`，意思是无法将类型为`interface{}`的data变量作为string类型使用。
+
+这是因为在进行`类型断言`前，谁也不知道data里放的是何类型。举个形象一点的例子，虽然箱子里装了某样货物，但箱子依然还是箱子，是不能将箱子当货使用的。
+
+所以，在从空接口中取值时，切记要使用`类型断言`。
+
+#### 空接口的值比较
+
+撸起袖子，我们一起来挑战几道题。
+
+不要用电脑编译和运行下面的代码，先猜猜它们的运行结果。
+
+```go
+func main() {
+   var a interface{} = 10
+   var b interface{} = "10"
+   fmt.Println(a == b)
+}
+```
+
+相信各位都能回答正确，上面这段代码运行结果为：
+
+> false
+
+挑战继续，再来试试这个：
+
+```go
+func main() {
+   var a interface{} = []int{1, 2, 3, 4, 5}
+   var b interface{} = []int{1, 2, 3, 4, 5}
+   fmt.Println(a == b)
+}
+```
+
+上面这段代码运行后，程序会发生宕机。报错信息如下：
+
+> panic: runtime error: comparing uncomparable type []int
+
+从字面上看，错误原因是程序比较了不可比较的类型——[]int。
+
+> 在Go语言中，**有两种数据是无法比较的，它们是：`Map` 和 `Slice`**，强行比较会引发如上宕机错误。
+
+数组是可以比较的，而且会比较数组中每个元素的值。因此，只需将上述代码改为：
+
+```go
+func main() {
+   var a interface{} = [5]int{1, 2, 3, 4, 5}
+   var b interface{} = [5]int{1, 2, 3, 4, 5}
+   fmt.Println(a == b)
+}
+```
+
+程序便会正常运行，输出结果：
+
+> true
+
+#### 接口与nil
+
+在Go语言中，nil是一个特殊的值，它只能赋值给指针类型和接口类型。
+
+让我们来挑战下面这段代码，还是不要用电脑编译运行，猜一猜它的输出结果：
+
+```go
+func main() {
+   var a interface{} = nil
+   fmt.Println(a == nil)
+}
+```
+
+这段代码运行后，控制台将输出：
+
+> true
+
+应该没什么疑问吧？继续看下面的代码：
+
+```go
+type Person struct {
+   name   string
+   age    int
+   gender int
+}
+
+type SayHello interface {
+   sayHello()
+}
+
+func (p *Person) sayHello() {
+   fmt.Println("Hello!")
+}
+
+func getSayHello() SayHello {
+   var p *Person = nil
+   return p
+}
+
+func main() {
+   var person = new(Person)
+   person.name = "David"
+   person.age = 18
+   person.gender = 0
+   var sayHello SayHello
+   sayHello = person
+   fmt.Println(reflect.TypeOf(sayHello))
+   fmt.Println(sayHello == nil)
+   fmt.Println(getSayHello())
+   fmt.Println(getSayHello() == nil)
+}
+```
+
+猜一猜最终控制台将输出什么呢？
+
+答案是：
+
+> *main.Person
+>
+> false
+> nil
+>
+> false
+
+是不是也很奇怪？
+
+输出第一个false无可厚非，可输出的第二个false就很耐人寻味了。第二个false来自于main()函数中调用的getSayHello()函数，该函数返回SayHello类型的接口，函数体内返回了nil值的*Person。直接输出getSayHello()函数的结果，是nil，但与nil比较时却不是true。
+
+这是因为：**将一个带有类型的nil赋值给接口时，只有值为nil，而类型不为nil。此时，接口与nil判断将不相等。**
+
+那么，为了规避这类问题，我们不妨在getSayHello()函数值做些特殊处理。当函数体中的p变量为nil时，直接返回nil即可。发生修改部分的代码如下：
+
+```go
+func getSayHello() SayHello {
+   var p *Person = nil
+   if p == nil {
+      return nil
+   } else {
+      return p
+   }
+}
+```
+
+再次运行程序，控制台输出如下：
+
+> *main.Person
+>
+> false
+> nil
+>
+> true
