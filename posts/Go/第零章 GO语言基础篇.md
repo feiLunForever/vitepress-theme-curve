@@ -1,4 +1,5 @@
 ---
+
 title: 第零章 GO语言基础篇
 tags:
   - Go
@@ -1604,13 +1605,342 @@ func processFiles2() error {
 }
 ```
 
+上述代码中，使用了`sync.WaitGroup` 来等待所有协程处理完文件后再返回。每个协程都会打开一个文件并处理其内容，处理完后使用 `defer` 语句关闭文件资源。
 
+> 但上面的程序并不是完全安全的，如果文件处理速度很慢，会存在协程堆积的情况，这样不仅会消耗大量的资源句柄，大量的文件同时载入内存，也可能导致系统内存占用过高，同样存在风险。
 
+### panic 和 recover函数
 
+#### panic
 
+> `panic` 指的是 Go 程序在运行时出现的一个异常（`Exception`）情况。
+>
+> 如果这个异常没有被捕获并恢复，Go 程序的执行就会被终止，即便出现异常的位置不在主 `Goroutine`（也就是 `main` 函数） 中也会终止。
 
+在 Go语言中，`panic` 主要有两类来源，一类是来自 Go 运行时（比如发生空指针异常，数组越界等），另一类则是调用 `panic` 函数主动触发的。
 
+##### panicking 执行过程
 
+> 无论是哪种 `panic`，一旦 `panic` 被触发，后续 Go 程序的执行过程都是一样的，这个过程被 Go 语言称为 `panicking`。
+
+1. 当函数 `f` 调用 `panic` 函数时，函数 `f` 的执行将停止。但是，函数 `f` 中已进行求值的 `deferred` 函数都会得到正常执行，执行完这些 `deferred` 函数后，函数f才会把控制权返还给其调用者。
+2. 对于函数f的调用者而言，函数 `f` 之后的行为就如同调用者调用的函数是 `panic` 一样，该 `panicking` 过程将继续在栈上进行下去，直到当前 `Goroutine` 中的所有函数都返回为止，然后 Go 程序将崩溃退出。
+
+```go
+func main() {
+	println("call main")
+	fn()
+	println("exit main")
+}
+
+func fn() {
+	println("call fn")
+	fn1()
+	println("exit fn")
+}
+func fn1() {
+	println("call fn1")
+	defer func() {
+		fmt.Println("defer before panic in fn1")
+	}()
+	panic("panic in fn1")
+    defer func() {
+		fmt.Println("defer after panic in fn1")
+	}()
+	fn2()
+	println("exit fn1")
+}
+func fn2() {
+	println("call fn2")
+	println("exit fn2")
+}
+```
+
+上面这个例子中，从 Go 应用入口开始，函数的调用次序依次为 `main` -> `fn` -> `fn1`-> `fn2`。在 fn1 函数中，我们调用 `panic` 函数手动触发了 `panic`。
+我们执行这个程序的输出结果如下：
+
+```shell
+call main 
+call fn 
+call fn1
+defer before panic in fn1
+panic: panic in fn1
+
+goroutine 1 [running]:
+main.fn1()
+...
+...
+```
+
+我们再根据前面对 `panicking` 过程的诠释，理解一下这个例子。
+
+这里，程序从入口函数 `main` 开始依次调用了 fn、fn1 函数，在 fn1 函数中，代码在调用 fn2 函数之前调用了 `panic` 函数触发了异常。那示例的 `panicking `过程就从这里开始了。
+
+fn1函数调用 `panic` 函数之后，它自身的执行就此停止了，所以我们也没有看到代码继续进入 fn2 函数执行，并且 `panic` 之后的 `defer` 函数也没有机会执行。由于 fn1 函数没有捕捉这个 `panic`，所以 `panic` 就会沿着函数调用栈向上传递，来到了 fn1 函数的调用者 fn 函数中。
+
+从 fn 函数的视角来看，这就好比将它对 fn1 函数的调用，换成了对 `panic` 函数的调用一样。这样一来，fn 函数的执行也被停止了。由于 fn 函数也没有捕捉 `panic` ，于是 `panic` 继续沿着函数调用栈向上传递，来到了 fn 函数的调用者 `main` 函数中。
+
+同理，从 `main` 函数的视角来看，这就好比将它对 fn 函数的调用，换成了对 `panic` 函数的调用一样。结果就是，`main` 函数的执行也被终止了，于是整个程序异常退出，日志 "exit main"也没有得到输出的机会。
+
+#### recover
+
+Go 语言也提供了捕捉 `panic` 并恢复程序正常执行的方式，我们可以通过 `recover`来实现：
+
+```go
+func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("捕获了一个panic：", err)
+			fmt.Println("防止了程序崩溃")
+		}
+	}()
+
+	println("call main")
+	fn()
+	println("exit main")
+}
+```
+
+在 `main` 函数中，我们在一个 `defer` 匿名函数中调用 `recover` 函数对 `panic` 进行了捕捉。
+
+> `recover` 是 Go 内置的专门用于恢复 `panic` 的函数，它必须被放在一个 `defer` 函数中才能生效。
+>
+> - 如果 `recover` 捕捉到 `panic` ，它就会返回以 `panic` 的具体内容为错误上下文信息的错误值。
+>
+> - 如果没有 `panic` 发生，那么 `recover` 将返回 nil。而且，如果 `panic` 被 `recover` 捕捉到，`panic` 引发的 `panicking` 过程就会停止。
+
+当然，我们将 `recover` 放在函数 fn1 中也是可以的，这取决于我们是不是希望捕获整个调用链的异常。通常如果我们希望程序在遇到异常不会退出，一般会将`recover` 放在最外层的函数中。
+
+上面的程序会得到如下结果：
+
+```shell
+call main 
+call fn 
+call fn1
+捕获了一个panic： panic in fn1
+防止了程序崩溃
+```
+
+#### panic 和 recover 细节
+
+我们需要注意下面几点：
+
+1. `reocver` 必须在 `defer` 申明的匿名函数中执行才能捕获到异常，如果不使用 `defer`，`recover` 函数是在` panic` 调用之前就已经执行，等程序运行到`panic` 时是无法捕获到异常的；
+
+2. 当 `recover` 与函数调用方不在同一个协程时，也是无法捕获到异常的，比如下面的代码：
+
+   ```go
+   func f() {
+   	go func() {
+   		defer func() {
+   			if err := recover(); err != nil {
+   				fmt.Println("recover", err)
+   			}
+   		}()
+   	}()
+   	panic("未知错误") // 演示目的产生的一个panic
+   
+   }
+   ```
+
+   由于上面的 `recover` 在一个新开的 `协程` 中，与函数 f() 已经不在同一个协程了，所以上面的 `panic` 是无法捕获到的。
+
+3. 当前 `gorutine` 中的 `panic` 如果被一个 `defer` 中的 `panic` 覆盖，则在当前 `gorutine` 中只能捕获到最后一个 `panic`
+
+   ```go
+   func paincInCovered() {
+   	defer func() {
+   		if err := recover(); err != nil {
+   			// main panic is override by defer2 panic
+   			fmt.Println(err)
+   		} else {
+   			fmt.Println("defer1 recover nil")
+   		}
+   	}()
+   
+   	defer func() {
+   		panic("defer2 panic")
+   	}()
+   
+   	panic("main panic")
+   }
+   ```
+
+   上面程序中 `panic(“main panic”)` 比 `panic(“defer2 panic”)` 先执行，但最终捕获到的是后执行的 `panic(“defer2 panic”)`
+
+4. 注意多个 `defer` 语句中 `panic` 的执行顺序.
+
+   当前协程中有多个 `defer` 语句中出现 `panic` 时，会先执行 `defer` 语句中 `panic` 之前的代码，再依次执行 `panic`
+
+   ```go
+   func panicInDefer() {
+   
+   	defer func() {
+   		fmt.Println("defer1")
+   		panic("defer1 panic")
+   	}()
+   
+   	defer func() {
+   		fmt.Println("defer2")
+   		panic("defer2 panic")
+   	}()
+   
+   	panic("main panic")
+   
+   }
+   ```
+
+   上面代码的输出结果为：
+
+   ```shell
+   defer2 
+   defer1 
+   panic: main panic
+   panic: defer2 panic
+   panic: defer1 panic
+   
+   goroutine 1 [running]:
+   main.panicInDefer.func1()
+   ...
+   ...
+   ```
+
+5. 多个调用链中捕获 `panic` 时，会优先被当前协程中的 `recover` 所捕获
+
+   ```go
+   func CoveredByCurrentGorutine() {
+   	defer func() {
+   		if err := recover(); err != nil {
+   			// main panic is override by defer2 panic
+   			fmt.Println(err)
+   		}
+   	}()
+   	f()
+   }
+   func f() {
+   	go func() {
+   		defer func() {
+   			if err := recover(); err != nil {
+   				fmt.Println("recover", err)
+   			}
+   		}()
+   	}()
+   	panic("未知错误") // 演示目的产生的一个panic
+   
+   }
+   ```
+   
+   调用函数 `CoveredByCurrentGorutine()` 时，函数 f() 产生的 `panic` 会优先被函数 f() 中的 `recover` 所捕获。
+
+#### 如何正确使用 panic&recover
+
+在实际工作中是不是在所有 Go 函数或方法中，我们都要用 `recover` 来恢复 `panic` 呢？
+
+其实是需要根据具体情况而定的。这里有几个经验可供参考：
+
+1. 是否应该使用 `recover` 来避免 `panic` 主要取决于程序对 `panic` 的忍受度.
+   - 不同应用对异常引起的程序崩溃退出的忍受度是不一样的。比如，一个单次运行于控制台窗口中的命令行交互类程序（CLI），和一个常驻内存的后端 HTTP 服务器程序，对异常崩溃的忍受度就是不同的。
+   - 前者即便因异常崩溃，对用户来说也仅仅是再重新运行一次而已。但后者一旦崩溃，就很可能导致整个网站停止服务。
+   - 所以，针对各种应用对 `panic` 忍受度的差异，我们采取的应对 `panic` 的策略也应该有不同。像后端 HTTP 服务器程序这样的关键任务系统，我们就需要在特定位置捕捉并恢复 `panic`，以保证服务器整体的健壮度。在这方面，Go 标准库中的 http server 就是一个典型的代表。
+2. 此外，在程序启动时可能会初始化一些组件，比如数据库，缓存，消息队列等，如果发现这些系统依赖的核心组件连接不上，我们也应该及时 `panic`，让程序提前退出及时发现问题。使用 `panic` 来提示潜在 bug。
+
+#### panic / recover机制的妙用
+
+`panic` / `recover` 机制不仅限于防止程序出现异常的时候使用，我们还可以使用 `panic` / `recover` 机制来减少错误判断，简化代码。
+
+比如下面代码中我们需要在一个函数中执行多个步骤，每一步都需要判断是否发生异常，如果有一步发生异常就需要停止执行并返回错误，一般我们可以这样实现：
+
+```go
+func doSomething() (err error) {
+	isContinue, err := doStep1()
+	if !isContinue {
+		return err
+	}
+	isContinue, err = doStep2()
+	if !isContinue {
+		return err
+	}
+	isContinue, err = doStep3()
+	if !isContinue {
+		return err
+	}
+	return
+}
+
+func doStep1() (isContinue bool, err error) {
+	// do something for doStep1
+	return
+}
+
+func doStep2() (isContinue bool, err error) {
+	// do something for doStep2
+	return
+}
+
+func doStep3() (isContinue bool, err error) {
+	// do something for doStep3
+	return
+}
+```
+
+上面的代码中错误判断太多，我们可以使用 `panic` / `recover` 机制来简化：
+
+```go
+package main
+
+func main() {
+	doSomething1()
+}
+
+func doSomething1() (err error) {
+
+	defer func() {
+		err, _ = recover().(error)
+	}()
+	doStep_1()
+	doStep_2()
+	doStep_3()
+	return
+}
+
+func doStep_1() {
+	var err error
+	var done bool
+	// do something for doStep1
+	if err != nil {
+		panic(err)
+	}
+	if done {
+		panic(nil)
+	}
+}
+
+func doStep_2() {
+	var err error
+	var done bool
+	// do something for doStep2
+	if err != nil {
+		panic(err)
+	}
+	if done {
+		panic(nil)
+	}
+}
+
+func doStep_3() {
+	var err error
+	var done bool
+	// do something for doStep3
+	if err != nil {
+		panic(err)
+	}
+	if done {
+		panic(nil)
+	}
+}
+```
+
+上面的代码中，我们在在各个 `step` 中通过 `panic` 传递 `err` 和 nil 来通知调用函数是出现异常还是已完成任务需要继续执行，如果 `step` 函数中 `panic` 传递的为 nil，则说明任务需要继续执行。
 
 ### 匿名函数的定义和调用
 
@@ -1758,8 +2088,6 @@ func closure() func() int { // 外层函数
 res := closure()  // 创建一个存钱罐（a=0）和存钱函数
 r1 := res()       // 存一次钱 → a=1
 r2 := res()       // 再存一次 → a=2（因为存钱罐还在）
-
-
 ```
 
 而当你再调用 `res2 := closure()` 时，相当于**新买了一个存钱罐**（新的a=0），之前的存钱罐和新的互不影响。
