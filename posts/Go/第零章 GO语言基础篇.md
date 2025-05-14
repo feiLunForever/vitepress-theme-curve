@@ -2563,7 +2563,7 @@ func main() {
 
 显然，虽然GrowUp2()方法也对d变量中的Age属性做了自增1计算，但并未影响原始数据。
 
-### 结构体的嵌套
+### 结构体的嵌套（extends）
 
 > 在Go语言中，没有直接等同于Java中`extends`的关键字，因为Go不支持传统的类继承。Go使用组合（composition）来复用代码，而不是继承。
 
@@ -2585,12 +2585,15 @@ type Animal struct {
 type Bird struct {
    WingColor    string
    CommonAnimal Animal
+   // CommonAnimal *CommonAnimal 
 }
 ```
 
-很明显地，Bird结构体中包含了一个名为CommonAnimal的Animal类型成员，而Animal类型就是我们刚刚定义好的结构体。
+很明显地，`Bird` 结构体中包含了一个名为 `CommonAnimal` 的 `Animal` 类型成员，而 `Animal` 类型就是我们刚刚定义好的结构体。
 
-如此，便完成了结构体的嵌套，即把Animal嵌入Bird中。从此，Bird也具有了Animal中的Name、Age和Gender属性了。
+如此，便完成了结构体的嵌套，即把 `Animal` 嵌入 `Bird` 中。从此，`Bird` 也具有了 `Animal` 中的 Name、Age 和 Gender属性了。
+
+> 需要注意的是：上面的内嵌结构体 `Animal` 也是可以传入指针类型的，如果传的是字面量，则实际是 `Animal` 结构体的副本，对内存消耗更大。
 
 ```go
 func NewBird(name string, age int, gender string, wingColor string) *Bird {
@@ -2747,6 +2750,50 @@ func main() {
 
 请大家将这种简化写法与普通的写法对比，重点关注Bird结构体的定义方式、NewBird()构造函数的实现方式以及main()函数中，bird变量的字段取值和方法调用方式。
 
+### 多态
+
+多态性可以提高程序的扩展性，使得代码更加灵活，易于扩展和维护。
+
+在Go语言中，多态可以通过接口实现。接口定义了一组方法的签名，任何实现了这个接口的类型都可以被认为是这个接口类型。这就使得我们可以使用接口类型来实现多态。
+
+```go
+package main
+
+import "fmt"
+
+type Duck interface {
+	Quack()
+}
+
+type YellowDuck struct{}
+
+func (yd YellowDuck) Quack() {
+	fmt.Println("YellowDuck嘎嘎叫")
+}
+
+type NormalDuck struct{}
+
+func (nd NormalDuck) Quack() {
+	fmt.Println("NormalDuck嘎嘎叫")
+}
+
+func Quack(d Duck) {
+	d.Quack()
+}
+func main() {
+	yd := YellowDuck{}
+	nd := NormalDuck{}
+	Quack(yd)
+	Quack(nd)
+
+}
+```
+
+> YellowDuck嘎嘎叫 
+> NormalDuck嘎嘎叫
+
+在这个示例中，我们定义了 `Duck` 接口和两个实现了这个接口的结构体 `YellowDuck` 和 `NormalDuck` 。然后我们创建了一个包含了两个不同类型的 `Duck` 对象的切片，使用 `for` 循环遍历这个切片，并调用它们的 `Quack()` 方法，这样就实现了多态。
+
 ## 接口
 
 ### 定义
@@ -2825,6 +2872,41 @@ FetchImage(url string) string
 - 第一是**接口中定义的的方法与实现接口的类型方法格式一致**。这要求不仅方法名称相同，参数和返回值也要相同；
 
 - 第二就是**接口中定义的所有方法全部都要实现**。
+
+### 接口的特性
+
+- Go语言是不支持重载的，Go语言的一个核心设计原则是**让Go保持足够的简单**，特别是在面向对象的支持上，阉割了很多面向对象中的一些语法，使得go的面向对象的实现更加轻量级。
+- Go语言支持重写。
+
+```go
+package main
+
+import "fmt"
+
+type Animal struct {
+}
+
+func (a *Animal) eat() {
+	fmt.Println("Animal is eating")
+}
+
+// Cat继承Animal
+type Cat struct {
+	Animal
+}
+
+// Cat子类也可以有eat方法，且实现可以跟父类Animal不同
+func (c *Cat) eat() {
+	fmt.Println("Cat is eating fish")
+}
+
+func main() {
+	a := &Animal{}
+	c := &Cat{}
+	a.eat()
+	c.eat()
+}
+```
 
 ### 空接口与泛型
 
