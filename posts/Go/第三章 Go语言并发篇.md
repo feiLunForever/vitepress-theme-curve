@@ -1,5 +1,5 @@
 ---
-title: 第三章 GO语言进阶之并发
+title: 第三章 Go语言并发篇
 tags:
   - Go
 categories:
@@ -10,7 +10,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 #cover: "/images/logo/logo.webp"
 ---
 
-# 第三章 GO语言进阶之并发
+# 第三章 Go语言并发篇
 
 ##  协程与线程
 

@@ -1,6 +1,6 @@
 ---
 
-title: 第一章 GO语言框架篇
+title: 第二章 GO语言runtime篇
 tags:
   - Go
 categories:
@@ -12,4 +12,4 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 ---
 
-# 第一章 GO语言框架篇
+# 第二章 GO语言runtime篇
