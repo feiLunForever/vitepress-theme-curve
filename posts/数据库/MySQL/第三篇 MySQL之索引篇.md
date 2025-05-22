@@ -1,5 +1,5 @@
 ---
-title: 第二篇 MySQL之索引篇
+title: 第三篇 MySQL之索引篇
 tags:
   - MySQL
 categories:
@@ -73,7 +73,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 此时结合上面给出的一些信息，主键索引是聚簇索引，表数据和索引数据在一块、索引结构是有序的，那再反推前面给出的疑惑，为何不使用`UUID`呢？因为`UUID`是无序的，如果使用`UUID`作为主键，那么每当插入一条新数据，都有可能破坏原本的树结构，如下：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/image-20250303110838016.png" alt="image-20250303110838016" style="zoom:80%;" />
+<img src="./%E7%AC%AC%E4%B8%89%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/image-20250303110838016.png" alt="image-20250303110838016" style="zoom:80%;" />
 
 比如上图中的灰色节点，是一条新插入的数据，此时经过计算后，应该排第二个位置，那就代表着后面的三个节点需要移动，然后给灰色节点挪出一个位置存储，从而确保索引的有序性。
 
@@ -186,7 +186,7 @@ SELECT * FROM `zz_users` WHERE `user_name`="竹子" AND `user_sex`="男";
 
 
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/image-20250303131009054.png" alt="image-20250303131009054" style="zoom:80%;" />
+<img src="./%E7%AC%AC%E4%B8%89%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/image-20250303131009054.png" alt="image-20250303131009054" style="zoom:80%;" />
 
 #### 索引下推
 
@@ -294,11 +294,11 @@ SELECT * FROM `zz_user` WHERE `ID` = 12;
 
 此时首先会根据条件字段，去内存中找到聚簇索引的根节点，然后根据节点中记录的地址去找次级的叶节点，最后再根据叶节点中的指针地址，找到最下面的叶子节点，从而获取其中的行数据，动画过程如下：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/4bf555145bbb4077af7bc27fb557f170~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0.gif" alt="4bf555145bbb4077af7bc27fb557f170~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0" style="zoom:80%;" />
+<img src="./%E7%AC%AC%E4%B8%89%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/4bf555145bbb4077af7bc27fb557f170~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0.gif" alt="4bf555145bbb4077af7bc27fb557f170~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0" style="zoom:80%;" />
 
 #### 非聚簇索引查找数据的过程
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/1546632-20200919225813936-1490118290.png" alt="InnoDB非主键索引原理图" style="zoom:80%;" />
+<img src="./%E7%AC%AC%E4%B8%89%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/1546632-20200919225813936-1490118290.png" alt="InnoDB非主键索引原理图" style="zoom:80%;" />
 
 相较于聚簇索引而言，非聚簇索引前面的步骤都是相同的，仅是最后一步有些许不同罢了，非聚簇索引经过一系列查询步骤后，最终会取到一个聚簇索引的字段值，然后再做一次回表查询，也就是再去聚簇索引中查一次才能取到数据。
 
@@ -314,7 +314,7 @@ INDEX idx_book_id_hero_name (book_id, hero_name) USING BTREE
 
 联合索引是多列按照次序一列一列比较大小，拿`idx_book_id_hero_name`这个联合索引来说，先比较`book_id`，book_id小的排在左边，book_id大的排在右边，book_id相同时再比较`hero_name`。如下图所示：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/1546632-20200920111026527-1672463564.png" alt="InnoDB联合索引原理图" style="zoom:80%;" />
+<img src="./%E7%AC%AC%E4%B8%89%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/1546632-20200920111026527-1672463564.png" alt="InnoDB联合索引原理图" style="zoom:80%;" />
 
 了解了联合索引的结构，就能引入`最左前缀法则`：
 
@@ -336,13 +336,13 @@ INSERT INTO `zz_user` VALUES(6,"上海市黄浦区xx街道666号","棕熊","男"
 
 因为主键索引字段，也就是`ID`字段是顺序递增的，因此只需要在本地索引文件的`B+Tree`结构中，按照树结构找到最后的位置，将当前插入的`ID:6`作为索引键，以当前插入的行数据作为索引值，然后插入到最后的节点中即可。如下：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/750c7cb5fd5e4fcfa7cb6baef4878a19~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0.gif" alt="750c7cb5fd5e4fcfa7cb6baef4878a19~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0" style="zoom:80%;" />
+<img src="./%E7%AC%AC%E4%B8%89%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/750c7cb5fd5e4fcfa7cb6baef4878a19~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0.gif" alt="750c7cb5fd5e4fcfa7cb6baef4878a19~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0" style="zoom:80%;" />
 
 `普通/非聚簇索引的变化`
 
 因为姓名字段本身的数据类型是字符串，与数值型字段天生的有序不同，字符串类型是无序的，因此首先需要根据已经配置好的排序规则，先对插入的`name：棕熊`这个值进行计算，然后根据计算出的值，决定当前数据在`B+Tree`中的索引位置，计算好之后再执行插入工作，过程如下：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/b594b2fe0dd64adeabb34b9fa0e8649b~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0.gif" alt="b594b2fe0dd64adeabb34b9fa0e8649b~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0" style="zoom:80%;" />
+<img src="./%E7%AC%AC%E4%B8%89%E7%AF%87%20MySQL%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%AF%87.assets/b594b2fe0dd64adeabb34b9fa0e8649b~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0.gif" alt="b594b2fe0dd64adeabb34b9fa0e8649b~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0" style="zoom:80%;" />
 
 相较于主键字段的顺序`ID`，插入字符串类型的`name`值会复杂一些，因为从这里可以明显看到，插入的“棕熊”数据经过计算后，它并不排最后面，而是排中间，所以要将这个值插入到对应的位置，此时树的节点就会发生裂变，后续的所有叶子节点都需要往后移动，这个开销是较大的。
 
