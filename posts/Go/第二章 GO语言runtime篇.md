@@ -2035,9 +2035,11 @@ func main() {
 
 实际工作中可能还会遇到更多复杂的内存泄漏场景需要我们去留意。为了排查内存泄漏问题，Go语言提供了 `pprof` 工具来对运行中的程序进行采样分析。其中就包含对内存的分析。`pprof` 工具可以通过命令行或者 web 界面来使用，可以生成火焰图、调用图等可视化结果，帮助我们定位内存泄漏的源头。 
 
-## 协程调度器 GMP 模型
+## 协程调度
 
-### 组成
+### 协程调度器 GMP 模型
+
+#### 组成
 
 `GMP` 是 Go 语言的 协程调度模型，它由三种结构体组成：G、M 和 P。
 
@@ -2052,11 +2054,11 @@ func main() {
   - `P` 是工作线程 `M` 所需的上下文环境，也可以理解为一个 `M` 运行所需要的 `Token` ，当 `P` 有任务时需要创建或者唤醒一个 `M` 来执行它队列里的任务。
   - 所以 `P` 的数量决定了并行执行任务的数量，可以通过 `runtime.GOMAXPROCS` 来设定，现在的 Go 版本中默认为 CPU 的核心数。一个 `P` 对应一个 `M`，`P` 结构中带有 `runnext` 字段和一个本地队列，`runnext` 字段中存储的就是下一个被 `M` 执行的 `G`，每个 `P` 带有一个 256 大小的本地数组队列，这个队列是无锁的。
 
-### 为什么需要 GMP 调度
+#### 为什么需要 GMP 调度
 
 讲解 `GMP` 调度流程之前我们需要理解一个问题，就是为什么需要 `GMP` 调度。
 
-#### 单进程问题
+##### 单进程问题
 
 早期 `单进程` 时代的操作系统每个时间点都只能运行一个 进程，通常一个 程序 就是一个 进程。这样所有的程序只能通过 `串行` 的方式执行，这种执行方式会遇到两个主要问题：
 
@@ -2077,13 +2079,13 @@ func main() {
 - 首先，内核会给每个 进程 分配相等的初始时间片。
 - 然后每个进程轮番地执行相应的时间，当所有进程都处于时间片耗尽的状态时，内核会重新为每个进程计算并分配时间片，如此往复。
 
-#### 多进程/线程模型问题
+##### 多进程/线程模型问题
 
 多进程/线程模型在很大程度上提高了 CPU 的利用率，但进程太多的话，由于每个进程的创建、切换、销毁都会占用时间，就会导致有很大的一部分被用来进行进程切换调度，这一部分的性能消耗实际上是没有做在对程序有用的计算算力上，这无疑会带来 CPU 时间成本的浪费。
 
 进程太多还会带来另一个问题，由于每个线程都存在较大的内存占用（比如 java 线程默认是1 MB），线程过多会消耗大量的内存。
 
-#### 协程调度器
+##### 协程调度器
 
 为了解决 多进程/线程模型 遇到的问题，我们就需要控制 线程 数量，或者使用 内存 开销更小的轻量级线程。一个 协程 默认大小为 `2kb`，跟线程比起来对内存的占用就变得很小了。
 
@@ -2091,11 +2093,11 @@ func main() {
 
 这就需要处理好 `协程` 与 `内核线程` 之间的对应关系：
 
-##### 1:1 模型
+###### 1:1 模型
 
 假设一个 `内核线程` 绑定一个 `协程`。这种方式实现最为简单，但问题也是比较明显的：协程的创建、删除和切换的代价都由 CPU 完成，无法避免这种切换带来 CPU 时间成本的浪费。
 
-##### n:1 模型
+###### n:1 模型
 
 假设一个 `内核线程` 绑定多个 `协程`，`协程` 在 `用户态` 由协 `程调度器` 分配给 `内核线程` 。这样可以在 `用户态` 实现 `协程` 之间的切换，不需要 `内核态` 去完成内核线程的切换带来 CPU 时间的损耗。如下图所示：
 
@@ -2106,7 +2108,7 @@ func main() {
 1. `线程` 一旦 阻塞 会导致与之绑定的全部 `协程` 都无法执行；
 2. 单线程 绑定 无法发挥 多核 CPU 的优势。
 
-##### n:m 模型
+###### n:m 模型
 
 假设 n 个 `协程` 绑定到 `m` 个 `线程` 上，如下图所示：
 
@@ -2120,7 +2122,7 @@ func main() {
 
 最关键的是，它屏蔽了这些底层的细节，极大的降低了编程的难度，并且保障了程序的并发性能。
 
-### GM 调度模型
+#### GM 调度模型
 
 早期的 `协程调度器` 中所有的 `协程G` 都会被放到一个全局的 Go `协程队列` 中，这些队列是被多个 `线程M` 所共享的，协程 调度 就是通过 `M线程` 来执行这个队列中的 `G`。
 
@@ -2145,7 +2147,7 @@ func main() {
 
 3. `M` 的 CPU 切换频繁，还有优化空间。
 
-### GMP 调度模型
+#### GMP 调度模型
 
 `GM` 调度模型的主要问题是给 全局 的 Go `协程队列` 中加了一把 大锁，导致锁竞争而影响了调度器的性能。
 
@@ -2161,7 +2163,7 @@ func main() {
    - 为避免资源浪费，`M` 会主动释放当前绑定的 `P`，并将` P` 放回空闲 `P` 池（全局队列）。此时 `P` 的本地队列中的其他` G` 仍可被调度。
    - 其他空闲的 `M'` 会从空闲 `P` 池中获取该 `P`，并接管其本地队列中的 `G` 继续执行。若没有空闲 `M`，调度器会创建新 `M`。
 
-#### 为什么要有 P？
+##### 为什么要有 P？
 
 请大家思考这样一个问题：如果 `P` 层的加入是想实现本地队列、`Work Stealing` 算法，那为什么不直接在 `M` 上实现呢？
 
@@ -2170,7 +2172,7 @@ func main() {
 1. `M` 作为工作线程，Go 默认最多能创建10000个（当然也需要操作系统内核的支持），如果 `M` 被阻赛而又没有其他 `M` 可用的情况下，`M` 的数量还会增加，如果本地队列在 `M` 上实现，也就意味着本地队列的数量也会随着增加，这会导致本地队列的管理变得很复杂，并且工作窃取 需要不断检测空的本地队列，过多的本地队列会影响工作窃取的性能；
 2. `M` 和 `P` 的执行机制不同，从降低模块耦合度的角度看应该将 `P` 与 `M` 解耦。`M` 被系统调用阻塞后，我们是期望把他既有未执行的任务分配给其他组件继续运行，而不是一阻塞就导致全部停止。而 `P` 组件的加入就是积极将 `G` 调度到其它空闲的 `M` 上执行。
 
-### GMP调度流程
+#### GMP 调度流程
 
 我们使用 `go func` 创建了一个 `Gorutine`，从创建到执行结束整个过程中是如何调度的呢？
 
@@ -2211,7 +2213,7 @@ func main() {
 > - 当配药员（`M`）开始给患者配药时，如果遇到等待的情况（比如药房库存不足需要到旁边仓库补充药品），为了避免阻塞窗口队伍中其他患者的取药请求，配药员（`M`）会与当前窗口解绑（ `M` 与 `P` 解绑），而当前顾客会被安排到其他的队伍中等待，同时会有其他配药员（`M`）来接管当前窗口的配药工作
 > - 当缺药的患者配好药之后，他会被通知到某个窗口继续完成取药操作。而与窗口解绑的配药员会在休息区等待（`M`进入休眠队列），如果有窗口需要，配药员将到其他窗口继续完成其他患者的配药任务。如果某个窗口没有人排队时，可以从其他窗口的队伍中分配一半的患者到这个窗口（工作窃取）
 
-### GMP模型的优缺点
+#### GMP 模型的优缺点
 
 GMP 模型的优点：
 
@@ -2224,3 +2226,270 @@ GMP 模型的缺点：
 - `GMP` 模型相对于传统的线程模型来说，更加复杂和难以理解，需要对 Go 语言的运行时系统有较深入的了解才能掌握其原理和细节。
 - `GMP` 模型由于涉及到 `用户态` 和 `内核态` 之间的切换和协作，可能会引入一些额外的开销和延迟，比如信号处理、栈扫描、内存分配等。
 - `GMP` 模型由于是基于 `协程` 的抽象，可能会导致一些潜在的问题或风险，比如协程泄露、协程同步、协程调试等。
+
+### Gorutine 调度时机
+
+根据调度方式的不同将 `Gorutine` 的调度时机分为下面3类：
+
+- 主动调度
+- 被动调度
+- 抢占调度
+
+#### 主动调度
+
+用户在代码中执行 `runtime.Gosched()`，可以让协程主动让渡自己的执行机会。
+
+某些特殊场景下，比如无限 `for` 循环 ，在 Go 1.14 版本之前是无法被抢占的，可以通过手动执行 `runtime.Gosched()` 的方式让出执行权。Go 1.14 之后的版本对于长时间执行的协程使用了操作系统的信号机制进行强制抢占。这种方式需要进入操作系统的内核，速度比不上用户直接调度的 `runtime.Gosched` 函数。
+
+主动调度的原理比较简单，需要先从当前 `协程` 切换到 `协程g0` ，取消 `G` 与 `M` 之间的绑定关系，将 `G` 放入全局运行队列，并调用 `schedule` 函数开始新一轮的循环。
+
+#### 被动调度
+
+被动调度指 `协程` 在休眠、channel 通道堵塞、锁操作、网络I/O阻塞、系统调用阻塞、执行垃圾回收等情况而暂停时，被动让渡自己执行机会的过程。
+
+> 被动调度的目的是保证最大化利用 CPU 的资源。
+
+和主动调度类似的是，被动调度需要先从当前 `协程` 切换到 `协程g0` ，更新协程的状态并解绑与 `M` 的关系，重新调度。和主动调度不同的是，被动调度不会将 `G` 放入全局运行队列。
+
+#### 抢占调度
+
+为了让每个 协程 都有执行的机会，并且最大化利用 CPU 资源，Go 语言在初始化时会启动一个 **特殊的线程** 来执行系统监控任务。系统监控在一个独立的 `M` 上运行，不用绑定逻辑处理器 `P` ，系统监控每隔 `10ms` 会检测是否有准备就绪的网络协程，并放置到 `全局队列` 中。系统监控服务会判断当前 协程 是否运行时间过长，或者处于系统调用阶段，如果出现这两种情况的话，则会抢占当前 `G` 的执行。
+
+> 在 Go1.14 之后的版本中，如果当前 协程 的执行时间超过了 `10ms` 或者一个 协程 在系统调用中超过了 `20微秒` ，就会触发抢占调度。
+
+当发生系统调用时，当前正在工作的线程会陷入 **等待状态**，等待内核完成系统调用并返回。当发生下面3种情况之一时，就会触发抢占调度：
+
+1. 当前 `P` 的本地运行队列中有等待运行的`G` 。在这种情况下，抢占调度只是为了让本地队列中的协程有执行的机会。
+2. 当前没有空闲的 `P` 和自旋的 `M` 。如果有空闲的 `P` 和自旋的 `M`，说明当前比较空闲，那么释放当前的 `P` 也没有太大意义。
+3. 当前系统调用的时间已经超过了 `10ms` ，这和执行时间过长一样，需要立即抢占。
+
+##### 什么是线程自旋（Spinning Threads）
+
+线程自旋是相对于线程阻塞而言的，其实就是循环执行一个指定逻辑（就是上面提到的调度逻辑，目的是不停地寻找 `G`）。
+
+这样做的问题显而易见，如果迟迟找不到可执行的 `G`，CPU 会白白浪费在这无意义的计算上。
+
+但好处也很明显，降低了 `M` 的上下文切换成本，提高了性能。
+
+假设 `Scheduler` 中全局和本地队列均为空，`M` 此时没有任何任务可以处理，那么此时有两个选择：
+
+1. 选择让 `M` 进入阻塞状态，唤醒则需要线程经过 **内核态** 到 **用户态** 的切换;
+2. 选择让 `M` 自旋，CPU 空转等待可执行的 `G`；
+
+当阻塞时间很短时，自旋的代价会更低，所以为了更高的调度性能，这里使用的是第二种自旋的方式。为了避免过多浪费 CPU 资源，自旋的线程数不会超过 `GOMAXPROCS` ，这是因为一个 `P` 在同一个时刻只能绑定一个 `M`，`P` 的数量不会超过 `GOMAXPROCS`，自然被绑定的 `M` 的数量也不会超过。对于未被绑定的“游离态”的 `M`，会进入休眠阻塞状态。
+
+### 调度过程中的工作窃取
+
+#### 什么是工作窃取
+
+为了实现高效的并发执行，系统线程 `M` 会优先执行其所绑定的 `P` 的本地队列的 `G`；如果当这个 `M`（系统线程）的本地队列 `P` 为空时，`M` 也会尝试从全局队列拿一批 `G` 放到 `P` 的本地队列；如果全局队列也为空时，会从其他 `P` 的本地队列偷一半放到自己 `P` 的本地队列，这种 `GMP` 调度模型被称为 **工作窃取（Work Stealing）**。
+
+<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E5%B7%A5%E4%BD%9C%E7%AA%83%E5%8F%96.jpg" alt="工作窃取" style="zoom:60%;" />
+
+**工作窃取** 实际上是一种多线程计算的一种调度机制，除了 **工作窃取** 还有一种是调度机制是 **工作共享**。那么 **工作窃取** 和 **工作共享** 有什么区别呢？
+
+1. **工作共享** 是当一个处理器创建新的 线程 时，它试图将一部分 线程 迁移到其他的处理器上执行，期望更充分的利用那些 `idle` 状态的处理器；
+2. 工作窃取是未被充分利用的处理器会主动寻找其他处理器上的线程，并“窃取”一些线程。
+
+他们的本质区别是 **工作共享** 是 **被动迁移** 到其它处理器上，而 **工作窃取** 是 **主动** 获取其他处理器上的执行任务。
+
+由于互联网服务的高并发特性，使得 CPU 处于高负载的状态是常态，从这个层面上看 **被动** 迁移要比 **主动** 窃取发生的概率更高。而不论是共享还是窃取都是有代价的，所以 **工作窃取** 执行的频率更低，对系统的消耗更少。
+
+#### 工作窃取机制的目的
+
+**工作窃取** 是调度器的一种优化技术，它可以减少线程之间的负载不平衡，从而提高程序的并发性能。
+
+我们可以通过下面的代码观察这一过程：
+
+```go
+package main
+
+import (
+	"fmt"
+	"math"
+	"runtime"
+	"sync"
+	"time"
+)
+
+func init() {
+	goMaxProcs := 2
+	cpuCoreNum := runtime.GOMAXPROCS(goMaxProcs)
+	Ticker(func() {
+		if goMaxProcs < cpuCoreNum {
+			goMaxProcs += 1
+			runtime.GOMAXPROCS(goMaxProcs)
+			fmt.Println("goMaxProcs:", goMaxProcs)
+		}
+	}, time.Second)
+}
+func main() {
+
+	var wg sync.WaitGroup
+	for i := 0; i < 5000; i++ {
+		wg.Add(1)
+		go func() {
+			x := 0
+			for i := 0; i < math.MaxInt; i++ {
+				x++
+			}
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
+}
+
+func Ticker(f func(), d time.Duration) {
+	go func() {
+		ticker := time.NewTicker(d)
+		for {
+			select {
+			case <-ticker.C:
+				go f()
+			}
+		}
+	}()
+}
+```
+
+在上面的代码中，我们设置初始 `P` 的数量为2，然后 每秒 将 `P` 的数量进行递增。
+
+我们通过开启 `GODEBUG` 模式运行即可打印出 `P` 队列及全局队列的调度情况，执行指令如下：
+
+```shell
+GODEBUG=schedtrace=1000 go run main.go
+```
+
+> 注意上面的指令需要在 linux 操作系统上执行，最终打印结果如下：
+
+```shell
+SCHED 0ms: gomaxprocs=16 idleprocs=15 threads=6 spinningthreads=0 idlethreads=3 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 0ms: gomaxprocs=16 idleprocs=13 threads=6 spinningthreads=1 idlethreads=1 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 0ms: gomaxprocs=16 idleprocs=15 threads=5 spinningthreads=0 idlethreads=3 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 0ms: gomaxprocs=16 idleprocs=14 threads=6 spinningthreads=1 needspinning=0 idlethreads=1 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+# internal/unsafeheader
+SCHED 0ms: gomaxprocs=16 idleprocs=15 threads=5 spinningthreads=0 needspinning=0 idlethreads=3 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+# internal/coverage/rtcov
+SCHED 0ms: gomaxprocs=16 idleprocs=14 threads=5 spinningthreads=1 needspinning=0 idlethreads=2 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+# internal/goos
+SCHED 0ms: gomaxprocs=16 idleprocs=15 threads=5 spinningthreads=0 needspinning=0 idlethreads=3 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+...
+...
+...
+# command-line-arguments
+SCHED 0ms: gomaxprocs=16 idleprocs=14 threads=6 spinningthreads=1 needspinning=0 idlethreads=2 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 0ms: gomaxprocs=16 idleprocs=15 threads=5 spinningthreads=0 needspinning=0 idlethreads=3 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 1002ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 1003ms: gomaxprocs=2 idleprocs=0 threads=5 spinningthreads=0 needspinning=1 idlethreads=2 runqueue=4871 [6 121]
+goMaxProcs: 3
+SCHED 2010ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 2011ms: gomaxprocs=3 idleprocs=0 threads=5 spinningthreads=0 needspinning=1 idlethreads=1 runqueue=4761 [85 71 80]
+goMaxProcs: 4
+SCHED 3018ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 3020ms: gomaxprocs=4 idleprocs=0 threads=5 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4829 [36 21 30 80]
+goMaxProcs: 5
+SCHED 4026ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 4028ms: gomaxprocs=5 idleprocs=0 threads=6 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4562 [115 100 109 31 79]
+goMaxProcs: 6
+SCHED 5033ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 7
+SCHED 5036ms: gomaxprocs=7 idleprocs=0 threads=8 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4606 [65 48 58 109 29 78 0]
+SCHED 6041ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 8
+SCHED 6044ms: gomaxprocs=8 idleprocs=0 threads=9 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4569 [15 126 8 59 108 29 78 0]
+SCHED 7048ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 9
+SCHED 7053ms: gomaxprocs=9 idleprocs=0 threads=10 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4454 [94 75 85 10 58 108 29 78 0]
+SCHED 8055ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 10
+SCHED 8061ms: gomaxprocs=10 idleprocs=0 threads=11 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4389 [45 25 35 87 9 58 108 29 78 127]
+SCHED 9062ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 11
+SCHED 9070ms: gomaxprocs=11 idleprocs=0 threads=12 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4117 [124 103 113 37 87 9 58 108 29 77 127]
+SCHED 10070ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 12
+SCHED 10079ms: gomaxprocs=12 idleprocs=0 threads=13 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4151 [75 53 63 115 38 87 9 58 108 28 77 126]
+SCHED 11077ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 13
+SCHED 11088ms: gomaxprocs=13 idleprocs=0 threads=14 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4234 [26 3 13 65 117 38 87 9 58 107 28 76 126]
+SCHED 12084ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 14
+SCHED 12097ms: gomaxprocs=14 idleprocs=0 threads=15 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=3984 [104 81 91 15 68 117 38 87 9 57 107 27 76 125]
+SCHED 13091ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 15
+SCHED 13107ms: gomaxprocs=15 idleprocs=0 threads=16 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4038 [55 30 40 94 19 69 117 38 87 8 57 106 27 75 125]
+SCHED 14098ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+goMaxProcs: 16
+SCHED 14107ms: gomaxprocs=16 idleprocs=0 threads=17 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=3876 [7 109 119 44 99 20 69 118 39 87 9 57 106 26 75 124]
+SCHED 15106ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 15116ms: gomaxprocs=16 idleprocs=0 threads=17 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=3894 [86 60 70 123 49 99 20 69 118 38 87 9 57 105 26 74]
+SCHED 16112ms: gomaxprocs=16 idleprocs=16 threads=23 spinningthreads=0 needspinning=0 idlethreads=16 runqueue=0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+SCHED 16124ms: gomaxprocs=16 idleprocs=0 threads=17 spinningthreads=0 needspinning=1 idlethreads=0 runqueue=4168 [37 11 21 74 0 49 99 20 69 117 38 87 8 56 105 25]
+```
+
+上述 `trace` 显示了全局队列中的 `goroutine` 数量，括号[37 11 21 74 0 49 99 20 69 117 38 87 8 56 105 25]中为本地 `P` 队列的 `Goroutine` 数量。
+
+当本地队列满了，达到 256 个等待的 `goroutine` 时，接下来的 `goroutine` 将堆叠在全局队列中，`runqueue` 显示了当前全局队列中 `Gorutine` 的数量。
+
+我们可以看到，当 `P` 的数量不断增加的时候，新增的 `P` 随后就被放入了一定数量的 `G`，当然这些 `G` 可能是从其他 `P` 窃取过来的，也可能是新的 `G` 直接被创建在这个空闲的 `P` 中。
+
+另外我们也可以看到，当本地 `P` 队列未满的情况的下，全局队列也有一定数量的 `G` 。所以 `Goroutine` 并不是只有在本地队列满了的时候才会进入全局队列，
+
+在某些情况下，比如来自网络轮询器或垃圾收集过程中处于 `sleep` 状态的 `goroutine` 也会直接被放到全局队列中。
+
+### GMP 调度过程触发阻塞的情况
+
+`GMP` 底层数据结构中，在 `g` 结构体中有一个 `waitreason` 字段，也就是 `Goroutine` 等待原因，从这个字段中我们就可以知道哪些情况会使得 `GMP` 调度发生阻塞。`waitreason` 字段枚举值如下：
+
+> 源码路径：$GOROOT\runtime\runtime2.go
+
+```go
+const (
+	waitReasonZero                  waitReason = iota // ""
+	waitReasonGCAssistMarking                         // "GC assist marking"
+	waitReasonIOWait                                  // "IO wait"
+	waitReasonChanReceiveNilChan                      // "chan receive (nil chan)"
+	waitReasonChanSendNilChan                         // "chan send (nil chan)"
+	waitReasonDumpingHeap                             // "dumping heap"
+	waitReasonGarbageCollection                       // "garbage collection"
+	waitReasonGarbageCollectionScan                   // "garbage collection scan"
+	waitReasonPanicWait                               // "panicwait"
+	waitReasonSelect                                  // "select"
+	waitReasonSelectNoCases                           // "select (no cases)"
+	waitReasonGCAssistWait                            // "GC assist wait"
+	waitReasonGCSweepWait                             // "GC sweep wait"
+	waitReasonGCScavengeWait                          // "GC scavenge wait"
+	waitReasonChanReceive                             // "chan receive"
+	waitReasonChanSend                                // "chan send"
+	waitReasonFinalizerWait                           // "finalizer wait"
+	waitReasonForceGCIdle                             // "force gc (idle)"
+	waitReasonSemacquire                              // "semacquire"
+	waitReasonSleep                                   // "sleep"
+	waitReasonSyncCondWait                            // "sync.Cond.Wait"
+	waitReasonSyncMutexLock                           // "sync.Mutex.Lock"
+	waitReasonSyncRWMutexRLock                        // "sync.RWMutex.RLock"
+	waitReasonSyncRWMutexLock                         // "sync.RWMutex.Lock"
+	waitReasonTraceReaderBlocked                      // "trace reader (blocked)"
+	waitReasonWaitForGCCycle                          // "wait for GC cycle"
+	waitReasonGCWorkerIdle                            // "GC worker (idle)"
+	waitReasonGCWorkerActive                          // "GC worker (active)"
+	waitReasonPreempted                               // "preempted"
+	waitReasonDebugCall                               // "debug call"
+	waitReasonGCMarkTermination                       // "GC mark termination"
+	waitReasonStoppingTheWorld                        // "stopping the world"
+)
+```
+
+大致总结下来主要有下面这些情况：
+
+1. 系统调用（`syscall`）：当 `Goroutine` 执行一个系统调用（比如读写文件、网络操作等）时，系统调用会导致 `Goroutine` 阻塞，此时 `M` 可以释放 `P`，并尝试获取新的 `P` 来执行其他可运行的 `Goroutine`；
+2. 内存同步访问。比如 `Channel` 操作，`Mutex` 和 `读写锁` 以及 `Select` 语句，同步原语（如 `sync.WaitGroup`、`sync.Cond` 等）等。
+   - `Channel` 操作：当 `Goroutine` 尝试从一个空的 `Channel` 接收数据或者向一个满的 `Channel` 发送数据时，它会被阻塞，直到有数据可读或者 `Channel` 可以接收数据为止。
+   - `Mutex` 和 `读写锁`（ `sync.Mutex` 和 `sync.RWMutex`）：当 `Goroutine` 尝试获取一个被其他 `Goroutine` 持有的互斥锁或读写锁时，它会被阻塞，直到锁被释放。
+   - `Select` 语句：当 `Goroutine` 执行 `select` 语句时，如果没有任何 `case` 可执行，它会被阻塞，直到有一个 `case` 可执行为止。
+   - `同步原语`（如 `sync.WaitGroup`、s`ync.Cond` 等）：当 `Goroutine` 尝试等待一个同步原语完成时，它会被阻塞，直到同步操作完成。
+3. 垃圾回收（`GC`）：在垃圾回收过程中，特别是 Go1.8 版本之前，还没有混合写屏障机制的版本，在标记扫描阶段以及 `STW` 都会导致 `Goroutine` 的阻塞；
+4. 睡眠（`Sleep` ）：当 `Goroutine` 调用 `time.Sleep() `方法时，它会被阻塞，直到休眠时间结束。
+
+> 当 `goroutine` 调度过程中发生了阻塞，系统线程 `M` 并不会一直等待，而会选择与当前的 `P` 解绑，调度执行其他本地队列或全局队列中的 `goroutine` 。
