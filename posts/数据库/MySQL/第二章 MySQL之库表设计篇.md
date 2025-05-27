@@ -344,7 +344,7 @@ SELECT * FROM `zz_roles_permissions`;
 
 经过一系列的阐述后，其实不难发现，越到后面的范式，越难令人理解，同时为了让表满足更高级别的范式，越往后付出代价也越大，而且拆分出的表数量也会越多，所以一般实际开发中，对于库表的设计最高满足 `BC` 范式即可，再往后就没意义了，因为表数量一多，查询也好，写入也罢，性能会越来越差。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20MySQL%E4%B9%8B%E5%BA%93%E8%A1%A8%E8%AE%BE%E8%AE%A1%E7%AF%87.assets/7f60a3cbd2f04a01886705d96bfffdfe~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="七大范式" style="zoom:50%;" />
+![image-20250527171503777](./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20MySQL%E4%B9%8B%E5%BA%93%E8%A1%A8%E8%AE%BE%E8%AE%A1%E7%AF%87.assets/image-20250527171503777.png)
 
 - 第一范式：原子性，每个字段的值不能再分。
 - 第二范式：唯一性，表内每行数据必须描述同一业务属性的数据。
