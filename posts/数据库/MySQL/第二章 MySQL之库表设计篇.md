@@ -1,5 +1,5 @@
 ---
-title: 第三篇 MySQL之库表设计篇
+title: 第二篇 MySQL之库表设计篇
 tags:
   - MySQL
 categories:

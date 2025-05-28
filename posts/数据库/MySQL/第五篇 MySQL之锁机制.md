@@ -1,5 +1,5 @@
 ---
-title: 第五篇 MySQL之锁机制
+title: 第五篇 MySQL之锁机制篇
 tags:
   - MySQL
 categories:
