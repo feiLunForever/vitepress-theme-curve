@@ -331,7 +331,7 @@ UPDATE `zz_account` SET balance = balance + 666 WHERE user_name = "竹子";
 
 套个例子来理解，好比目前库中有 `T1`、`T2`、`T3` 三个事务、有 `X1`、 `X2`、 `X3` 三个锁，事务与锁的关系如下：
 
-<img src="./%E7%AC%AC%E4%BA%94%E7%AF%87%20MySQL%E4%B9%8B%E9%94%81%E6%9C%BA%E5%88%B6.assets/image-20250523181344680.png" alt="image-20250523181344680" style="zoom:95%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250523181344680.png" alt="image-20250523181344680" style="zoom:95%;" />
 
 此时当T3事务需要阻塞等待获取X1锁时，就会触发一次 `wait-for graph` 算法，流程如下：
 

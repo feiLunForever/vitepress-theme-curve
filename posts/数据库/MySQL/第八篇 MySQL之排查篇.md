@@ -95,7 +95,7 @@ and
 
 此时找到本地的慢查询日志，接着打开它来瞧瞧其中是否有数据呢？如下：
 
-![image-20250528173915166](./%E7%AC%AC%E5%85%AB%E7%AF%87%20MySQL%E4%B9%8B%E6%8E%92%E6%9F%A5%E7%AF%87.assets/image-20250528173915166.png)
+![image-20250528173915166](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250528173915166.png)
 
 从上面日志中记录的查询信息来看，可以得知几个信息：
 
@@ -117,7 +117,7 @@ and
 
 通过`show status like 'innodb_row_lock_%';`命令可以查询`MySQL`整体的锁状态，如下：
 
-![image-20250528174219584](./%E7%AC%AC%E5%85%AB%E7%AF%87%20MySQL%E4%B9%8B%E6%8E%92%E6%9F%A5%E7%AF%87.assets/image-20250528174219584.png)
+![image-20250528174219584](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250528174219584.png)
 
 - `Innodb_row_lock_current_waits`：当前正在阻塞等待锁的事务数量。
 - `Innodb_row_lock_time`：`MySQL `启动到现在，所有事务总共阻塞等待的总时长。
@@ -152,7 +152,7 @@ and
 
 当出现死锁时，`MySQL` 会将死锁对应的信息记录到该日志中，但这个日志会记录着 `InnoDB` 运行期间的所有状态日志，因此输入之后，要先找到 `LATEST DETECTED DEADLOCK` 这块区域的日志：
 
-![image-20250528175013213](./%E7%AC%AC%E5%85%AB%E7%AF%87%20MySQL%E4%B9%8B%E6%8E%92%E6%9F%A5%E7%AF%87.assets/image-20250528175013213.png)
+![image-20250528175013213](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250528175013213.png)
 
 在上面的日志中，基本上已经写的很清楚了，在 `2022-11-04 23:04:34` 这个时间点上，检测到了一个死锁出现，该死锁主要由两个事务产生，`SQL` 如下：
 

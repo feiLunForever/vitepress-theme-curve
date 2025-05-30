@@ -47,7 +47,7 @@ Redisson 的分布式锁 RLock 是一种可重入锁。当一个线程获取到�
 
 **在Redisson中，不再用简单的key-value来实现分布式锁。而是使用key-hashMap来实现分布式锁，hashMap中也是key-value组合，key为表示哪个线程持有这把锁，value为锁的重入次数。**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/bddbecf2c19ca58e3708140bfe888615.png" alt="在这里插入图片描述" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/bddbecf2c19ca58e3708140bfe888615.png" alt="在这里插入图片描述" style="zoom:50%;" />
 
 > 废话不多说, 我们直接进入 Redisson的锁重入源码解读
 
@@ -55,7 +55,7 @@ Redisson 的分布式锁 RLock 是一种可重入锁。当一个线程获取到�
 
 #### tryLock
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405161732437.png" alt="image-20250405161732437" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405161732437.png" alt="image-20250405161732437" style="zoom:60%;" />
 
 - waitTime : 获取锁的最大等待时长, 第一次获取锁失败不会立即返回, 而是在等待时间内不断的尝试, 如果这个时间结束了都还没获取成功, 才返回false
 - lease : 锁自动失效释放的时间
@@ -90,7 +90,7 @@ private Long tryAcquire(long leaseTime, TimeUnit unit, long threadId) {
 
 继续看`tryLockInner`方法 - 它是最核心的加锁 Lua 脚本：
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405163511138.png" alt="image-20250405163511138" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405163511138.png" alt="image-20250405163511138" style="zoom:60%;" />
 
 > lua脚本部分执行成功返回的是nil (类似于我们java中的null), 执行失败了反而返回一个结果 : redis.call ( 'pttl', KEYS[1] ) 也就是锁的剩余的有效期
 
@@ -102,27 +102,27 @@ private Long tryAcquire(long leaseTime, TimeUnit unit, long threadId) {
 
 **我们现在往回倒一步**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405171938572.png" alt="image-20250405171938572" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405171938572.png" alt="image-20250405171938572" style="zoom:60%;" />
 
 把RFuture返回以后, 这里就有回到了这里 get(tryAcquireAsync((wait, leaseTime, threadId))
 
 **get方法就是获取阻塞等待RFuther结果, 等待得到的剩余有效期**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405172018656.png" alt="image-20250405172018656" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405172018656.png" alt="image-20250405172018656" style="zoom:60%;" />
 
 **这时就回到了这里**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405172044357.png" alt="image-20250405172044357" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405172044357.png" alt="image-20250405172044357" style="zoom:60%;" />
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405172111129.png" alt="image-20250405172111129" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405172111129.png" alt="image-20250405172111129" style="zoom:60%;" />
 
 这里的subscribe就是订阅释放锁的lua脚本中的publish。
 
 如果等待结束还没有收到通知就取消订阅, 并返回获取锁失败。
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405172142862.png" alt="image-20250405172142862" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405172142862.png" alt="image-20250405172142862" style="zoom:60%;" />
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405172217459.png" alt="image-20250405172217459" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405172217459.png" alt="image-20250405172217459" style="zoom:60%;" />
 
 `if (ttl>=0 && ttl < time)`
 
@@ -151,32 +151,32 @@ Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果�
 
 我们必须确保锁是业务执行完释放的, 而不是因为阻塞而释放的。
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250421172522354.png" alt="image-20250421172522354" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250421172522354.png" alt="image-20250421172522354" style="zoom:80%;" />
 
 #### tryAcquire
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204341854.png" alt="image-20250405204341854" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405204341854.png" alt="image-20250405204341854" style="zoom:60%;" />
 
 - 当我们没有设置leaseTime的时候, 也就是leaseTime=-1的时候就用看门狗过期时间来获取锁
 - watchTimeout默认时间是30s
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204423306.png" alt="image-20250405204423306" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405204423306.png" alt="image-20250405204423306" style="zoom:60%;" />
 
 - 当ttlRemainingFuture的异步尝试获取锁完成以后, 先判断执行过程中是否有异常, 如果有异常就直接返回了结束执行.
 - 如果没有发生异常, 则判断ttlRemaining(剩余有效期)是否为空, 为空的话就代表获取锁成功, 执行锁到期续约的核心方法scheduleExpectationRenew
 
 #### **scheduleExpectationRenew**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204526114.png" alt="image-20250405204526114" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405204526114.png" alt="image-20250405204526114" style="zoom:60%;" />
 
 **这里面的 `EXPIRATION_RENEWAL_MAP` 中的 key 很有意思，我们进去看一下**：
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204623365.png" alt="image-20250405204623365" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405204623365.png" alt="image-20250405204623365" style="zoom:60%;" />
 
 - 清楚的发现 entryName由 id 和 name 两部分组成
 - id就是当前的这个连接的id, name 就是 当前锁的名称
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204704553.png" alt="image-20250405204704553" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405204704553.png" alt="image-20250405204704553" style="zoom:60%;" />
 
 这就好办了, 我们可以这样理解`getEntryName`**获得的就是锁的名称**, 而这个`EXPIRATION_RENEWAL_MAP`是静态的, 那么`RedissonLock`类的所有实例就都可以看到这个`map`。
 
@@ -191,23 +191,23 @@ Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果�
 
 **internalLockLeaseTime是这样来的**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204909871.png" alt="image-20250405204909871" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405204909871.png" alt="image-20250405204909871" style="zoom:60%;" />
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405204928998.png" alt="image-20250405204928998" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405204928998.png" alt="image-20250405204928998" style="zoom:60%;" />
 
 这个方法主要开启一段定时任务, 不断的去更新有效期, 定时任务的的时间就是 `看门狗时间 / 3`, 也就是10s后刷新有效期。
 
 **10s后做这样一件事**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405205024998.png" alt="image-20250405205024998" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405205024998.png" alt="image-20250405205024998" style="zoom:60%;" />
 
 刷新有效期
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405205051894.png" alt="image-20250405205051894" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405205051894.png" alt="image-20250405205051894" style="zoom:60%;" />
 
 这段lua脚本重置有效期, 满血复活
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405205113377.png" alt="image-20250405205113377" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405205113377.png" alt="image-20250405205113377" style="zoom:60%;" />
 
 这里实现了递归， 一直调用自己,，这就是锁永不过期的原因。
 
@@ -217,9 +217,9 @@ Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果�
 
 ### 解锁流程分析
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405205224039.png" alt="image-20250405205224039" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405205224039.png" alt="image-20250405205224039" style="zoom:60%;" />
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250405205247088.png" alt="image-20250405205247088" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250405205247088.png" alt="image-20250405205247088" style="zoom:60%;" />
 
 - 先从map中取出任务，先移除任务的线程Id，再取消这个任务，最后再移除entry。
 
@@ -227,7 +227,7 @@ Redisson锁重试的问题是解决了, 但是总会发生一些问题, 如果�
 
 #### 执行流程
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/image-20250406102459833.png" alt="image-20250406102459833" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250406102459833.png" alt="image-20250406102459833" style="zoom:50%;" />
 
 #### Redisson分布式锁原理
 
@@ -550,7 +550,7 @@ thread01 在10:00:00 执行加锁逻辑，下面开始一点点分析lua脚本�
 
 **简单画图总结如下：**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/d3c623257c79cbc9ba58a6d909f9b8e5.png" alt="img" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/d3c623257c79cbc9ba58a6d909f9b8e5.png" alt="img" style="zoom:80%;" />
 
 #### **客户端C thread03 加锁分析**
 
@@ -587,7 +587,7 @@ thread01 在10:00:00 执行加锁逻辑，下面开始一点点分析lua脚本�
 
 **最终执行完后 如下图：**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/d23f20c53c2e298401289fe8dc17716b.png" alt="img" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/d23f20c53c2e298401289fe8dc17716b.png" alt="img" style="zoom:80%;" />
 
 上面已经知道了，多个线程加锁过程中实际会进行排队，根据加锁的时间来作为获取锁的优先级，如果此时客户端A释放了锁，来看下客户端B、C是如果获取锁的。
 
@@ -1172,7 +1172,7 @@ anyLock: {
 
 此时继续往下，具体逻辑如图：
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/911f59e7d56481e93cac580c53d2fb00.png" alt="img" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/911f59e7d56481e93cac580c53d2fb00.png" alt="img" style="zoom:80%;" />
 
 > 1. hlen anyLock > 1，就是hash里面的元素超过1个
 > 2. pttl {anyLock}:UUID_01:threadId_01:rwlock_timeout:1，此时获取那个timeout key的剩余生存时间还有多少毫秒，比如说此时这个key的剩余生存时间是20000毫秒
@@ -1461,7 +1461,7 @@ anyLock: {
 
 先看下Semaphore原理图如下：
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/2pqgznoety.png" alt="img" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/2pqgznoety.png" alt="img" style="zoom:80%;" />
 
 ```java
 RSemaphore semaphore = redisson.getSemaphore("semaphore");
@@ -1574,7 +1574,7 @@ public class RedissonSemaphore extends RedissonExpirable implements RSemaphore {
 
 此时如果再来进行加锁则直接返回0，然后进入死循环去获取锁，如下图：
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/ovhix4txs5.png" alt="img" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/ovhix4txs5.png" alt="img" style="zoom:60%;" />
 
 接着看看解锁逻辑`releaseAsync()` ：
 
@@ -1618,7 +1618,7 @@ System.out.println(new Date() + "：线程[" + Thread.currentThread().getName() 
 
 **接着分析`latch.await();`方法，如下图：**
 
-<img src="./redisson%E6%A1%86%E6%9E%B6.assets/7sy1pcoiyt.png" alt="img" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/7sy1pcoiyt.png" alt="img" style="zoom:60%;" />
 
 这个方法其实就是陷入一个while true死循环，不断的get anyCountDownLatch的值，如果这个值还是大于0那么就继续死循环，否则的话呢，就退出这个死循环。
 

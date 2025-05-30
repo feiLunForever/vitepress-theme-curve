@@ -38,7 +38,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 `MySQL `是基于它自身的 `Bin-log` 日志来完成数据的异步复制，因为 `Bin-log` 日志中会记录所有对数据库产生变更的语句，包括 `DML` 数据变更和 `DDL` 结构变更语句，数据的同步过程如下：
 
-<img src="./%E7%AC%AC%E4%B9%9D%E7%AB%A0%20MySQL%E4%B9%8B%E4%B8%BB%E4%BB%8E%E7%AF%87.assets/image-20250528180932022.png" alt="image-20250528180932022" style="zoom:70%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250528180932022.png" alt="image-20250528180932022" style="zoom:70%;" />
 
 - ① 客户端将写入数据的需求交给主节点，主节点先向自身写入数据。
 - ② 数据写入完成后，紧接着会再去记录一份 `Bin-log` 二进制日志。

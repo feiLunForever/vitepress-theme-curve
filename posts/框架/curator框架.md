@@ -18,11 +18,11 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 ### 加锁示例
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418155305185.png" alt="image-20250418155305185" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418155305185.png" alt="image-20250418155305185" style="zoom:80%;" />
 
 #### 加锁前
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418155458130.png" alt="image-20250418155458130" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418155458130.png" alt="image-20250418155458130" style="zoom:80%;" />
 
 在加锁之前，ZooKeeper 仅有一个节点 `/zookeeper`。
 
@@ -30,7 +30,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 在 `/locks/lock_01` 路径上加锁。
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418155543072.png" alt="image-20250418155543072" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418155543072.png" alt="image-20250418155543072" style="zoom:80%;" />
 
 #### 加锁后
 
@@ -141,13 +141,13 @@ String attemptLock(long time, TimeUnit unit, byte[] lockNodeBytes) throws Except
 
 `StandardLockInternalsDriver#createsTheLock`
 
-![image-20250418160259723](./curator%E6%A1%86%E6%9E%B6.assets/image-20250418160259723.png)
+![image-20250418160259723](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418160259723.png)
 
 可以看出节点的 mode 是 `CreateMode.EPHEMERAL_SEQUENTIAL`，表示这是一个**临时顺序节点**！
 
 进入 `CreateBuilderImpl#forPath(java.lang.String, byte[])`
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418160333219.png" alt="image-20250418160333219" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418160333219.png" alt="image-20250418160333219" style="zoom:80%;" />
 
 `client.getDefaultData()` 就是本机 IP 地址。
 
@@ -157,7 +157,7 @@ String attemptLock(long time, TimeUnit unit, byte[] lockNodeBytes) throws Except
 
 具体创建节点是在 `CreateBuilderImpl#pathInForeground` 中。
 
-![image-20250418160415129](./curator%E6%A1%86%E6%9E%B6.assets/image-20250418160415129.png)
+![image-20250418160415129](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418160415129.png)
 
 1. 创建临时节点，如果路径存在，会创建成功，如果路径不存在会创建失败；
 2. 创建失败后，先创建路径，再创建节点。
@@ -168,7 +168,7 @@ String attemptLock(long time, TimeUnit unit, byte[] lockNodeBytes) throws Except
 
 ##### 内部锁循环判断是否获取锁成功
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418161959719.png" alt="image-20250418161959719" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418161959719.png" alt="image-20250418161959719" style="zoom:80%;" />
 
 `LockInternals#internalLockLoop`
 
@@ -248,7 +248,7 @@ private boolean internalLockLoop(long startMillis, Long millisToWait, String our
 
 ###### 是否获取锁
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418162122687.png" alt="image-20250418162122687" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418162122687.png" alt="image-20250418162122687" style="zoom:80%;" />
 
 这块就是判断是否为最小节点，因为在 `getSortedChildren` 中已经对所有节点排序，所以方法中的 `List<String> children` 是有序的。
 
@@ -262,9 +262,9 @@ private boolean internalLockLoop(long startMillis, Long millisToWait, String our
 
 因为是为了防止无效自旋，因为这里有监听机制，会监听上一个节点是否释放。
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418162324541.png" alt="image-20250418162324541" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418162324541.png" alt="image-20250418162324541" style="zoom:80%;" />
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418162340004.png" alt="image-20250418162340004" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418162340004.png" alt="image-20250418162340004" style="zoom:80%;" />
 
 这块是 ZooKeeper 的 `Watcher` 监听机制，在节点释放的时候，会进行回调，然后使用 Java 的 notifyAll 方法通知所有的 wait 线程。然后这里的 `while true` 会继续执行，重新检查是否获得锁等。
 
@@ -278,7 +278,7 @@ private boolean internalLockLoop(long startMillis, Long millisToWait, String our
 
 加锁的过程看完后，再回头看 `internalLock` 这个方法。
 
-![image-20250418161131831](./curator%E6%A1%86%E6%9E%B6.assets/image-20250418161131831.png)
+![image-20250418161131831](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418161131831.png)
 
 - 加锁成功之后，将当前线程放到 `threadData` 中，threadData 是 `ConcurrentMap<Thread, LockData>` 类型的，不用担心并发问题。
 - 假如锁重入了，直接就会在上一部分 `lockData != null` 被拦下，然后执行 `lockData.lockCount.incrementAndGet();`。对 lockCount 自增，代表了锁重入。
@@ -287,7 +287,7 @@ private boolean internalLockLoop(long startMillis, Long millisToWait, String our
 
 #### 总结
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418161549825.png" alt="image-20250418161549825" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418161549825.png" alt="image-20250418161549825" style="zoom:80%;" />
 
 重点需要关注的是：
 
@@ -341,7 +341,7 @@ public void release() throws Exception {
 
 ZooKeeper 的 `InterProcessMutex` 锁是通过 Java 代码中维护了一个 `lockCount` 来判断是否重入的。
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418161447408.png" alt="image-20250418161447408" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418161447408.png" alt="image-20250418161447408" style="zoom:80%;" />
 
 ## 分布式信号量和互斥锁
 
@@ -389,7 +389,7 @@ public class CuratorDemo {
 
 控制台输出数据如下：
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418163243094.png" alt="image-20250418163243094" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418163243094.png" alt="image-20250418163243094" style="zoom:80%;" />
 
 ### 源码分析
 
@@ -397,19 +397,19 @@ public class CuratorDemo {
 
 `InterProcessSemaphoreV2#internalAcquire1Lease`
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418163345829.png" alt="image-20250418163345829" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418163345829.png" alt="image-20250418163345829" style="zoom:80%;" />
 
 lock 是 `InterProcessMutex`，`InterProcessSemaphoreV2` 信号量，也是借助于最基础的加锁。
 
-![image-20250418163417079](./curator%E6%A1%86%E6%9E%B6.assets/image-20250418163417079.png)
+![image-20250418163417079](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418163417079.png)
 
 通过图也可以看出，使用 `InterProcessSemaphoreV2` 时，会先创建 `/semaphores/semaphore_01` 路径，并在路径下创建 `locks` 节点。也就是 `/semaphores/semaphore_01/locks` 路径下，有 10 个临时顺序节点。
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418170350516.png" alt="image-20250418170350516" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418170350516.png" alt="image-20250418170350516" style="zoom:80%;" />
 
 紧接着会在 `/semaphores/semaphore_01` 路径下创建 `leases` 节点，所以创建锁的临时顺序节点之后，会紧接着在 `/semaphores/semaphore_01/leases` 下创建临时顺序节点。
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418170431075.png" alt="image-20250418170431075" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418170431075.png" alt="image-20250418170431075" style="zoom:80%;" />
 
 对 `/semaphores/semaphore_01/leases` 节点进行监听，同时获取 `/semaphores/semaphore_01/leases` 下面的子节点数量。
 
@@ -445,7 +445,7 @@ lock 是 `InterProcessMutex`，`InterProcessSemaphoreV2` 信号量，也是借�
 
 #### 释放凭证
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418170510166.png" alt="image-20250418170510166" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418170510166.png" alt="image-20250418170510166" style="zoom:80%;" />
 
 释放凭证就是调用 Lease 的 close 方法，删除节点，这样 `/semaphores/semaphore_01/leases` 上的监听器就会触发，然后其他线程获取凭证。
 
@@ -453,7 +453,7 @@ lock 是 `InterProcessMutex`，`InterProcessSemaphoreV2` 信号量，也是借�
 
 互斥锁 `InterProcessSemaphoreMutex`，不支持重入，其他的和可重入锁并没有什么区别。就是基于 `InterProcessSemaphoreV2` 实现的。
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418170651967.png" alt="image-20250418170651967" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418170651967.png" alt="image-20250418170651967" style="zoom:80%;" />
 
 就是把计数的值 `maxLeases` 设置为了 1。
 
@@ -496,22 +496,22 @@ public class CuratorDemo {
 
 ### 源码
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171004738.png" alt="image-20250418171004738" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418171004738.png" alt="image-20250418171004738" style="zoom:80%;" />
 
 读锁写锁都是基于 `InterProcessMutex` 实现的，所以基本都和 `InterProcessMutex` 没有区别。不过这里生成的锁名字不再是 `-lock-` 而是换成了 `__WRIT__` 和 `__READ__`。
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171040238.png" alt="image-20250418171040238" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418171040238.png" alt="image-20250418171040238" style="zoom:80%;" />
 
 - 读锁加锁节点名为 `/locks/lock_01/_c_44a8eaf8-f177-403a-92bf-9119591b54d5-__READ__0000000000`，写锁解锁节点名为 `_c_2e5dde98-c548-4f8b-a798-821ee8330eb6-__WRIT__0000000001`。
 - 其中创建节点时和可重入锁 `InterProcessMutex` 没有区别，唯一的区别就是在 `internalLockLoop` 方法中，判断锁获取结果时有区别。
 - 当可重入锁时是在 `StandardLockInternalsDriver#getsTheLock` 判断当前节点是否为最小节点。
 - 而读写锁是在 `InterProcessReadWriteLock#InterProcessReadWriteLock` 中重写了 `getsTheLock` 方法。
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171139742.png" alt="image-20250418171139742" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418171139742.png" alt="image-20250418171139742" style="zoom:80%;" />
 
 #### 读锁加锁
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171206563.png" alt="image-20250418171206563" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418171206563.png" alt="image-20250418171206563" style="zoom:80%;" />
 
 ```java
 public static class ReadLock extends InternalInterProcessMutex {
@@ -594,11 +594,11 @@ public static class ReadLock extends InternalInterProcessMutex {
 
 #### 联锁
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171330216.png" alt="image-20250418171330216" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418171330216.png" alt="image-20250418171330216" style="zoom:80%;" />
 
 联锁的使用，就是将 `InterProcessLock` 放到集合中，然后进行统一加锁。
 
-<img src="./curator%E6%A1%86%E6%9E%B6.assets/image-20250418171356153.png" alt="image-20250418171356153" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250418171356153.png" alt="image-20250418171356153" style="zoom:80%;" />
 
 加锁就遍历集合，依次进行加锁。
 

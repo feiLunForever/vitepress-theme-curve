@@ -37,12 +37,12 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 - 只分库：
   - 就是一个数据库分成多个数据库，部署到不同机器
-  - <img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529132429310.png" alt="image-20250529132429310" style="zoom:50%;" />
+  - <img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529132429310.png" alt="image-20250529132429310" style="zoom:50%;" />
   - 业务量剧增，MySQL 单机磁盘容量会撑爆，拆成多个数据库，磁盘使用率大大降低
   - 数据库连接是有限的。在高并发的场景下，大量请求访问数据库，MySQL 单机是扛不住的，将单个数据库拆成多个库（订单库、用户库、商品库），以分担读写压力
 
 - 分库分表
-  - <img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529132500314.png" alt="image-20250529132500314" style="zoom:50%;" />
+  - <img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529132500314.png" alt="image-20250529132500314" style="zoom:50%;" />
   - 单表数据量较大，单表读写性能出现瓶颈；
   - 数据库(读）写压力较大，数据库出现存储性能瓶颈
 
@@ -84,7 +84,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 图例如下：
 
-<img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529132642146.png" alt="image-20250529132642146" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529132642146.png" alt="image-20250529132642146" style="zoom:90%;" />
 
 - 优点：非常适合于存储 **冷热** 分明的业务数据，几乎所有查询操作全部在热数据表中完成，而冷数据则是以半归档的方式进行存储。
 - 缺点：热点数据全部集中在一张表中，在高并发的场景下容易产生性能瓶颈。
@@ -95,7 +95,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 图例如下：
 
-<img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529132731776.png" alt="image-20250529132731776" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529132731776.png" alt="image-20250529132731776" style="zoom:90%;" />
 
 - 优点：无论是分库还是分表，热点数据都已经全部散开，可以从容应对高并发的场景，不会产生性能瓶颈。
 - 缺点：对非 `Sharding Key` 的查询操作不友好，只能将所有库表全部查询一遍，然后再进行多路归并的方式返回结果。而且扩容时，还需要 `数据迁移`
@@ -106,7 +106,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 图例如下：
 
-<img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529133021664.png" alt="image-20250529133021664" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529133021664.png" alt="image-20250529133021664" style="zoom:90%;" />
 
 优点：
 
@@ -124,7 +124,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 图例如下：
 
-<img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529133133108.png" alt="image-20250529133133108" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529133133108.png" alt="image-20250529133133108" style="zoom:90%;" />
 
 优点：
 
@@ -160,7 +160,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 如下图所示：
 
-![image-20250529133236115](./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529133236115.png)
+![image-20250529133236115](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529133236115.png)
 
 这个方案的优点是，按照 `订单 ID` 进行分库分表，每个库表中的数据会分散得非常均匀，且热点数据全部散开，不会出现一个数据库读写压力过大导致性能瓶颈，其他数据库却出现资源闲置的情况。
 
@@ -174,7 +174,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 如下图所示：
 
-![image-20250529133340430](./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529133340430.png)
+![image-20250529133340430](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529133340430.png)
 
 这个方案的优点是，通过 `用户 ID` 作为 `Sharding Key` 进行分库分表，55% 根据用户 ID 进行查询的请求不需要进行跨库查询了。
 
@@ -194,7 +194,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 当我们在创建订单的时候，同时将 `订单 ID` 和 `用户 ID` 的对应关系写入 `映射表` 中，这样根据 `订单 ID` 进行查询的时候，就可以先到 `映射表` 中查询到用户 ID，再通过 `用户 ID` + `订单 ID` 查询到对应的订单数据。
 
-![image-20250529133536783](./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529133536783.png)
+![image-20250529133536783](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529133536783.png)
 
 这个技术方案的优点是简单清晰，开发工作量小，缺点是需要多进行一次映射表查询，且映射表的存储也是一种开销。另外，映射表数据量过大，也需要进行分库分表。
 
@@ -210,7 +210,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 如上文所述，我们“通过 `用户 ID` 作为` Sharding Key`” 分了 10 个库，每个库有 10 张表，算起来正好是 100 张表，后两位（00～99）恰好够了。
 
-![image-20250529133705649](./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529133705649.png)
+![image-20250529133705649](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529133705649.png)
 
 > 需要注意的是，以这种方式生成的 `订单 ID`，MySQL 中的 bigint 数据类型已经存不下了，需要用 decimal(21) 来进行存储。
 
@@ -220,17 +220,17 @@ BTW：方案 3、4 确实有效地解决了“不跨库根据用户 ID 查询 + 
 
 阿里的订单中心是采用三个 `Sharding Key`（订单 ID、用户 ID、商家 ID）分库分表实现的，且每个 `Sharding Key` 所对应的库表都是订单的全量数据。
 
-![image-20250529133931275](./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529133931275.png)
+![image-20250529133931275](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529133931275.png)
 
-![image-20250529133940326](./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529133940326.png)
+![image-20250529133940326](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529133940326.png)
 
-![image-20250529133949240](./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529133949240.png)
+![image-20250529133949240](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529133949240.png)
 
 这种方式的优点是，不像上文所讲的映射表那样，需要进行二次查询，在性能上是有所提升的。缺点则是，需要耗费更多的存储空间进行冗余数据存储。
 
 另外，这种方案如果通过程序控制，进行多个库的数据写入和修改就不合适了，最好通过 `Binlog` 同步工具 `Canal` 或 `DataBus` 去进行多个库的数据同步。
 
-![image-20250529134012698](./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529134012698.png)
+![image-20250529134012698](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529134012698.png)
 
 ### 6. 多 Sharding Key 分库分表 + ElasticSearch
 
@@ -240,7 +240,7 @@ BTW：方案 3、4 确实有效地解决了“不跨库根据用户 ID 查询 + 
 
 相比较于 MySQL 的 B+ Tree 索引，ElasticSearch 的分词器 + 倒排索引机制，更加适合多维复杂查询和全文检索关键字的场景。
 
-![image-20250529134035194](./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529134035194.png)
+![image-20250529134035194](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529134035194.png)
 
 最终，技术团队选择了方案 6——“`多 Sharding Key 分库分表` + `ElasticSearch` ”，作为未来五年订单数据的分库分表方案，也是订单中心系统最为核心的架构设计。
 
@@ -261,14 +261,14 @@ BTW：方案 3、4 确实有效地解决了“不跨库根据用户 ID 查询 + 
 - 缺点：热点数据一般为新增数据，存在明显的写偏移
 - 适用场景：数据归档
 
-<img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529134149876.png" alt="image-20250529134149876" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529134149876.png" alt="image-20250529134149876" style="zoom:60%;" />
 
 #### 中间表映射
 
 - 优点：灵活；
 - 缺点：引入了额外的单点，增加了流程复杂度。
 
-<img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529134204573.png" alt="image-20250529134204573" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529134204573.png" alt="image-20250529134204573" style="zoom:60%;" />
 
 #### hash切分
 
@@ -276,7 +276,7 @@ BTW：方案 3、4 确实有效地解决了“不跨库根据用户 ID 查询 + 
 - 缺点：后续扩容需要迁移数据、存在跨节点查询等问题；
 - 适用场景：大部分场景下都能适用。
 
-<img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529134216820.png" alt="image-20250529134216820" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529134216820.png" alt="image-20250529134216820" style="zoom:60%;" />
 
 ### 资源准备、代码改造
 
@@ -345,7 +345,7 @@ BTW：方案 3、4 确实有效地解决了“不跨库根据用户 ID 查询 + 
 
 - 方案2：雪花算法
 
-<img src="./%E7%AC%AC%E5%8D%81%E7%AB%A0%20MySQL%E4%B9%8B%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E7%AF%87.assets/image-20250529134234756.png" alt="image-20250529134234756" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250529134234756.png" alt="image-20250529134234756" style="zoom:50%;" />
 
 - 方案3：设置数据库自增起始值和步长，不同节点 id 交叉增长
 - 方案4：第三方中间件，redis incr

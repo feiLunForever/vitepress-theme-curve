@@ -39,7 +39,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 - 遇到 `rollback`，在 `undo log` 中找到撤销 sql 执行，将缓冲区数据还原
 - 遇到 `commit`，利用 `checkpoint` 机制 异步刷盘，生成 `bin log`，然后将 `redo log` 改为 `commit` 状态
 
-![image-20250528105933933](./%E7%AC%AC%E5%85%AD%E7%AB%A0%20MySQL%E4%B9%8B%E6%97%A5%E5%BF%97%E7%AF%87.assets/image-20250528105933933.png)
+![image-20250528105933933](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250528105933933.png)
 
 ### 事务的恢复机制
 
@@ -105,7 +105,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 `Redo-log`的本地磁盘文件个数 默认是两个，因为 `MySQL` 通过来回写这两个文件的形式记录 `Redo-log` 日志，用两个日志文件组成一个“环形”，如下：
 
-<img src="./%E7%AC%AC%E5%85%AD%E7%AB%A0%20MySQL%E4%B9%8B%E6%97%A5%E5%BF%97%E7%AF%87.assets/image-20250528103731925.png" alt="image-20250528103731925" style="zoom:40%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250528103731925.png" alt="image-20250528103731925" style="zoom:40%;" />
 
 - `write pos`
   - 记录写到了哪里
@@ -122,7 +122,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 > 作用与 `Redo-log` 类似，主要是记录所有对数据库表结构变更和表数据修改的操作，对于 `select、show` 这类读操作并不会记录。`bin-log `是 `MySQL-Server` 级别的日志，也就是所有引擎都能用的日志，而 `redo-log、undo-log` 都是 `InnoDB` 引擎专享的，无法跨引擎生效。
 
-![image-20250528104636974](./%E7%AC%AC%E5%85%AD%E7%AB%A0%20MySQL%E4%B9%8B%E6%97%A5%E5%BF%97%E7%AF%87.assets/image-20250528104636974.png)
+![image-20250528104636974](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250528104636974.png)
 
 这张写 `SQL `的执行流程图，重点观察里面的 第`⑨`步 ，无论当前表使用的是什么引擎，实际上都需要完成记录 `bin-log` 日志这步操作，和之前分析的两种日志相同，`bin-log `也由内存日志缓冲区+本地磁盘文件两部分组成，这也就意味着：写 `bin-log` 日志时，也会先写缓冲区，然后由后台线程去刷盘。
 
@@ -130,7 +130,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 为啥要单独把 `bin-log` 的缓冲区拎出来讲呢？因为它跟 `redo-log、undo-log` 的缓冲区并不同，前面分析的两种日志缓冲区，都位于 `InnoDB` 创建的共享`BufferPool `中，而 `bin_log_buffer` 是位于每条线程中的，关系图如下：
 
-![image-20250528104830871](./%E7%AC%AC%E5%85%AD%E7%AB%A0%20MySQL%E4%B9%8B%E6%97%A5%E5%BF%97%E7%AF%87.assets/image-20250528104830871.png)
+![image-20250528104830871](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250528104830871.png)
 
 > 也就是说，`MySQL-Server  `会给每一条工作线程，都分配一个 `bin_log_buffer`，而并不是放在共享缓冲区中，这是为啥呢？因为 `MySQL` 设计时要兼容所有引擎，直接将 `bin-log` 的缓冲区，设计在线程的工作内存中，这样就能够让所有引擎通用，并且不同线程/事务之间，由于写的都是自己工作内存中的 `bin-log `缓冲，因此并发执行时也不会冲突！
 

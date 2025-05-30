@@ -14,7 +14,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 ## MySQL整体结构浅析
 
-<img src="./%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%85%A8%E8%A7%A3MySQL%E4%B9%8B%E6%9E%B6%E6%9E%84%E7%AF%87.assets/image-20250303094003794.png" alt="image-20250303094003794" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250303094003794.png" alt="image-20250303094003794" style="zoom:80%;" />
 
 从上往下看，依次会分为网络连接层、系统服务层、存储引擎层、以及文件系统层，往往编写`SQL`后，都会遵守着`MySQL`的这个架构往下走。
 
@@ -47,7 +47,7 @@ mysql -h 127.0.0.1 -uroot -p123456
 
 ## 系统服务层
 
-<img src="./%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%85%A8%E8%A7%A3MySQL%E4%B9%8B%E6%9E%B6%E6%9E%84%E7%AF%87.assets/image-20250303142817860.png" alt="image-20250303142817860" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250303142817860.png" alt="image-20250303142817860" style="zoom:80%;" />
 
 ### `SQL`接口组件
 
@@ -71,7 +71,7 @@ mysql -h 127.0.0.1 -uroot -p123456
 
 ##  文件系统层
 
-<img src="./%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%85%A8%E8%A7%A3MySQL%E4%B9%8B%E6%9E%B6%E6%9E%84%E7%AF%87.assets/image-20250303142850427.png" alt="image-20250303142850427" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250303142850427.png" alt="image-20250303142850427" style="zoom:80%;" />
 
 这一层主要可分为两个板块：①日志板块。②数据板块。
 
@@ -104,7 +104,7 @@ mysql -h 127.0.0.1 -uroot -p123456
 
 ## InnoDb 内存结构
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226163452463.png" alt="image-20250226163452463" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226163452463.png" alt="image-20250226163452463" style="zoom:80%;" />
 
 注意观察，实际 MySQL 启动后内存结构略显复杂，但大体可分为 `MySQL工作组件`、`线程本地内存`、`MySQL共享内存`、`存储引擎缓冲区` 四大板块。
 
@@ -151,7 +151,7 @@ select * from zz_users where user_id = 1;
 
 ### 存储引擎缓冲区(InnoDB Buffer Pool)
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226163747008.png" alt="image-20250226163747008" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226163747008.png" alt="image-20250226163747008" style="zoom:50%;" />
 
 - `Data Page`：写入缓冲区，主要用来缓冲磁盘的表数据，将写操作转移到内存进行。
 - `Index Page`：索引缓冲页，对于所有已创建的索引根节点，都会放入到内存，提升索引效率。
@@ -189,7 +189,7 @@ Buffer Pool 是一片连续的内存空间，innodb 存储引擎是通过页的�
 
 缓存池的结构如下图：
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226163910072.png" alt="image-20250226163910072" style="zoom:30%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226163910072.png" alt="image-20250226163910072" style="zoom:50%;" />
 
 ##### 数据页（data page）
 
@@ -199,7 +199,7 @@ Buffer Pool 是一片连续的内存空间，innodb 存储引擎是通过页的�
 
 其中，我们日常口中所称的数据记录的页，称为数据页。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226164004502.png" alt="image-20250226164004502" style="zoom:40%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226164004502.png" alt="image-20250226164004502" style="zoom:50%;" />
 
 - File Header 文件头部
 
@@ -225,7 +225,7 @@ Buffer Pool 是一片连续的内存空间，innodb 存储引擎是通过页的�
 
 在页的 7 个组成部分中，我们自己存储的记录会按照我们指定的行格式存储到 `User Records` 部分。但是在一开始生成页的时候，其实并没有 `User Records` 这个部分，每当我们插入一条记录，都会从 `Free Space` 部分，也就是尚未使用的存储空间中申请一个记录大小的空间划分到 `User Records` 部分，当 `Free Space` 部分的空间全部被 `User Records` 部分替代掉之后，也就意味着这个页使用完了，如果还有新的记录插入的话，就需要去申请新的页了，这个过程的图示如下：
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226164748985.png" alt="image-20250226164748985" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226164748985.png" alt="image-20250226164748985" style="zoom:80%;" />
 
 为了更好的管理在 `User Records` 中的这些记录，`InnoDB` 可费了一番力气呢。
 
@@ -245,7 +245,7 @@ Query OK, 0 rows affected (0.03 sec)
 
 简化后的行格式示意图就是这样：
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226164826517.png" alt="image-20250226164826517" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226164826517.png" alt="image-20250226164826517" style="zoom:90%;" />
 
 下边我们试着向 page_demo 表中插入几条记录：
 
@@ -255,7 +255,7 @@ Query OK, 4 rows affected (0.00 sec)
 Records: 4  Duplicates: 0  Warnings: 0
 ```
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226164902770.png" alt="image-20250226164902770" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226164902770.png" alt="image-20250226164902770" style="zoom:110%;" />
 
 我们对照着这个图来看看记录头信息中的各个属性是啥意思：
 
@@ -286,11 +286,11 @@ Records: 4  Duplicates: 0  Warnings: 0
     - 表示从当前记录的真实数据到下一条记录的真实数据的地址偏移量
     - 比方说第一条记录的 next_record 值为 32，意味着从第一条记录的真实数据的地址处向后找 32 个字节便是下一条记录的真实数据
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226165005145.png" alt="image-20250226165005145" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226165005145.png" alt="image-20250226165005145" style="zoom:80%;" />
 
 * 从图中可以看出来，我们的记录按照主键从小到大的顺序形成了一个单链表。`最大记录` 的 `next_record` 的值为 0，这也就是说最大记录是没有下一条记录了，它是这个单链表中的最后一个节点。如果从中删除掉一条记录，这个链表也是会跟着变化的，比如我们把第 2 条记录删掉：
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226165039313.png" alt="image-20250226165039313" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226165039313.png" alt="image-20250226165039313" style="zoom:80%;" />
 
 从图中可以看出来，删除第 2 条记录前后主要发生了这些变化：
 
@@ -313,7 +313,7 @@ InnoDB 制作了一个类似书的目录：
 
 比方说现在的 page_demo 表中正常的记录共有 6 条，InnoDB 会把它们分成两组，第一组中只有一个最小记录，第二组中是剩余的 5 条记录，看下边的示意图：
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226165127229.png" alt="image-20250226165127229" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226165127229.png" alt="image-20250226165127229" style="zoom:80%;" />
 
 从这个图中我们需要注意这么几点:
 
@@ -323,11 +323,11 @@ InnoDB 制作了一个类似书的目录：
     - 最小记录的 `n_owned` 值为 1，这就代表着以最小记录结尾的这个分组中只有 1 条记录，也就是最小记录本身。
     - 最大记录的 `n_owned` 值为 5，这就代表着以最大记录结尾的这个分组中只有 5 条记录，包括最大记录本身还有我们自己插入的 4 条记录。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226165504521.png" alt="image-20250226165504521" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226165504521.png" alt="image-20250226165504521" style="zoom:80%;" />
 
 我们一口气又往表中添加了 12 条记录，现在页里边就一共有 18 条记录了（包括最小和最大记录），这些记录被分成了 5 个组，如图所示：
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250226165546949.png" alt="image-20250226165546949" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250226165546949.png" alt="image-20250226165546949" style="zoom:80%;" />
 
 比方说我们想找主键值为 `6` 的记录，过程是这样的：
 

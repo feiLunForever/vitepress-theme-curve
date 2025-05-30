@@ -185,7 +185,7 @@ MySQL 的事务机制是基于 `日志` 实现的。
 - `TRX_ID` 最新事务 ID
 - `ROLL_PTR` 回滚指针
 
-<img src="./%E7%AC%AC%E5%9B%9B%E7%AF%87%20MySQL%E4%B9%8B%E4%BA%8B%E5%8A%A1%E7%AF%87.assets/image-20250527142627070.png" alt="image-20250527142627070" style="zoom:95%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250527142627070.png" alt="image-20250527142627070" style="zoom:95%;" />
 
 #### 隐藏主键 - ROW_ID（6Bytes）
 
@@ -246,7 +246,7 @@ UPDATE `zz_users` SET user_sex = "男" WHERE user_id = 1;
 
 那 `Undo-log `日志如下：
 
-![image-20250527155624760](./%E7%AC%AC%E5%9B%9B%E7%AF%87%20MySQL%E4%B9%8B%E4%BA%8B%E5%8A%A1%E7%AF%87.assets/image-20250527155624760.png)
+![image-20250527155624760](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250527155624760.png)
 
 细说一下执行上述 `update` 语句的详细过程：
 
@@ -276,7 +276,7 @@ UPDATE `zz_users` SET user_sex = "男" WHERE user_id = 1;
 
 上个 `ReadView` 的示意图，来好好理解一下它：
 
-![image-20250527155643218](./%E7%AC%AC%E5%9B%9B%E7%AF%87%20MySQL%E4%B9%8B%E4%BA%8B%E5%8A%A1%E7%AF%87.assets/image-20250527155643218.png)
+![image-20250527155643218](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250527155643218.png)
 
 假设目前数据库中共有 `T1~T5` 这五个事务，`T1、T2、T4 `还在执行，`T3 `已经回滚，`T5 `已经提交，此时当有一条查询语句执行时，就会利用 `MVCC` 机制生成一个 `ReadView`，由于前面讲过，单纯由一条 `select` 语句组成的事务并不会分配事务 `ID`，因此默认为 `0`，所以目前这个快照的信息如下：
 
@@ -333,7 +333,7 @@ UPDATE `zz_users` SET user_sex = "男" WHERE user_id = 1;
 SELECT * FROM `zz_users` WHERE user_id = 1;
 ```
 
-![image-20250527155656747](./%E7%AC%AC%E5%9B%9B%E7%AF%87%20MySQL%E4%B9%8B%E4%BA%8B%E5%8A%A1%E7%AF%87.assets/image-20250527155656747.png)
+![image-20250527155656747](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250527155656747.png)
 
 这是由事务 `T1` 生成的版本链，此时 `T2` 生成的 `ReadView` 如下：
 
@@ -348,11 +348,11 @@ SELECT * FROM `zz_users` WHERE user_id = 1;
 
 结合这个 `ReadView` 信息，经过前面那一系列判断后，最终会得到：不能读取最新版数据，因此需要去 `Undo-log` 的版本链中读数据，首先根据 `roll_ptr` 找到第一条旧数据：
 
-![image-20250527155705722](./%E7%AC%AC%E5%9B%9B%E7%AF%87%20MySQL%E4%B9%8B%E4%BA%8B%E5%8A%A1%E7%AF%87.assets/image-20250527155705722.png)
+![image-20250527155705722](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250527155705722.png)
 
 此时发现其 `trx_id=1` ，位于 `ReadView.trx_ids `中，因此不能读取这条旧数据，接着再根据这条旧数据的 `roll_ptr` 找到第二条旧版本数据：
 
-![image-20250527155719863](./%E7%AC%AC%E5%9B%9B%E7%AF%87%20MySQL%E4%B9%8B%E4%BA%8B%E5%8A%A1%E7%AF%87.assets/image-20250527155719863.png)
+![image-20250527155719863](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250527155719863.png)
 
 这时再看其 `trx_id=null` ，并不位于 `ReadView.trx_ids` 中，`null `表示这条数据在上次 `MySQL` 运行时就已插入了，因此这条旧版本的数据可以被 `T2` 事务读取，最终 `T2` 就会查询到这条数据并返回。
 
