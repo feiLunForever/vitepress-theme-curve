@@ -42,7 +42,9 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 ### 机器学习
 
-<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20241113122027-wf60cgc.png" alt="image" style="zoom: 33%;" />​<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20241113122136-r2kebnu.png" alt="image" style="zoom: 33%;" />​
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20241113122027-wf60cgc.png" alt="image" style="zoom: 33%;" />
+
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250531121647623.png" alt="image-20250531121647623" style="zoom:50%;" />
 
 1. 给电脑大量玫瑰和向日葵图片，让其识别模式，总结规律，属于`机器学习`​范畴，机器通过学习能预测和判断未知图片。
 2. 机器学习领域包括`监督学习`​、`无监督学习`​、`强化学习`​等分支。
@@ -335,7 +337,7 @@ GPT等生成式大语言模型通过预测出现概率最高的下一个词来�
 
 <img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250217170659278.png" alt="image-20250217170659278" style="zoom:50%;" />
 
-<img src="./%E6%9E%97%E7%B2%92%E7%B2%92%EF%BC%9A%E5%B0%8F%E7%99%BD%E7%8E%A9%E8%BD%ACAI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.assets/image-20250217170711319.png" alt="image-20250217170711319" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250531121827711.png" alt="image-20250531121827711" style="zoom:50%;" />
 
 # AI 提示工程
 

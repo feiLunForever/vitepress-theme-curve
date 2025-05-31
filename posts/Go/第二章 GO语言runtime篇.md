@@ -46,7 +46,7 @@ Go语言是一门编译语言，它并不能直接运行。我们需要通过go 
 
 #### Go 编译过程
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/go%E8%AF%AD%E8%A8%80%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B.jpg" alt="go语言编译过程" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/go语言编译过程.jpg" alt="go语言编译过程" style="zoom:80%;" />
 
 上图展示了编译过程的几个重要步骤：
 
@@ -740,7 +740,7 @@ main.go:7:2     ;       "\n"
 
 以表达式 `1*2+3` 为例，编译器的语法分析阶段会生成如下图所示的抽象语法树：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E8%AF%AD%E6%B3%95%E6%A0%91.jpg" alt="语法树" style="zoom:45%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/语法树.jpg" alt="语法树" style="zoom:45%;" />
 
 抽象语法树最终存储形式如下：
 
@@ -1269,11 +1269,11 @@ Go 程序启动时，操作系统会将程序镜像加载到内存中，并为�
 6. 程序退出
    当 main 函数执行完毕或者程序遇到异常情况时，程序会退出。在退出前，运行时环境会清理资源，包括关闭所有 `goroutine`、释放内存等。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/Go%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B%EF%BC%88%E6%A6%82%E8%BF%B0%EF%BC%89.jpg" alt="Go启动过程（概述）" style="zoom:75%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/Go启动过程（概述）.jpg" alt="Go启动过程（概述）" style="zoom:75%;" />
 
 详细版如下：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/Go%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89.jpg" alt="Go启动过程（源码）" style="zoom:78%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/Go启动过程（源码）.jpg" alt="Go启动过程（源码）" style="zoom:78%;" />
 
 > - m0
 >   - `m0` 是 Go `Runtime` 所创建的第一个系统线程，一个 Go 进程只有一个 `m0`，也叫主线程。`m0` 只是工作线程的一种，它的声明跟其他 `m` 线程一样。普通的工作线程 `m` 是通过调度器P将可执行的 `goroutine` 队列调度给工作线程去执行，而 `m0` 会调度执行 `g0` 。
@@ -1328,7 +1328,7 @@ func main(){
 
 我们还可以看到在 `main()` 函数中可以调用 `fmt` 包中的函数，这正是由于我们导入了 `fmt` 包才能做到的。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/image-20250516104634380.png" alt="image-20250516104634380" style="zoom:75%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250516104634380.png" alt="image-20250516104634380" style="zoom:75%;" />
 
 我们从左上角的开始处分析这张图，可以发现Go源码的启动流程是这样的：
 
@@ -1408,7 +1408,7 @@ Go 语言的 GC 使用的是追踪式 GC 的一种变种：**无分代**（对�
 2. 找出程序所有可达对象并做上标记；
 3. 解除暂停继续执行业务代码，重复上述过程直到指定的处理程序生命周期结束。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%A0%87%E8%AE%B0%E6%B8%85%E9%99%A4.png" alt="标记清除" style="zoom:75%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/标记清除.png" alt="标记清除" style="zoom:75%;" />
 
 如上图所示，对象 1,2,3,6 将被标记为可达对象，而对象4 和 对象5 为该程序的不可达对象，最终会被垃圾回收器清理。
 
@@ -1430,7 +1430,7 @@ Go 语言的 GC 使用的是追踪式 GC 的一种变种：**无分代**（对�
 
 1. 创建新对象时默认标记为 `白色` ，表示对象未被垃圾回收器访问。GC流程开始时，首先从 `根节点` 开始遍历所有对象，将遍历到的根对象放入“`灰色`”集合。
    - 注意，本轮只会遍历 `根对象` ，比如下图中的对象只会将对象1 和 对象6 标记为灰色。
-   - <img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%A0%87%E8%AE%B0%E6%B8%85%E9%99%A4-20250516174414616.png" alt="标记清除" style="zoom:70%;" />
+   - <img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/标记清除-20250516174414616.png" alt="标记清除" style="zoom:70%;" />
    - 在标记的过程中，垃圾回收器会维护这3种颜色对象的集合，将对应颜色的对象记录到对应的集合中。
 2. 上一步我们将 `根对象` 记录到了 `灰色` 集合，接着就开始遍历 `灰色` 集合，同样也只遍历一层，将 `灰色` 对象可直达的对象也放入 `灰色` 集合，同时将之前标记的 `灰色` 对象移动到 `黑色` 对象的集合中。
    - 这一步中，上图的对象2 将会被标记为灰色对象，同时对象1 和 对象6 会被标记为黑色对象。
@@ -1447,7 +1447,7 @@ Go 语言的 GC 使用的是追踪式 GC 的一种变种：**无分代**（对�
 
 这种标记方式下，如果不暂停程序会出现什么问题呢？
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%A0%87%E8%AE%B0%E6%B8%85%E9%99%A4-%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98.png" alt="标记清除-并发问题" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/标记清除-并发问题.png" alt="标记清除-并发问题" style="zoom:80%;" />
 
 由于程序运行过程中对象的引用关系是有可能随时发生改变的，如果在标记阶段发生了变化就会影响标记结果的正确性。
 
@@ -1470,13 +1470,13 @@ Go 语言的 GC 使用的是追踪式 GC 的一种变种：**无分代**（对�
 
 所谓强三色不变 实际上是强制性地不允许 `黑色` 对象引用 `白色` 对象，这样就不会出现 `白色` 对象被误删的情况。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%BB%A1%E8%B6%B3%E5%BC%BA%E4%B8%89%E8%89%B2%E4%B8%8D%E5%8F%98%E5%BC%8F%E7%9A%84%E6%83%85%E5%86%B5.jpg" alt="满足强三色不变式的情况" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/满足强三色不变式的情况.jpg" alt="满足强三色不变式的情况" style="zoom:80%;" />
 
 #### 弱三色不变式
 
 而弱三色不变式 则 允许 `黑色` 对象引用 `白色` 对象，但必须满足一定的条件：即这个 `白色` 对象必须存在其他 `灰色` 对象对它的引用，或者这个 `白色` 对象的链路上游存在 `灰色` 对象。满足这个条件之后，即使 `黑色` 对象引用 `白色` 对象，使得 `白色` 对象处于一个危险被删除的状态，但是上游 `灰色` 对象的引用，可以保护该 `白色` 对象，使其不会被垃圾回收器回收。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%BB%A1%E8%B6%B3%E5%BC%B1%E4%B8%89%E8%89%B2%E4%B8%8D%E5%8F%98%E5%BC%8F%E7%9A%84%E6%83%85%E5%86%B5.jpg" alt="满足弱三色不变式的情况" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/满足弱三色不变式的情况.jpg" alt="满足弱三色不变式的情况" style="zoom:80%;" />
 
 如果三色标记法中满足上面两个不变式之一就可以保证对象不丢失。为了实现上面两种方式，GC算法演进了两种屏障方式来避免 `STW` 的时间。
 
@@ -1494,25 +1494,25 @@ Go 语言的 GC 使用的是追踪式 GC 的一种变种：**无分代**（对�
 
 我们根据下面的示意图来具体理解这一过程：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%8F%92%E5%85%A5%E5%86%99%E5%B1%8F%E9%9A%9C1-%E5%88%9D%E5%A7%8B%E7%8A%B6%E6%80%81.jpg" alt="插入写屏障1-初始状态" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/插入写屏障1-初始状态.jpg" alt="插入写屏障1-初始状态" style="zoom:90%;" />
 
 我们以上图的对象为例，上图中有7个对象，其中 对象1 引用 对象2 ，对象2 引用 对象3，对象4 引用对象2，对象5 引用 对象6，而 对象7 没有引用任何对象，也没有被任何对象引用。
 
 首先这些对象在创建时会被全部标记为 `白色` 。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%8F%92%E5%85%A5%E5%86%99%E5%B1%8F%E9%9A%9C2-%E6%A0%87%E8%AE%B0%E6%A0%B9%E5%AF%B9%E8%B1%A1.jpg" alt="插入写屏障2-标记根对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/插入写屏障2-标记根对象.jpg" alt="插入写屏障2-标记根对象" style="zoom:90%;" />
 
 根据三色标记的流程，遍历 `根节点` 集合，非递归形式，只遍历一次，能够标记出第一层的 `灰色` 节点 对象1 和 对象5，同时这些 `灰色` 节点也被添加至 `灰色` 标记的集合中。如上图所示。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%8F%92%E5%85%A5%E5%86%99%E5%B1%8F%E9%9A%9C3-%E9%81%8D%E5%8E%86%E7%81%B0%E8%89%B2%E5%AF%B9%E8%B1%A1.jpg" alt="插入写屏障3-遍历灰色对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/插入写屏障3-遍历灰色对象.jpg" alt="插入写屏障3-遍历灰色对象" style="zoom:90%;" />
 
 接下来就遍历 `灰色` 标记表中的 对象1 和 对象5，将可达的对象从 `白色` 标记为 `灰色`。同时被遍历的 `灰色` 对象被标记为 `黑色`。这一轮标记后，对象1 和 对象5 由 `灰色` 对象集合移动到了 `黑色` 对象集合，而 对象1 和 对象5 的可达 对象2 和 6 由 `白色` 对象集合移动到了 `灰色` 对象集合。如上图所示。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%8F%92%E5%85%A5%E5%86%99%E5%B1%8F%E9%9A%9C4-%E8%A7%A6%E5%8F%91%E6%8F%92%E5%85%A5%E5%86%99%E5%B1%8F%E9%9A%9C%E6%9C%BA%E5%88%B6.png" alt="插入写屏障4-触发插入写屏障机制" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/插入写屏障4-触发插入写屏障机制.png" alt="插入写屏障4-触发插入写屏障机制" style="zoom:90%;" />
 
 此时，业务程序像已经标记为 `黑色` 对象的 对象1 和 对象5 分别添加了 对象8 和 对象9，这时就会触发 `插入屏障` 机制，`黑色` 对象上添加 `白色` 对象，所以插入的 对象8 和 对象9 会变成 `灰色` 对象。之后就是正常的三色标记流程，继续循环上述的流程，直到没有 `灰色` 节点。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%8F%92%E5%85%A5%E5%86%99%E5%B1%8F%E9%9A%9C5-%E8%BF%9B%E8%A1%8C%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0.jpg" alt="插入写屏障5-进行三色标记" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/插入写屏障5-进行三色标记.jpg" alt="插入写屏障5-进行三色标记" style="zoom:90%;" />
 
 最终只有 对象4 和 对象7 是不可达对象，最终会被垃圾回收期回收。
 
@@ -1522,25 +1522,25 @@ Go 语言的 GC 使用的是追踪式 GC 的一种变种：**无分代**（对�
 
 我们根据下面的示意图来具体理解这一过程：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E5%88%A0%E9%99%A4%E5%B1%8F%E9%9A%9C1.jpg" alt="删除屏障1" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/删除屏障1.jpg" alt="删除屏障1" style="zoom:90%;" />
 
 假设初始状态下，堆内存空间有 4个对象，这些对象创建后都会被标记为 `白色` 放到 `白色` 标记集合中，如上图所示。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E5%88%A0%E9%99%A4%E5%B1%8F%E9%9A%9C-%E6%A0%B9%E9%81%8D%E5%8E%86.jpg" alt="删除屏障-根遍历" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/删除屏障-根遍历.jpg" alt="删除屏障-根遍历" style="zoom:90%;" />
 
 根据三色标记的流程，先遍历 `根节点` ，非递归遍历一次，此时 对象1 被标记为 `灰色` 对象并被添加到 `灰色` 标记集合中。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E5%88%A0%E9%99%A4%E5%B1%8F%E9%9A%9C3-%E8%A7%A6%E5%8F%91%E5%88%A0%E9%99%A4%E5%B1%8F%E9%9A%9C.jpg" alt="删除屏障3-触发删除屏障" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/删除屏障3-触发删除屏障.jpg" alt="删除屏障3-触发删除屏障" style="zoom:90%;" />
 
 如果此时删除 `灰色` 对象1 的下游 对象2，在没有 `删除屏障` 机制下，对象2 连同其下游 对象 3和 4 将会与主路径断开，最终都会被清除。
 
 而在 `删除屏障` 机制的保护下，被删除的 对象2 会被标记为 `灰色`。由于没有 `STW` 的保护，在删除 对象2 的同时可能会有 `黑色` 对象引用了 对象2，那么 对象2 就不能被回收。这就是 `删除屏障` 的目的所在，虽然会增加扫描次数，但极大的减少了 `STW` 的时间。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E5%88%A0%E9%99%A4%E5%B1%8F%E9%9A%9C4-%E7%81%B0%E5%8F%98%E9%BB%91.jpg" alt="删除屏障4-灰变黑" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/删除屏障4-灰变黑.jpg" alt="删除屏障4-灰变黑" style="zoom:90%;" />
 
 按照三色标记法的顺序，接下来遍历 `灰色` 标记表中的 `灰色` 对象1 和 对象2 将它们可达的对象从 `白色` 标记为 `灰色`，同时 `灰色` 对象1 和 对象2 被标记为 `黑色`。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E5%88%A0%E9%99%A4%E5%B1%8F%E9%9A%9C5-%E6%9C%80%E7%BB%88%E7%8A%B6%E6%80%81.jpg" alt="删除屏障5-最终状态" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/删除屏障5-最终状态.jpg" alt="删除屏障5-最终状态" style="zoom:90%;" />
 
 继续循环上述流程进行三色标记，直到没有 `灰色` 节点，最终的状态如上图所示，全部对象被标记为 `黑色` 。
 
@@ -1576,7 +1576,7 @@ Go 语言的 GC 使用的是追踪式 GC 的一种变种：**无分代**（对�
 
 我们通过示意图来理解这个过程：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C1-%E5%88%9D%E5%A7%8B%E7%8A%B6%E6%80%81.png" alt="混合写屏障1-初始状态" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障1-初始状态.png" alt="混合写屏障1-初始状态" style="zoom:90%;" />
 
 如上图所示：假设在初始状态下 **栈** 上有 4个对象，O1，O2，O3 和 O5，**堆** 上有 6 个对象 O6，O7，O8，O9，O10 和 O11。
 
@@ -1588,7 +1588,7 @@ Go 语言的 GC 使用的是追踪式 GC 的一种变种：**无分代**（对�
 
 初始状态这些对象默认会被标记为 `白色`。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C2-%E6%89%AB%E6%8F%8F%E6%A0%88%E5%AF%B9%E8%B1%A1.jpg" alt="混合写屏障2-扫描栈对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障2-扫描栈对象.jpg" alt="混合写屏障2-扫描栈对象" style="zoom:90%;" />
 
 GC 开始时，首先扫描 **栈** 区，将可达对象全部标记为 `黑色` 。
 
@@ -1596,11 +1596,11 @@ GC 开始时，首先扫描 **栈** 区，将可达对象全部标记为 `黑色
 
 此时 **栈** 区新增了 对象4，在 GC 期间 **栈** 区新增的对象将会被标记为 `黑色`（注意，不论 对象4 是否被其他对象引用，只要是 GC 期间在 **栈** 上新增的对象就会被标记为 `黑色` 从而避免 **栈** 空间的重复扫描），所以此时栈空间上对象 1，2，3，4 为 `黑色`。如上图所示。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C3-1-%E5%88%A0%E9%99%A4%E6%A0%88%E5%AF%B9%E8%B1%A1.jpg" alt="混合写屏障3-1-删除栈对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障3-1-删除栈对象.jpg" alt="混合写屏障3-1-删除栈对象" style="zoom:90%;" />
 
 假设此时 对象4 的引用被指向了 对象2，然后 **删除** 对象1 对 对象2 的引用。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C3-2-%E5%88%A0%E9%99%A4%E6%A0%88%E5%AF%B9%E8%B1%A1%E5%BC%95%E7%94%A8.jpg" alt="混合写屏障3-2-删除栈对象引用" style="zoom:90%;" />
+
 
 由于是 **栈** 空间，所以 对象4 新增下游 对象2 以及 对象1 删除 对象2 的引用不会触发 `屏障` 机制，直接操作即可。
 
@@ -1608,47 +1608,47 @@ GC 开始时，首先扫描 **栈** 区，将可达对象全部标记为 `黑色
 
 假设 对象4 没有被其他对象引用，那么在下一次 `GC` 的过程中也会被回收。对象1 指向 对象2 的引用被移除后的状态如上图所示。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C3-3%E6%89%AB%E6%8F%8F%E5%A0%86%E5%AF%B9%E8%B1%A1.jpg" alt="混合写屏障3-3扫描堆对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障3-3扫描堆对象.jpg" alt="混合写屏障3-3扫描堆对象" style="zoom:90%;" />
 
 接着继续执行 `GC` 开始扫描 **堆** ，根据三色标记法，先扫描 `根对象` ，并将 `根对象` 放到 `灰色` 队列等待下一轮扫描。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C3-4%E5%A0%86%E5%88%A0%E9%99%A4%E5%BC%95%E7%94%A8%E6%88%90%E4%B8%BA%E6%A0%88%E7%9A%84%E4%B8%8B%E6%B8%B8.jpg" alt="混合写屏障3-4堆删除引用成为栈的下游" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障3-4堆删除引用成为栈的下游.jpg" alt="混合写屏障3-4堆删除引用成为栈的下游" style="zoom:90%;" />
 
 假设此时 **栈** 对象4 的引用指向了 对象7，由于 对象4 是 **栈** 对象，所以当 对象4 添加 对象7 后，依然不会触发 `屏障` 机制，此时 对象7 依然是白色。如果 **堆** 对象6 指向 对象7 的引用不被删除，则 对象7 仍然是安全的，因为 对象7 此时是在 `灰色` 对象的下游。假设此时 **堆** 对象6 指向 堆对象7 的引用被删除会发生什么呢？
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C3-5%E5%A0%86%E5%88%A0%E9%99%A4%E5%BC%95%E7%94%A8%E8%A7%A6%E5%8F%91%E5%B1%8F%E9%9A%9C%E6%9C%BA%E5%88%B6.png" alt="混合写屏障3-5堆删除引用触发屏障机制" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障3-5堆删除引用触发屏障机制.png" alt="混合写屏障3-5堆删除引用触发屏障机制" style="zoom:90%;" />
 
 由于 对象6 在 **堆** 区，所以 对象6 解除 对象7 的引用属于 `灰色` 对象删除 `白色` 对象，**堆** 上的 **删除** 操作就会触发`删除屏障`，被删除的 对象7 就会被标记为 `灰色` 。这样做是为了为了保留被删除对象的引用路径，防止被删除对象的下游有被使用的对象而被 GC 误删除。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C4%E7%BB%A7%E7%BB%AD%E6%89%AB%E6%8F%8F%E7%81%B0%E8%89%B2%E5%AF%B9%E8%B1%A1.png" alt="混合写屏障4继续扫描灰色对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障4继续扫描灰色对象.png" alt="混合写屏障4继续扫描灰色对象" style="zoom:90%;" />
 
 接着继续执行三色标记法的流程，扫描 `灰色` 队列中的 对象6，7 和 9，也只扫描一层，将 对象7 的下游对象8 标记为 `灰色`，同时 对象6，7 和 9 被标记为 `黑色`，如上图所示。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C5-%E5%A0%86%E5%8C%BA%E6%96%B0%E5%A2%9E%E6%8C%87%E9%92%88.jpg" alt="混合写屏障5-堆区新增指针" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障5-堆区新增指针.jpg" alt="混合写屏障5-堆区新增指针" style="zoom:90%;" />
 
 此时，如果 对象6 新增了对 对象10 的引用，由于 对象6 是 `黑色` 对象，并且是 **堆** 空间范围的对象，所以将 对象6 指向 对象10 时会触发 `插入写屏障` ，对象10 将会从 `白色` 标记为 `灰色` ，这样也间接保护了白色 对象11。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C6-%E5%9B%9E%E6%94%B6%E5%9E%83%E5%9C%BE%E5%AF%B9%E8%B1%A1.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障6-回收垃圾对象.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
 
 再经过两轮三色标记的扫描流程，首先扫描 `灰色` 对象8 和 10 将其标记为 `黑色` 同时将 对象10 的下游 对象11 标记为 `灰色`。然后再进行一轮扫描将对象11标记为 `黑色`。最终 **栈** 区的 `白色` 对象5 被回收。
 
 这里我们再讨论另一种情况，假设 **堆** 区的 `灰色` 对象解除了对下游 `白色` 对象的引用而指向了 **栈** 区 `黑色` 的对象，GC 过程又会怎样呢？
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C7-1-%E6%A0%88%E5%AF%B9%E8%B1%A1%E5%88%A0%E9%99%A4%E5%BC%95%E7%94%A8%E6%88%90%E4%B8%BA%E5%A0%86%E7%9A%84%E4%B8%8B%E6%B8%B8%E7%9A%84%E5%9C%BA%E6%99%AF.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障7-1-栈对象删除引用成为堆的下游的场景.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
 
 假设当前对象的标记状态如上图所示，假设在 GC 的过程中 **栈** 空间目前有 3 个 `黑色` 对象O1，O2，O3，**堆** 空间有一个 `灰色` 对象O4 以及 两个 `白色` 对象 O5 和 O6。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C7-2-%E6%A0%88%E5%AF%B9%E8%B1%A1%E5%88%A0%E9%99%A4%E5%BC%95%E7%94%A8%E6%88%90%E4%B8%BA%E5%A0%86%E7%9A%84%E4%B8%8B%E6%B8%B8%E7%9A%84%E5%9C%BA%E6%99%AF.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障7-2-栈对象删除引用成为堆的下游的场景.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
 
 假设此时将 O1 赋值为 nil，则O1 对 Q2 的引用会断开，相当于O1 **删除** 了对 对象2 的引用，因为对象2 是 **栈** 空间的对象，删除 操作并不会触发 `屏障` 机制，可以直接操作，由于 GC 开始时会扫描 **栈** 的可达对象并标记为 `黑色`，所以即使 删除 `黑色` 对象2，对象2 也不会在这一次垃圾回收中被清理掉。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C7-3-%E6%A0%88%E5%AF%B9%E8%B1%A1%E5%88%A0%E9%99%A4%E5%BC%95%E7%94%A8%E6%88%90%E4%B8%BA%E5%A0%86%E7%9A%84%E4%B8%8B%E6%B8%B8%E7%9A%84%E5%9C%BA%E6%99%AF.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障7-3-栈对象删除引用成为堆的下游的场景.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
 
 接着再将 对象2 赋值给 对象4，这个操作会分两步执行，先是 移除 对象4 对 对象5 的引用，由于 对象5在 **堆** 空间，所以 对象5 的 删除 会触发 `屏障` 机制，此时 对象5 会被标记成 `灰色` 。
 
 接着将 对象4 的指针指向 对象2，这个过程中相当于 对象4 新增了下游对象，会触发 `插入写屏障`，将 对象2 标记为 `灰色`，由于 对象2 已经是 `黑色`，属于安全的对象，所以 对象2 会继续保持 `黑色`。如上图所示。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C7-4-%E6%A0%88%E5%AF%B9%E8%B1%A1%E5%88%A0%E9%99%A4%E5%BC%95%E7%94%A8%E6%88%90%E4%B8%BA%E5%A0%86%E7%9A%84%E4%B8%8B%E6%B8%B8%E7%9A%84%E5%9C%BA%E6%99%AF.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/混合写屏障7-4-栈对象删除引用成为堆的下游的场景.jpg" alt="混合写屏障6-回收垃圾对象" style="zoom:90%;" />
 
 最后根据三色标记法继续扫描 `灰色` 对象4 和 5 并将其标记为 `黑色`，同时将 `灰色` 对象5 的下游 对象6 标记为 `灰色`，最后一轮将 对象6 标记为 `黑色` 后 GC 结束，这种情况下没有需要回收的对象。对象5 和 6 属于不可达的游离对象，如果在下一次 GC 过程中依然没有其他可达对象的引用，就会被回收。
 
@@ -1727,7 +1727,7 @@ GC 的 触发时机 和 触发频率 跟以下因素有关：
 
   - 三级缓存（L3 Cache）通常是位于 CPU 和 主内存 之间的高速缓存，速度比二级缓存慢一些，容量比二级缓存大。三级缓存的容量通常在几兆字节到几十兆字节之间。三级缓存的作用是缓存一级和二级缓存中没有命中的数据和指令，以减少从内存中读取数据的延迟。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%AD%98%E5%82%A8%E5%AA%92%E4%BB%8B%E7%9A%84%E9%87%91%E5%AD%97%E5%A1%94%E6%A8%A1%E5%9E%8B.jpg" alt="计算机存储媒介的金字塔模型" style="zoom:70%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/计算机存储媒介的金字塔模型.jpg" alt="计算机存储媒介的金字塔模型" style="zoom:70%;" />
 
 > 随着技术发展，CPU 的运算速度越来越快，但内存访问的速度却一直没什么突破。最终导致了 CPU 访问主存就成了整个机器的性能瓶颈。CPU Cache 的出现就是为了解决这个问题，在 CPU 和 主存之间再加了 Cache，用来缓存一块内存中的数据，而且还不只一个，现代计算机一般都有 3 级 Cache，其中 L1 Cache 的访问速度和寄存器差不多。
 
@@ -1775,7 +1775,7 @@ GC 的 触发时机 和 触发频率 跟以下因素有关：
 - `MMU` 从 转译高速缓存（`TLB`）中通过 `虚拟地址` 获取实际的 `物理地址`，如果 `TLB` 缓存中没有，就会去 `主存` 中查询这个 `虚拟地址` 对应的 页表 条目（`PTE`），如果能查到真实的 `物理地址`，就可以正常读取数据。 
 - 如果 `PTE` 信息表中没查到关联的 `物理地址`，`MMU` 就会触发一个 **缺页异常** ，然后 **操作系统** 会捕获到这个异常，开始在 `物理内存` 上找一个 **页** 进行替换，这个被替换的 **页** 被称为 牺牲页（Sacrificial Page）。如果这个 牺牲页 上有数据，则把 数据 保存到 `磁盘` 上。 缺页处理程序会更新 `PTE`。这时MOV 指令就可以拿到关联的 `物理地址` 了。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E5%86%85%E5%AD%98%E8%AE%BF%E9%97%AE%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="内存访问示意图" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/内存访问示意图.png" alt="内存访问示意图" style="zoom:90%;" />
 
 上面的过程中，如果 `MMU` 能从 `TLB` 或者 `页表` 中 直接拿到 `物理地址` 则此时我们就成为 `页命中` ，反之则未命中，或者称为 `缺页` 。
 
@@ -1789,7 +1789,7 @@ GC 的 触发时机 和 触发频率 跟以下因素有关：
 
 操作系统已经将一整块内存划分好了区域，每个区域用来做不同的事情，我们通过下面的示意图来理解程序的内存布局：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/linux%E7%A8%8B%E5%BA%8F%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80.png" alt="linux程序内存布局" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/linux程序内存布局.png" alt="linux程序内存布局" style="zoom:90%;" />
 
 上面演示的是程序的内存布局，像 Golang，C语言，java 等高级语言，在实现程序内存管理过程中，对虚拟内存的管理都有上面这种分区的思想。虚拟内存的地址从下往上是递增的。
 
@@ -1845,7 +1845,7 @@ Go 语言通过自动的垃圾回收机制来管理这部分内存区域。
     >
     > 中间的1 和 2 两个特权级别，一般很少使用。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/linux%E8%BF%9B%E7%A8%8B%E7%9A%84%E8%99%9A%E6%8B%9F%E7%A9%BA%E9%97%B4.png" alt="linux进程的虚拟空间" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/linux进程的虚拟空间.png" alt="linux进程的虚拟空间" style="zoom:90%;" />
 
 ### Golang 的内存管理
 
@@ -1873,7 +1873,7 @@ Golang 的内存管理本质上就是一个内存池，只不过内部做了很�
 
 下图展示的是Golang程序的内存分布图：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/Golang%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80.png" alt="Golang内存布局" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/Golang内存布局.png" alt="Golang内存布局" style="zoom:90%;" />
 
 Go在程序启动的时候，`runtime` 会使用一大块连续的 **虚拟** 的地址空间，（**注意**这时候并不会真正地分配物理内存）然后将这块虚拟的内存地址切成小块后自己进行管理。
 
@@ -1938,7 +1938,7 @@ Go动态分配的内存都是在这个区域（`堆区`），它把内存分割�
 
 这三者的关系如下图所示
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/Golang%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80.jpg" alt="Golang内存布局" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/Golang内存布局.jpg" alt="Golang内存布局" style="zoom:90%;" />
 
 > 注意，上图中 `bitmap` 和 `arena_start` 指向了同一个地址，这是因为 `bitmap` 的地址是从高到低增长的，所以他们指向的内存位置相同。
 
@@ -2070,7 +2070,7 @@ func main() {
 
 为了解决 `单进程` 的阻塞问题，多进程或者多线程模型的操作系统就诞生了。多进程或多线程模型允许 CPU 在阻塞时切换到其它进程中。而且 CPU 的调度算法可以确保所有运行的进程都可以分配到 CPU 的运行时间片。如下图所示：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/CPU%E6%97%B6%E9%97%B4%E7%89%87.png" alt="CPU时间片" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/CPU时间片.png" alt="CPU时间片" style="zoom:80%;" />
 
 由于CPU的切换，每个进程都得了执行的机会，虽然本质上单个 CPU 还是不能同时运行多个任务，但由于 CPU 上的执行时间比内存磁盘等媒介快很多，所以从用户视角来看，这些程序是同时执行的。
 
@@ -2101,7 +2101,7 @@ func main() {
 
 假设一个 `内核线程` 绑定多个 `协程`，`协程` 在 `用户态` 由协 `程调度器` 分配给 `内核线程` 。这样可以在 `用户态` 实现 `协程` 之间的切换，不需要 `内核态` 去完成内核线程的切换带来 CPU 时间的损耗。如下图所示：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/n%EF%BC%9A1%E6%A8%A1%E5%9E%8B.png" alt="n：1模型" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/n：1模型.png" alt="n：1模型" style="zoom:80%;" />
 
 但是这种 模型 也是存在弊端的，主要由以下两个问题：
 
@@ -2112,7 +2112,7 @@ func main() {
 
 假设 n 个 `协程` 绑定到 `m` 个 `线程` 上，如下图所示：
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/n%EF%BC%9Am%E6%A8%A1%E5%9E%8B.png" alt="n：m模型" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/n：m模型.png" alt="n：m模型" style="zoom:80%;" />
 
 多个 `协程` 依然通过 一个 `调度器` 调度给多个 `内核线程`。 虽然在 调度 实现上会很复杂，但可以解决上面提到的问题。
 
@@ -2194,7 +2194,7 @@ func main() {
 
 5. 当 `M` 系统调用结束时，这个 `G` 会尝试重新放到并放入某个 `P` 的本地队列。如果这时本地的 `P` 队列已满，则这个线程 `M` 会变成休眠状态，加入空闲线程中，然后这个 `G` 会被放入全局队列中等待下一次调度机会。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/GMP%E8%B0%83%E5%BA%A6%E6%B5%81%E7%A8%8B.jpg" alt="GMP调度流程" style="zoom:90%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/GMP调度流程.jpg" alt="GMP调度流程" style="zoom:90%;" />
 
 > 我们可以使用一个形象的例子来类比这一过程：
 >
@@ -2284,7 +2284,7 @@ GMP 模型的缺点：
 
 为了实现高效的并发执行，系统线程 `M` 会优先执行其所绑定的 `P` 的本地队列的 `G`；如果当这个 `M`（系统线程）的本地队列 `P` 为空时，`M` 也会尝试从全局队列拿一批 `G` 放到 `P` 的本地队列；如果全局队列也为空时，会从其他 `P` 的本地队列偷一半放到自己 `P` 的本地队列，这种 `GMP` 调度模型被称为 **工作窃取（Work Stealing）**。
 
-<img src="./%E7%AC%AC%E4%BA%8C%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80runtime%E7%AF%87.assets/%E5%B7%A5%E4%BD%9C%E7%AA%83%E5%8F%96.jpg" alt="工作窃取" style="zoom:60%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/工作窃取.jpg" alt="工作窃取" style="zoom:60%;" />
 
 **工作窃取** 实际上是一种多线程计算的一种调度机制，除了 **工作窃取** 还有一种是调度机制是 **工作共享**。那么 **工作窃取** 和 **工作共享** 有什么区别呢？
 

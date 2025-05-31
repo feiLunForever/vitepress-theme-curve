@@ -238,7 +238,7 @@ func main(){
 
 “封装”和“复用”等就可以用包来实现。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250428163217788.png" alt="image-20250428163217788" style="zoom:25%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250428163217788.png" alt="image-20250428163217788" style="zoom:25%;" />
 
 在Hello World的源码中，第一行的内容是：
 
@@ -254,15 +254,15 @@ package main
 
 使用`import` 导入包。go自己会默认从GO的安装目录和`GOPATH`环境变量中的目录，检索`src`下的目录进行检索包是否存在。所以导入包的时候路径要从`src`目录下开始写。`GOPATH` 就是我们自己定义的包的目录。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250428163257209.png" alt="image-20250428163257209" style="zoom:25%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250428163257209.png" alt="image-20250428163257209" style="zoom:25%;" />
 
 我们导入包目的是要使用写在其他包内的函数，或者包里面的结构体方法等等，如果在同一个包下的内容不需要导包，可以直接使用。也可以给包起别名，如果包原有名称太长不方便使用，则可以在导入包之前加上别名。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250428163413839.png" alt="image-20250428163413839" style="zoom:25%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250428163413839.png" alt="image-20250428163413839" style="zoom:25%;" />
 
 ### 包管理方案
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250428163722716.png" alt="image-20250428163722716" style="zoom:25%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250428163722716.png" alt="image-20250428163722716" style="zoom:25%;" />
 
 #### GOPATH 模式
 
@@ -785,7 +785,7 @@ const ALLOW_DOWNLOAD_WHEN_WIFI bool = true
 
 在Go语言中，声明变量的一般格式为：
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430171127725.png" alt="image-20250430171127725" style="zoom:20%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430171127725.png" alt="image-20250430171127725" style="zoom:20%;" />
 
 ```Go
 var name type
@@ -804,7 +804,7 @@ number = 100
 var number int = 100
 ```
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430171500066.png" alt="image-20250430171500066" style="zoom:20%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430171500066.png" alt="image-20250430171500066" style="zoom:20%;" />
 
 ##### 匿名变量
 
@@ -1256,7 +1256,7 @@ if condition {
 
 > 另外：if 语句后面可以跟多个语句条件，允许先赋值再判断，其作用域仅限于当前F语句块内，一旦离开该块，所定义的变量将不再有效。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430180859402.png" alt="image-20250430180859402" style="zoom:20%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430180859402.png" alt="image-20250430180859402" style="zoom:20%;" />
 
 ```go
 if contents, err := ioutil.ReadFile(`test.txt`); err == nil {
@@ -1391,7 +1391,7 @@ lable:func1
 goto label
 ```
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430181247832.png" alt="image-20250430181247832" style="zoom:30%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430181247832.png" alt="image-20250430181247832" style="zoom:30%;" />
 
 ```go
 TestLabel: //标签
@@ -1465,7 +1465,7 @@ arr4 :=  [...]int{1,2,3,4}
 arr5 := [...]int{2:3,6:3}//在固定位置存储固定的值
 ```
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430181620045.png" alt="image-20250430181620045" style="zoom:25%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430181620045.png" alt="image-20250430181620045" style="zoom:25%;" />
 
 #### 遍历
 
@@ -1515,7 +1515,7 @@ var resultSlice []int
 
 通常情况下，使用`make`函数来创建一个切片，切片有长度和容量，默认情况下它的容量与长度相等。所以可以不用指定容量。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430181831702.png" alt="image-20250430181831702" style="zoom: 25%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430181831702.png" alt="image-20250430181831702" style="zoom: 25%;" />
 
 ```go
 // 使用make函数来创建切片
@@ -1566,7 +1566,7 @@ s2=append(s2,s1...) //...表示将另一个切片数组完整加入到当前切�
 - `make()`，只适用 `slice`，`map`，`channel`的数据，`new()`没有限制。
 - `make()`返回原始类型（`T`）, `new()` 返回类型的指针（`*T`）
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430182157366.png" alt="image-20250430182157366" style="zoom:25%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430182157366.png" alt="image-20250430182157366" style="zoom:25%;" />
 
 ```go
 // 测试使用new方法新建切片
@@ -1606,7 +1606,7 @@ func main() {
 //地址0xc00000e4b0,长度5,容量6
 ```
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430182312640.png" alt="image-20250430182312640" style="zoom:30%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430182312640.png" alt="image-20250430182312640" style="zoom:30%;" />
 
 容量成倍数扩充 3--->6--->12--->24......
 
@@ -1627,7 +1627,7 @@ func main() {
 - 数组和切片的值存储形式不同
   - 数组的存储形式直接存储元素，而指针的存储结构相对复杂，可以看成包含长度、容量和指针值的结构体。
   
-  - <img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250504102827988.png" alt="image-20250504102827988" style="zoom:45%;" />
+  - <img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250504102827988.png" alt="image-20250504102827988" style="zoom:45%;" />
   
   - 对切片进行赋值时，实际上是将切片的结构体基本信息进行拷贝，复制给另一个变量，而非直接复制数组内容。
   
@@ -1644,7 +1644,7 @@ func main() {
     	fmt.Printf("array1 ptr:%p;array2 ptr:%p\n", &array1, &array2)
     ```
   
-  - <img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250504102915265.png" alt="image-20250504102915265" style="zoom:45%;" />
+  - <img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250504102915265.png" alt="image-20250504102915265" style="zoom:45%;" />
 
 ### Map
 
@@ -1802,7 +1802,7 @@ func function_name([params_list])([return_values_list]){
 
 > 参数列表和返回值列表是可选的。有些函数无需参数，有些参数运行后并不会有任何返回值，有些函数则无需参数也无需返回值。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430214245142.png" alt="image-20250430214245142" style="zoom:25%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430214245142.png" alt="image-20250430214245142" style="zoom:25%;" />
 
 ### 函数的可见性
 
@@ -2524,7 +2524,7 @@ func main() {
 
 这段代码中，“定义时就调用”便是要传入的参数了。运行这段代码，控制台将输出这些文字。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430230743516.png" alt="image-20250430230743516" style="zoom:30%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430230743516.png" alt="image-20250430230743516" style="zoom:30%;" />
 
 另一种调用匿名函数的方法是将匿名函数赋值给某个变量，然后通过变量调用。这听起来很神奇，写起来其实非常简单：
 
@@ -2630,9 +2630,9 @@ r2 := res()       // 再存一次 → a=2（因为存钱罐还在）
 
 而当你再调用 `res2 := closure()` 时，相当于**新买了一个存钱罐**（新的a=0），之前的存钱罐和新的互不影响。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430231455022.png" alt="image-20250430231455022" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430231455022.png" alt="image-20250430231455022" style="zoom:50%;" />
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250430231502512.png" alt="image-20250430231502512" style="zoom:50%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250430231502512.png" alt="image-20250430231502512" style="zoom:50%;" />
 
 🛠 **技术原理：**
 
@@ -2716,7 +2716,7 @@ func main(){
 
 意思为，数组的指针。 首先是他是一个指针， 指向一个数组，存储数组的地址。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501061222851.png" alt="image-20250501061222851" style="zoom:20%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250501061222851.png" alt="image-20250501061222851" style="zoom:20%;" />
 
 ```go
 package main
@@ -2755,7 +2755,7 @@ func main() {
 
 其实就是一个普通数组，只是存储数据类型是指针。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501062906188.png" alt="image-20250501062906188" style="zoom:25%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250501062906188.png" alt="image-20250501062906188" style="zoom:25%;" />
 
 ```go
 package main
@@ -2795,7 +2795,7 @@ func main() {
 
 如果一个函数返回结果是一个指针，那么这个函数就是一个指针函数。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501063707547.png" alt="image-20250501063707547" style="zoom:30%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250501063707547.png" alt="image-20250501063707547" style="zoom:30%;" />
 
 ```go
 package main
@@ -2836,7 +2836,7 @@ func fun2() *[]int {
 
 将指针作为参数传递时，只有值类型的数据，需要传递指针，而引用类型的数据本身就是传递的地址，所以数组传递可以使用指针，切片是引用类型数据，则不需要传递指针传递。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501064500868.png" alt="image-20250501064500868" style="zoom:30%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250501064500868.png" alt="image-20250501064500868" style="zoom:30%;" />
 
 ```go
 package main
@@ -2882,7 +2882,7 @@ type StructName struct {
 - `StructName`代表结构体的名称；
 - `struct`表示结构体类型；
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501064948392.png" alt="image-20250501064948392" style="zoom:30%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250501064948392.png" alt="image-20250501064948392" style="zoom:30%;" />
 
 ### 使用
 
@@ -2933,7 +2933,7 @@ func main() {
 
 使用`new`创建结构体，默认就是一个指针类型的结构体。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501065107952.png" alt="image-20250501065107952" style="zoom:30%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250501065107952.png" alt="image-20250501065107952" style="zoom:30%;" />
 
 ```go
 // 使用new 创建结构体指针
@@ -2946,7 +2946,7 @@ fmt.Println(p.name)
 
 在开发过程中经常会以下面这种使用函数封装写法，来实例化一个结构体。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501065210009.png" alt="image-20250501065210009" style="zoom:40%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250501065210009.png" alt="image-20250501065210009" style="zoom:40%;" />
 
 ```go
 package main
@@ -2983,7 +2983,7 @@ func newPerson(name string, age int, sex string) *Person {
 
 匿名结构体就是没有类型名称，也不需要type关键字可以直接使用。
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501065317799.png" alt="image-20250501065317799" style="zoom:40%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250501065317799.png" alt="image-20250501065317799" style="zoom:40%;" />
 
 ### 构造函数
 
@@ -3022,7 +3022,7 @@ func (接收器变量 接收器类型) 方法名(参数列表) (返回参数) {
 }
 ```
 
-<img src="./%E7%AC%AC%E9%9B%B6%E7%AB%A0%20GO%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%AF%87.assets/image-20250501082915246.png" alt="image-20250501082915246" style="zoom:35%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250501082915246.png" alt="image-20250501082915246" style="zoom:35%;" />
 
 - **接收器变量和接收器类型共同构成了接收器**；
 - 参数列表是可选的；

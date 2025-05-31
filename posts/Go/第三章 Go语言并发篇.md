@@ -28,7 +28,7 @@ articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明�
 
 在 Go 语言中启动并发任务非常简单，只需要在相应的语句前面加上 go 即可。
 
-<img src="./%E7%AC%AC%E4%B8%89%E7%AB%A0%20Go%E8%AF%AD%E8%A8%80%E5%B9%B6%E5%8F%91%E7%AF%87.assets/image-20250509153339747.png" alt="image-20250509153339747" style="zoom:35%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250509153339747.png" alt="image-20250509153339747" style="zoom:35%;" />
 
 来看下面这段代码：
 
@@ -198,7 +198,7 @@ func main() {
 
 下面这张图展示了上述调度结构：
 
-<img src="./%E7%AC%AC%E4%B8%89%E7%AB%A0%20Go%E8%AF%AD%E8%A8%80%E5%B9%B6%E5%8F%91%E7%AF%87.assets/image-20250509154035583.png" alt="image-20250509154035583" style="zoom:40%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250509154035583.png" alt="image-20250509154035583" style="zoom:40%;" />
 
 > 图中的橙色线条表示绑定关系，其中隐含了协程调度器和协程队列处理器。
 
@@ -210,7 +210,7 @@ func main() {
 
 Go 语言中的 GPM 任务调度模型充分利用了多核 CPU 的资源。需要时，将创建与之匹配的线程，并将用户态的协程任务“智能”地分配给多个线程执行。整体上运用的是并行+并发的模式，具体如下图所示：
 
-<img src="./%E7%AC%AC%E4%B8%89%E7%AB%A0%20Go%E8%AF%AD%E8%A8%80%E5%B9%B6%E5%8F%91%E7%AF%87.assets/image-20250509154104820.png" alt="image-20250509154104820" style="zoom:65%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250509154104820.png" alt="image-20250509154104820" style="zoom:65%;" />
 
 从图中可以看到，整个 GPM 结构分为上下两大部分，我们一起从下往上看，正好对应的是内核空间和用户空间。
 
@@ -387,7 +387,7 @@ ch := make(chan int) // 同步通道
 
 
 
-<img src="./%E7%AC%AC%E4%B8%89%E7%AB%A0%20Go%E8%AF%AD%E8%A8%80%E5%B9%B6%E5%8F%91%E7%AF%87.assets/image-20250509154624579.png" alt="image-20250509154624579" style="zoom:35%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250509154624579.png" alt="image-20250509154624579" style="zoom:35%;" />
 
 典型示例如下：
 
@@ -403,7 +403,7 @@ func main() {
 }
 ```
 
-<img src="./%E7%AC%AC%E4%B8%89%E7%AB%A0%20Go%E8%AF%AD%E8%A8%80%E5%B9%B6%E5%8F%91%E7%AF%87.assets/image-20250509154645849.png" alt="image-20250509154645849" style="zoom:35%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250509154645849.png" alt="image-20250509154645849" style="zoom:35%;" />
 
 输出如下：
 
@@ -433,7 +433,7 @@ func main() {
 ch := make(chan int, 3) // 缓冲通道，容量为3
 ```
 
-<img src="./%E7%AC%AC%E4%B8%89%E7%AB%A0%20Go%E8%AF%AD%E8%A8%80%E5%B9%B6%E5%8F%91%E7%AF%87.assets/image-20250509154709565.png" alt="image-20250509154709565" style="zoom:35%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250509154709565.png" alt="image-20250509154709565" style="zoom:35%;" />
 
 1. 带缓冲区的 `channel`，定义了缓冲区大小，可以存储多个数据;
 2. 不带缓冲区的 `channel`，只能存一个数据，并且只有当该数据被取出才能存下一个数据.
@@ -470,7 +470,7 @@ func main() {
 - **编译期检查**：单向通道在编译时限制非法操作（如向只读通道发送数据），提前暴露逻辑错误。
 - **代码可读性**：明确函数参数中通道的用途（如数据源只读、结果通道只写），提升代码可维护性。
 
-<img src="./%E7%AC%AC%E4%B8%89%E7%AB%A0%20Go%E8%AF%AD%E8%A8%80%E5%B9%B6%E5%8F%91%E7%AF%87.assets/image-20250509154737000.png" alt="image-20250509154737000" style="zoom:40%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250509154737000.png" alt="image-20250509154737000" style="zoom:40%;" />
 
 ```go
 func ProcessData(in <-chan int, out chan<- int) {
@@ -693,7 +693,7 @@ func (m *MyStruct) myMethod(ctx context.Context, arg1 string, arg2 int) error {
 >
 > 我们应该在 `f1()` 中创建 `context`，让整个调用链都传递 `context`。
 
-<img src="./%E7%AC%AC%E4%B8%89%E7%AB%A0%20Go%E8%AF%AD%E8%A8%80%E5%B9%B6%E5%8F%91%E7%AF%87.assets/context1.png" alt="context1" style="zoom:65%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/context1.png" alt="context1" style="zoom:65%;" />
 
 - 及时取消 `context`
 
