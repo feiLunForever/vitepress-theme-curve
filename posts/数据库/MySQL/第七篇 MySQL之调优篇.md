@@ -1,16 +1,4 @@
----
-title: 第七篇 MySQL之调优篇
-tags:
-  - MySQL
-categories:
-  - 数据库
-date: '2025-05-28'
-description: 欢迎使用 Curve 主题，这是你的第一篇文章
-articleGPT: 这是一篇初始化文章，旨在告诉用户一些使用说明和须知。
-#cover: "/images/logo/logo.webp"
 
-
----
 
 # 调优篇
 
