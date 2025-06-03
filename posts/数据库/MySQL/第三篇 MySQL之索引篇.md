@@ -271,19 +271,25 @@ SELECT * FROM `tb_xx` WHERE B = `xxx` AND C = `xxx` AND A = "zzz";
 
 ###  索引内部查询与维护的过程
 
-查询`SQL`执行时，如果选中了索引，索引内部的检索过程是什么样的呢？
+查询 `SQL` 执行时，如果选中了索引，索引内部的检索过程是什么样的呢？
 
 #### 聚簇索引查找数据的过程
 
-如果当前`SQL`使用的是主键/聚簇索引，比如：
+如果当前 `SQL` 使用的是主键/聚簇索引，比如：
 
 ```sql
-SELECT * FROM `zz_user` WHERE `ID` = 12;
+SELECT * FROM `product` WHERE `ID` = 5;
 ```
 
-此时首先会根据条件字段，去内存中找到聚簇索引的根节点，然后根据节点中记录的地址去找次级的叶节点，最后再根据叶节点中的指针地址，找到最下面的叶子节点，从而获取其中的行数据，动画过程如下：
+此时首先会根据条件字段，去内存中找到聚簇索引的根节点，然后根据节点中记录的地址去找次级的叶节点，最后再根据叶节点中的指针地址，找到最下面的叶子节点，从而获取其中的行数据，过程如下：
 
-<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/4bf555145bbb4077af7bc27fb557f170~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0.gif" alt="4bf555145bbb4077af7bc27fb557f170~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0" style="zoom:100%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/btree.drawio.png" alt="主键索引 B+Tree" style="zoom:70%;" />
+
+查询过程是这样的，B+Tree 会自顶向下逐层进行查找：
+
+*   将 5 与根节点的索引数据 (1，10，20) 比较，5 在 1 和 10 之间，所以根据 B+Tree的搜索逻辑，找到第二层的索引数据 (1，4，7)；
+*   在第二层的索引数据 (1，4，7)中进行查找，因为 5 在 4 和 7 之间，所以找到第三层的索引数据（4，5，6）；
+*   在叶子节点的索引数据（4，5，6）中进行查找，然后我们找到了索引值为 5 的行数据。
 
 #### 非聚簇索引查找数据的过程
 
@@ -292,6 +298,31 @@ SELECT * FROM `zz_user` WHERE `ID` = 12;
 相较于聚簇索引而言，非聚簇索引前面的步骤都是相同的，仅是最后一步有些许不同罢了，非聚簇索引经过一系列查询步骤后，最终会取到一个聚簇索引的字段值，然后再做一次回表查询，也就是再去聚簇索引中查一次才能取到数据。
 
 #### 联合索引查找数据过程
+
+主键索引的 B+Tree 和二级索引的 B+Tree 区别如下：
+
+*   主键索引的 B+Tree 的叶子节点存放的是实际数据，所有完整的用户记录都存放在主键索引的 B+Tree 的叶子节点里；
+*   二级索引的 B+Tree 的叶子节点存放的是主键值，而不是实际数据。
+
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/二级索引btree.drawio.png" style="zoom:70%;" />
+
+其中非叶子的 key 值是 product\_no（图中橙色部分），叶子节点存储的数据是主键值（图中绿色部分）。
+
+如果我用 product\_no 二级索引查询商品，如下查询语句：
+
+```sql
+select * from product where product_no = '0002'; 
+```
+
+会先检二级索引中的 B+Tree 的索引值（商品编码，product\_no），找到对应的叶子节点，然后获取主键值，然后再通过主键索引中的 B+Tree 树查询到对应的叶子节点，然后获取整行数据。**这个过程叫「回表」，也就是说要查两个 B+Tree 才能查到数据**。如下图（图中叶子节点之间我画了单向链表，但是实际上是双向链表，原图我找不到了，修改不了，偷个懒我不重画了，大家脑补成双向链表就行）：
+
+![](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/回表.drawio.png)
+
+
+
+
+
+
 
 比如 
 

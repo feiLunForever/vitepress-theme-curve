@@ -46,12 +46,17 @@
   - 是多个事务一起操作同一条数据，就会造成数据覆盖，或者主键冲突的问题，这个问题也被称之为更新丢失问题
 - 脏读
   - 事务 `A` 正在访问数据，读到了事务 `B` 未提交事务的数据
+  - <img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/10b513008ea35ee880c592a88adcb12f.png" alt="图片" style="zoom:50%;" />
 - 不可重复读
   - 同一事务内，多次读取一条记录发现其中某些列的`值被修改`
+  - <img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/f5b4f8f0c0adcf044b34c1f300a95abf.png" alt="图片" style="zoom:50%;" />
 - 幻读
   - 同一事务内，多次读取发现记录`变多`或者`变少`了
+  - <img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/d19a1019dc35dfe8cfe7fbff8cd97e31.png" alt="图片" style="zoom:70%;" />
 
 #### 四大隔离级别
+
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/4e98ea2e60923b969790898565b4d643.png" alt="图片" style="zoom:60%;" />
 
 - `RU` 读未提交（READ-UNCOMMITTE）
 

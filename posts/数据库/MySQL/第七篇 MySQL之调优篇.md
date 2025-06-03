@@ -208,6 +208,24 @@ select * from t1 order by a limit 99000, 2;
 SELECT * FROM t1 f INNER JOIN (SELECT id FROM t1 ORDER BY a LIMIT 99000, 2) g ON f.id = g.id;
 ```
 
+- 如果是给用户做分页展示
+
+可以尝试只支持 上一页，下一页
+
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/7cc01cdc245a2777d4c766649ab439ae.png" alt="img" style="zoom:30%;" />
+
+这样我们就可以使用上面提到的 `start_id` 方式，采用分批获取，每批数据以 `start_id` 为起始位置。这个解法最大的好处是不管翻到多少页，查询速度永远稳定。
+
+听起来很挫？
+
+怎么会呢，把这个功能包装一下。
+
+变成像抖音那样只能上划或下划，专业点，叫 `瀑布流`。
+
+是不是就不挫了？
+
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/3e1d7768f0fddd4efd99467bc1250d90.png" alt="img" style="zoom:50%;" />
+
 #### Join 语句优化（以小驱大）
 
 > 多表查询时，一定要以小驱大。
