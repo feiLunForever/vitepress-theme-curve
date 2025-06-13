@@ -2344,7 +2344,7 @@ b）对 id2，进行三次哈希，并确定其在二进制数组中的位置。
 
 使用 `zadd score1 value1` 命令就可以一直往内存中生产消息。再利用 `zrangebysocre` 查询符合条件的所有待处理的任务， 通过循环执行队列任务即可。
 
-<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/延迟队列.png" style="zoom:80%;" />
+![](https://gitee.com/JBL_lun/tuchuang/raw/master/assets/延迟队列.png)
 
 ### Redisson 原理
 
