@@ -87,23 +87,29 @@ routing 是一个可以配置的变量,默认是使用文档的 id。对 routing
 
 ### es 读数据过程
 
+#### 基于文档ID的读取流程（GET by ID）
+
 - 客户端发送请求到任意一个 node，成为 coordinate node
 - coordinate node 对 doc id 进行 哈希 路由，将请求转发到对应的 node，此时会使用 round-robin 随机轮询算法，在 primary shard 以及其所有 replica 中随机选择一个，让读请求负载均衡
 
-#### Query
+#### 搜索请求流程（Search - Query and Fetch）
 
-- 广播到索引中每一个分片（主分片/副本分片）
+客户端发送请求到任意一个 node，成为 coordinate node
+
+##### Query
+
+- 协调节点 广播到索引中每一个分片（主分片/副本分片）
 - 每个分片在本地执行搜索并构建一个匹配文档的大小为 from + size 的 优先队列
 - 每个分片返回各自优先队列中 所有文档的 ID 和排序值 给 协调节点
 - 协调节点 合并这些值到自己的优先队列中来产生一个 全局排序 后的结果列表
 
-#### Fetch
+##### Fetch
 
 - 协调节点 辨别出哪些文档需要被取回并向相关的分片提交多个 GET 请求
 
 ### 单个节点的读流程
 
-<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250613164400577.png" alt="image-20250613164400577" style="zoom:80%;" />
+<img src="https://gitee.com/JBL_lun/tuchuang/raw/master/assets/image-20250613164400577.png" alt="image-20250613164400577" style="zoom:90%;" />
 
 1. 节点接收到 读数据 请求根据请求中的 `doc_id` 字段从 `translog` 缓存中查询数据，如果查询到数据则直接返回结果。
 2. 如果没有查到结果，从磁盘中的 `translog` 查询数据，如果查询到数据则直接返回结果。
